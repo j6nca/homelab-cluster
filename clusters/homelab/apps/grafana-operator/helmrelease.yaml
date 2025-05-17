@@ -4,10 +4,8 @@ metadata:
   name: grafana-operator
   namespace: grafana-operator
 spec:
-  chart:
-    spec:
-      chartRef:
-        kind: OCIRepository
-        name: grafana-operator
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: grafana-operator
+    namespace: flux-system
   interval: 15m
