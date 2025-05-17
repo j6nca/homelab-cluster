@@ -6,10 +6,8 @@ metadata:
 spec:
   chart:
     spec:
-      chart: grafana-operator
-      sourceRef:
+      chartRef:
         kind: OCIRepository
         name: grafana-operator
         namespace: flux-system
-      version: v5.18.0
   interval: 15m
