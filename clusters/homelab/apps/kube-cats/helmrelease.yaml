@@ -11,5 +11,5 @@ spec:
         kind: HelmRepository
         name: j6nca
         namespace: flux-system
-      version: 1.0.2
+      version: 1.0.3
   interval: 15m
