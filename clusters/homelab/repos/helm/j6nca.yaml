@@ -5,4 +5,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
-  url: https://helm.j6n.ca
+  url: https://charts.j6n.dev
