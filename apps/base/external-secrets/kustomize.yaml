@@ -8,8 +8,9 @@ spec:
   commonMetadata:
     labels:
       service: external-secrets
-  # dependsOn:
-  #   - name: onepassword-connect
+  dependsOn:
+    - name: onepassword-connect
+      namespace: onepassword-connect
   interval: 5m
   path: ./apps/base/external-secrets/release
   prune: true

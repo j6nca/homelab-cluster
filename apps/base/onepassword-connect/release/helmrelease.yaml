@@ -14,3 +14,5 @@ spec:
       version: 1.15.1
   interval: 15m
 # defaults to secret>op-credentials>1password-credentials.json
+# Can bootstrap with:
+# kubectl create secret generic op-token --from-literal=token=<OP_CONNECT_TOKEN> --namespace=onepassword-connect
