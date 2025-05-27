@@ -6,7 +6,7 @@ metadata:
 spec:
   chart:
     spec:
-      chart: connect
+      chart: onepassword-connect
       sourceRef:
         kind: HelmRepository
         name: onepassword-connect
