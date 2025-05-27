@@ -10,7 +10,6 @@ spec:
       service: external-secrets
   dependsOn:
     - name: onepassword-connect
-      namespace: flux-system
   interval: 5m
   path: ./apps/base/external-secrets/release
   prune: true
