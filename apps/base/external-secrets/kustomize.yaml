@@ -1,0 +1,37 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets
+  namespace: flux-system
+spec:
+  targetNamespace: external-secrets
+  commonMetadata:
+    labels:
+      service: external-secrets
+  # dependsOn:
+  #   - name: onepassword-connect
+  interval: 5m
+  path: ./apps/base/external-secrets/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets-resources
+  namespace: flux-system
+spec:
+  targetNamespace: external-secrets
+  commonMetadata:
+    labels:
+      service: external-secrets
+  dependsOn:
+    - name: external-secrets
+  interval: 5m
+  path: ./apps/base/external-secrets/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
