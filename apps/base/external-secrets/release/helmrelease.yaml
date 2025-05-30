@@ -15,4 +15,4 @@ spec:
   interval: 15m
 # values.yaml
   values:
-    installCRDS: true
+    installCRDs: true
