@@ -11,22 +11,22 @@ spec:
         name: cloudflare
         namespace: flux-system
       version: 0.3.2
-    interval: 15m
-    values:
-      cloudflare:
-        tunnelName: "k8s-lab"
-        # If defined, no secret is created for the credentials, and instead, the secret referenced is used
-        secretName: cloudflare-tunnel-credentials
-        # If true, turn on WARP routing for TCP
-        enableWarp: true
-        # Define ingress rules for the tunnel. See
-        # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
-        ingress:
-          - hostname: status.j6n.ca
-            service: http://gatus.gatus.svc.cluster.local:80
-          - hostname: encrypt.j6n.ca
-            service: http://yopass.tools.svc.cluster.local:1337
-          - hostname: toolbox.j6n.ca
-            service: http://it-tools.tools.svc.cluster.local:8181
-      replicaCount: 1
+  interval: 15m
+  values:
+    cloudflare:
+      tunnelName: "k8s-lab"
+      # If defined, no secret is created for the credentials, and instead, the secret referenced is used
+      secretName: cloudflare-tunnel-credentials
+      # If true, turn on WARP routing for TCP
+      enableWarp: true
+      # Define ingress rules for the tunnel. See
+      # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
+      ingress:
+        - hostname: status.j6n.ca
+          service: http://gatus.gatus.svc.cluster.local:80
+        - hostname: encrypt.j6n.ca
+          service: http://yopass.tools.svc.cluster.local:1337
+        - hostname: toolbox.j6n.ca
+          service: http://it-tools.tools.svc.cluster.local:8181
+    replicaCount: 1
         
