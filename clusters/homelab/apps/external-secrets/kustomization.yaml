@@ -3,3 +3,6 @@ kind: Kustomization
 resources:
   - ../../../../apps/base/external-secrets/kustomize.yaml
   - ./namespace.yaml
+commonMetadata:
+  labels:
+    cluster: homelab

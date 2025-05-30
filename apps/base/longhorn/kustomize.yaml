@@ -1,15 +1,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: onepassword-connect
+  name: longhorn
   namespace: flux-system
 spec:
-  targetNamespace: onepassword-connect
+  targetNamespace: longhorn-system
   commonMetadata:
     labels:
-      service: onepassword-connect
+      service: longhorn
   interval: 5m
-  path: ./apps/base/onepassword-connect/release
+  path: ./apps/base/longhorn/release
   prune: true
   sourceRef:
     kind: GitRepository
