@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: external-secrets
         namespace: flux-system
-      version: 0.10.7
+      version: 0.17.0
   interval: 15m
 # values.yaml
   values:
