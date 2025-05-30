@@ -8,11 +8,11 @@ spec:
   chart:
     spec:
       chart: longhorn
-      version: '1.8.1'
       sourceRef:
         kind: HelmRepository
         name: longhorn
         namespace: flux-system
-      interval: 10m
+      version: 1.8.1
+  interval: 10m
   values:
     replicaCount: 2
