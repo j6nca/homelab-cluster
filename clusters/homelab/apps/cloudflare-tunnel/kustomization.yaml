@@ -3,3 +3,6 @@ kind: Kustomization
 resources:
   - ../../../../apps/base/cloudflare-tunnel/kustomize.yaml
   - ./namespace.yaml
+commonLabels:
+  cluster: homelab
+  group: network

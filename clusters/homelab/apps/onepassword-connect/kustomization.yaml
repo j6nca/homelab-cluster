@@ -3,3 +3,6 @@ kind: Kustomization
 resources:
   - ../../../../apps/base/onepassword-connect/kustomize.yaml
   - ./namespace.yaml
+commonLabels:
+  cluster: homelab
+  group: secrets-ops

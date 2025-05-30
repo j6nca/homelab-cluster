@@ -3,3 +3,6 @@ kind: Kustomization
 resources:
   - ../../../../apps/base/gatus/kustomize.yaml
   - ./namespace.yaml
+commonLabels:
+  cluster: homelab
+  group: observability
