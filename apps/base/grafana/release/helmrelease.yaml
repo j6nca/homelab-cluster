@@ -13,3 +13,11 @@ spec:
         namespace: flux-system
       version: 9.2.1
   interval: 10m
+  values:
+    grafana.ini:
+      # Enable public viewer
+      auth.anonymous:
+        enabled: true
+        org_name: Main Org.
+        org_role: Viewer
+        hide_version: true
