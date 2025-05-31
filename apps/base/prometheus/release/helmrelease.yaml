@@ -12,3 +12,10 @@ spec:
         namespace: flux-system
       version: 27.17.0
   interval: 15m
+  values:
+    alertmanager:
+      enabled: false
+    kube-state-metrics:
+      enabled: false
+    prometheus-pushgateway:
+      enabled: false
