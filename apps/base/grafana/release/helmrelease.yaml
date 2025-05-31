@@ -1,17 +1,15 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: longhorn
-  namespace: longhorn-system
+  name: grafana
+  namespace: grafana
 spec:
   chart:
     spec:
-      chart: longhorn
+      chart: grafana
       sourceRef:
         kind: HelmRepository
-        name: longhorn
+        name: grafana
         namespace: flux-system
-      version: 1.8.1
+      version: 9.2.1
   interval: 10m
-  values:
-    replicaCount: 2
