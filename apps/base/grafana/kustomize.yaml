@@ -8,6 +8,8 @@ spec:
   commonMetadata:
     labels:
       service: grafana
+  dependsOn:
+    - name: external-secrets-resources
   interval: 5m
   path: ./apps/base/grafana/release
   prune: true

@@ -22,7 +22,9 @@ spec:
       # Define ingress rules for the tunnel. See
       # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
       ingress:
-        - hostname: status.j6n.ca
+        - hostname: gatus.j6n.dev
           service: http://gatus.gatus.svc.cluster.local:80
+        - hostname: grafana.j6n.dev
+          service: http://grafana.grafana.svc.cluster.local:80
     replicaCount: 1
         

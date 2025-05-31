@@ -2,7 +2,6 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: grafana
-  namespace: grafana
 spec:
   chart:
     spec:
@@ -14,12 +13,35 @@ spec:
       version: 9.2.1
   interval: 10m
   values:
+    envFromSecrets:
+      - name: grafana-oidc
     grafana.ini:
       server:
         root_url: https://grafana.j6n.dev
+      # OIDC
+      auth:
+        signout_redirect_url: https://auth.j6n.ca/application/o/grafana/end-session/
+        disable_login_form: true
+        oauth_allow_insecure_email_lookup: true
+
+      auth.generic_oauth:
+        name: authentik
+        enabled: true
+        scopes: openid email profile
+        auth_url: https://auth.j6n.ca/application/o/authorize/
+        token_url: https://auth.j6n.ca/application/o/token/
+        api_url: https://auth.j6n.ca/application/o/userinfo/
+        # Map user groups to Grafana roles
+        role_attribute_path: contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_editor') && 'Editor' || 'Viewer'
       # Enable public viewer
       auth.anonymous:
         enabled: true
         org_name: Main Org.
         org_role: Viewer
         hide_version: true
+      # Use an existing secret for the admin user.
+      admin:
+        ## Name of the secret. Can be templated.
+        existingSecret: "grafana-admin"
+        userKey: admin-user
+        passwordKey: admin-password
