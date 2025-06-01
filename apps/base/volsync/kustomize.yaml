@@ -8,6 +8,8 @@ spec:
   commonMetadata:
     labels:
       service: volsync
+  dependsOn:
+    - name: external-secrets-resources
   interval: 5m
   path: ./apps/base/volsync/release
   prune: true
