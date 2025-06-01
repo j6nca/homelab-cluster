@@ -1,0 +1,22 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+   name: prometheus
+   namespace: prometheus
+spec:
+  sourcePVC: prometheus-server
+  trigger:
+    # Run backup daily
+    schedule: "0 * * * *"
+  restic:
+    pruneIntervalDays: 15
+    # Name of secret with bucket config
+    repository: volsync-r2
+    # Backup retention policy
+    retain:
+      hourly: 24
+      daily: 7
+      weekly: 5
+      monthly: 3
+      yearly: 1
+    copyMethod: Clone
