@@ -6,17 +6,14 @@ metadata:
 spec:
   sourcePVC: prometheus-server
   trigger:
-    # Run backup daily
-    schedule: "0 * * * *"
+    # Run backup daily @ midnight
+    schedule: "0 0 * * *"
   restic:
-    pruneIntervalDays: 15
+    pruneIntervalDays: 7
     # Name of secret with bucket config
     repository: volsync-r2
     # Backup retention policy
     retain:
-      hourly: 24
       daily: 7
-      weekly: 5
-      monthly: 3
-      yearly: 1
-    copyMethod: Clone
+    # Use Snapshot method for longhorn
+    copyMethod: Snapshot
