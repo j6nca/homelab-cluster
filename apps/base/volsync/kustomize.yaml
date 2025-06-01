@@ -1,13 +1,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: gatus
+  name: volsync
   namespace: flux-system
 spec:
-  targetNamespace: gatus
+  targetNamespace: volsync
   commonMetadata:
     labels:
-      service: gatus
+      service: volsync
   interval: 5m
   path: ./apps/base/volsync/release
   prune: true
