@@ -11,4 +11,9 @@ spec:
         name: j6nca
         namespace: flux-system
       version: 1.0.0
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
   interval: 15m

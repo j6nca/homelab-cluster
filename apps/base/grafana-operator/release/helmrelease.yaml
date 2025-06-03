@@ -7,4 +7,9 @@ spec:
     kind: OCIRepository
     name: grafana-operator
     namespace: flux-system
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
   interval: 15m
