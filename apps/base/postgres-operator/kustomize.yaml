@@ -5,6 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   targetNamespace: postgres-operator
+  dependsOn:
+    - name: longhorn
   commonMetadata:
     labels:
       service: postgres-operator

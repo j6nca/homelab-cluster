@@ -5,6 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   targetNamespace: longhorn-system
+  dependsOn:
+    - name: snapshot-controller
   commonMetadata:
     labels:
       service: longhorn
