@@ -1,9 +1,12 @@
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
-  name: longhorn-backup-vsc
+  name: longhorn-snapshot-class
+  annotations:
+    # Set as default vsclass
+    snapshot.storage.kubernetes.io/is-default-class: "true"
 driver: driver.longhorn.io
 deletionPolicy: Delete
 parameters:
-  type: bak
+  type: snap
   backupMode: full

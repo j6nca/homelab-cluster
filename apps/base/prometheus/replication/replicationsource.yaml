@@ -16,4 +16,3 @@ spec:
       daily: 7
     # Use Snapshot method for longhorn
     copyMethod: Snapshot
-    volumeSnapshotClassName: longhorn-backup-vsc
