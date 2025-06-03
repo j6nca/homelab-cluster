@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: snapshot-controller
+  namespace: flux-system
+spec:
+  targetNamespace: snapshot-controller
+  commonMetadata:
+    labels:
+      service: snapshot-controller
+  interval: 5m
+  path: ./apps/base/snapshot-controller/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

@@ -29,6 +29,7 @@ spec:
       service: volsync
   dependsOn:
     - name: volsync
+    - name: snapshot-controller
   interval: 5m
   path: ./apps/base/volsync/replication
   prune: true
