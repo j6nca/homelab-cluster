@@ -10,7 +10,7 @@ spec:
   restic:
     pruneIntervalDays: 7
     # Name of secret with bucket config
-    repository: volsync-r2
+    repository: prometheus-replication
     # Backup retention policy
     retain:
       daily: 7
