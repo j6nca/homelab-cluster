@@ -2,7 +2,6 @@ apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
    name: prometheus
-   namespace: prometheus
 spec:
   sourcePVC: prometheus-server
   trigger:
