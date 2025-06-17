@@ -1,0 +1,19 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana-alloy
+  namespace: flux-system
+spec:
+  targetNamespace: grafana-alloy
+  commonMetadata:
+    labels:
+      service: grafana-alloy
+  dependsOn:
+    - name: prometheus
+  interval: 5m
+  path: ./apps/base/grafana-alloy/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
