@@ -1,0 +1,14 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: yopass
+spec:
+  chart:
+    spec:
+      chart: yopass
+      sourceRef:
+        kind: HelmRepository
+        name: j6nca
+        namespace: flux-system
+      version: 1.0.0
+  interval: 15m
