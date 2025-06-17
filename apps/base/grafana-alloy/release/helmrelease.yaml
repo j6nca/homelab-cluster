@@ -52,6 +52,6 @@ spec:
 
           prometheus.remote_write "prometheus" {
             endpoint {
-              url = "http://prometheus-server.prometheus:9090/api/v1/write"
+              url = "http://prometheus-server.prometheus/api/v1/write"
             }
           }
