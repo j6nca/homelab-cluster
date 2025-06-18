@@ -14,6 +14,7 @@ spec:
   interval: 10m
   values:
     alloy:
+    # Runs as daemonset by default
       configMap:
         content: |
           logging {
@@ -44,9 +45,74 @@ spec:
           discovery.kubernetes "ingresses" {
             role = "ingress"
           }
+          
+          // Filter down targets
+          discovery.relabel "services" {
+            targets = discovery.kubernetes.services.targets
 
-          prometheus.scrape "prometheus" {
-            targets    = discovery.kubernetes.pods.targets
+            // Ref: https://github.com/grafana/k8s-monitoring-helm/blob/main/charts/k8s-monitoring-v1/templates/alloy_config/_annotation_autodiscovery.alloy.txt
+            rule {
+              source_labels = ["__meta_kubernetes_service_annotation_k8s_grafana_com_scrape"]
+              regex = "true"
+              action = "keep"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_annotation_k8s_grafana_com_metrics_path"]
+              action = "replace"
+              target_label = "__metrics_path__"
+            }
+
+            // Choose the service port
+            rule {
+              source_labels = ["__meta_kubernetes_service_port_name"]
+              target_label = "__tmp_port"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_annotation_k8s_grafana_com_metrics_portName"]
+              regex = "(.+)"
+              target_label = "__tmp_port"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_port_name"]
+              action = "keepequal"
+              target_label = "__tmp_port"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_service_port_number"]
+              target_label = "__tmp_port"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_annotation_k8s_grafana_com_metrics_portNumber"]
+              regex = "(.+)"
+              target_label = "__tmp_port"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_service_port_number"]
+              action = "keepequal"
+              target_label = "__tmp_port"
+            }
+            rule {
+              action = "labeldrop"
+              regex = "__tmp_port"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_service_annotation_k8s_grafana_com_metrics_scheme"]
+              action = "replace"
+              target_label = "__scheme__"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_service_annotation_k8s_grafana_com_metrics_scrapeInterval"]
+              action = "replace"
+              target_label = "__scrape_interval__"
+            }
+          }
+
+          // Scrape filtered targets
+          prometheus.scrape "services" {
+            targets    = discovery.relabel.services.targets
             forward_to = [prometheus.remote_write.prometheus.receiver]
           }
 
