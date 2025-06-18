@@ -13,6 +13,12 @@ spec:
       version: 1.2.0
   interval: 15m
   values:
+    service:
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/metrics-path: "/metrics"
+        k8s.grafana.com/portName: "http"
+        k8s.grafana.com/metrics-scheme: "http"
     persistence:
       enabled: false
     config:
@@ -23,80 +29,79 @@ spec:
           group: Projects
           url: https://j6n.ca
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Blog
           group: Projects
           url: https://notes.j6n.ca
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: kube-cats
           group: Projects
           url: https://meow.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Jellyfin
           group: Media
           url: https://watch.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Jellyseerr
           group: Media
           url: https://requests.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Photos
           group: Media
           url: https://photos.j6n.ca
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Grafana
           group: Observability
           url: https://grafana.j6n.dev/api/health
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: AlertManager
           group: Observability
           url: http://alertmanager.alertmanager
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Prometheus
           group: Observability
           url: http://prometheus-server.prometheus
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Actual
           group: Tools
           url: https://actual.j6n.ca
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Authentik
           group: Tools
           url: https://auth.j6n.ca
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: HomeAssistant
           group: Tools
           url: https://hass.j6n.ca
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Moodist
           group: Utilities
           url: https://moodist.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: IT-Tools
           group: Utilities
           url: https://tools.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: Vert
           group: Utilities
           url: https://convert.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
+            - "[STATUS] <= 299"
         - name: YoPass
           group: Utilities
           url: https://secrets.j6n.dev
           conditions:
-            - '[STATUS] <= 299'
-
+            - "[STATUS] <= 299"
