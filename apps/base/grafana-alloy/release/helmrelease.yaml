@@ -112,7 +112,7 @@ spec:
 
           // Scrape filtered targets
           prometheus.scrape "services" {
-            targets    = discovery.relabel.services.targets
+            targets    = discovery.relabel.services.output
             forward_to = [prometheus.remote_write.prometheus.receiver]
           }
 
