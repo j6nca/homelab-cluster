@@ -24,6 +24,7 @@ spec:
     config:
       storage:
         type: memory
+      metrics: true
       endpoints:
         - name: Personal
           group: Projects
