@@ -116,9 +116,9 @@ spec:
             grafana_folder: Kubernetes
           folderAnnotation: grafana_folder
           folder: /tmp/dashboards
-        provider:
-          allowUiUpdates: true
-          foldersFromFilesStructure: true
+          provider:
+            allowUiUpdates: true
+            foldersFromFilesStructure: true
       defaultDashboardsTimezone: 'America/Toronto'
       forceDeployDashboards: false
       defaultDashboardsEnabled: true
