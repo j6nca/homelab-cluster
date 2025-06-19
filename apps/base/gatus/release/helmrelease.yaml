@@ -43,6 +43,12 @@ spec:
           url: https://meow.j6n.dev
           conditions:
             - "[STATUS] <= 299"
+        - name: kube-cats-api
+          group: Projects
+          url: https://kube-cats-api.j6n.dev/health
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY] == OK"
         - name: Jellyfin
           group: Media
           url: https://watch.j6n.dev
@@ -58,19 +64,26 @@ spec:
           url: https://photos.j6n.ca
           conditions:
             - "[STATUS] <= 299"
+        - name: Gatus
+          group: Observability
+          url: https://status.j6n.dev/health
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY].status == up"
         - name: Grafana
           group: Observability
           url: https://grafana.j6n.dev/api/health
           conditions:
             - "[STATUS] <= 299"
+            - "[BODY].database == ok"
         - name: AlertManager
           group: Observability
-          url: http://alertmanager.alertmanager
+          url: http://kube-prometheus-stack-alertmanager.kube-prometheus-stack:9093
           conditions:
             - "[STATUS] <= 299"
         - name: Prometheus
           group: Observability
-          url: http://prometheus-server.prometheus
+          url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack:9090
           conditions:
             - "[STATUS] <= 299"
         - name: Actual
