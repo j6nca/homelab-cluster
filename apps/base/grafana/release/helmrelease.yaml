@@ -39,39 +39,39 @@ spec:
         org_name: Main Org.
         org_role: Viewer
         hide_version: true
-      # Use an existing secret for the admin user.
-      admin:
-        ## Name of the secret. Can be templated.
-        existingSecret: "grafana-admin"
-        userKey: admin-user
-        passwordKey: admin-password
+    # Use an existing secret for the admin user.
+    admin:
+      ## Name of the secret. Can be templated.
+      existingSecret: "grafana-admin"
+      userKey: admin-user
+      passwordKey: admin-password
+    sidecar:
+      # Plugins
+      plugins: []
 
-    # Plugins
-    plugins: []
+      ## Configure grafana datasources
+      ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+          - name: Prometheus
+            type: prometheus
+            url: http://prometheus-server.prometheus
+            access: proxy
+            isDefault: true
+      #    - name: CloudWatch
+      #      type: cloudwatch
+      #      access: proxy
+      #      uid: cloudwatch
+      #      editable: false
+      #      jsonData:
+      #        authType: default
+      #        defaultRegion: us-east-1
+      #    deleteDatasources: []
+      #    - name: Prometheus
 
-    ## Configure grafana datasources
-    ## ref: http://docs.grafana.org/administration/provisioning/#datasources
-    datasources:
-      datasources.yaml:
-        apiVersion: 1
-        datasources:
-        - name: Prometheus
-          type: prometheus
-          url: http://prometheus-server.prometheus
-          access: proxy
-          isDefault: true
-    #    - name: CloudWatch
-    #      type: cloudwatch
-    #      access: proxy
-    #      uid: cloudwatch
-    #      editable: false
-    #      jsonData:
-    #        authType: default
-    #        defaultRegion: us-east-1
-    #    deleteDatasources: []
-    #    - name: Prometheus
-
-    ## NOTE: To use dashboards you must also enable/configure dashboardProviders
-    ## ref: https://grafana.com/dashboards
-    ## dashboards per provider, use provider name as key.
-    dashboards: {}
+      ## NOTE: To use dashboards you must also enable/configure dashboardProviders
+      ## ref: https://grafana.com/dashboards
+      ## dashboards per provider, use provider name as key.
+      dashboards: {}
