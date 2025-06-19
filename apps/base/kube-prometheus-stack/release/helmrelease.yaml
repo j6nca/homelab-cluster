@@ -103,7 +103,7 @@ spec:
       dashboards:
         system:
           gatus:
-            url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboard/gatus.json
+            url: https://raw.githubusercontent.com/j6nca/homelab-cluster/refs/heads/main/dashboards/gatus.json
             datasource: Prometheus
       forceDeployDashboards: true
       sidecar:
