@@ -103,19 +103,25 @@ spec:
       dashboards:
         system:
           gatus:
-            url: https://raw.githubusercontent.com/j6nca/homelab-cluster/refs/heads/main/dashboards/gatus.json
+            url: https://raw.githubusercontent.com/j6nca/homelab-cluster/refs/heads/main/dashboards/system/gatus.json
             datasource: Prometheus
-      forceDeployDashboards: true
       sidecar:
         dashboards:
           enabled: true
+          label: grafana_dashboard
+          labelValue: "1"
+          searchNamespace: ALL
+          # Store default dashboards in 'Kubernetes' folder. Ref: https://github.com/grafana/helm-charts/issues/527#issuecomment-982319638
           annotations:
             grafana_folder: Kubernetes
           folderAnnotation: grafana_folder
+          folder: /tmp/dashboards
         provider:
           allowUiUpdates: true
           foldersFromFilesStructure: true
       defaultDashboardsTimezone: 'America/Toronto'
+      forceDeployDashboards: false
+      defaultDashboardsEnabled: true
 
     kubeStateMetrics:
       enabled: true
