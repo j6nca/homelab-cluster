@@ -68,21 +68,48 @@ spec:
       #       url: http://prometheus-server.prometheus
       #       access: proxy
       #       isDefault: true
-      #    - name: CloudWatch
-      #      type: cloudwatch
-      #      access: proxy
-      #      uid: cloudwatch
-      #      editable: false
-      #      jsonData:
-      #        authType: default
-      #        defaultRegion: us-east-1
-      #    deleteDatasources: []
-      #    - name: Prometheus
 
       ## NOTE: To use dashboards you must also enable/configure dashboardProviders
       ## ref: https://grafana.com/dashboards
       ## dashboards per provider, use provider name as key.
-      dashboards: {}
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: default
+              orgId: 1
+              folder: ""
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/default
+            - name: system
+              orgId: 1
+              folder: System
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/system      
+            - name: kubernetes
+              orgId: 1
+              folder: Kubernetes
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/kubernetes
+      dashboards:
+        system:
+          gatus:
+            url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboard/gatus.json
+            datasource: Prometheus
+      forceDeployDashboards: true
+      sidecar:
+        dashboards:
+          annotations:
+            grafana_folder: Kubernetes
 
     kubeStateMetrics:
       enabled: true
