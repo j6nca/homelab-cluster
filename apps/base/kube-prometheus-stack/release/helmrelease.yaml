@@ -91,7 +91,7 @@ spec:
     windowsMonitoring:
       enabled: false
     
-    prometheusOperator:
+    prometheus:
       prometheusSpec:
         serviceMonitorSelectorNilUsesHelmValues: false
         retention: "15d"
