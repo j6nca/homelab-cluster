@@ -108,8 +108,14 @@ spec:
       forceDeployDashboards: true
       sidecar:
         dashboards:
+          enabled: true
           annotations:
             grafana_folder: Kubernetes
+          folderAnnotation: grafana_folder
+        provider:
+          allowUiUpdates: true
+          foldersFromFilesStructure: true
+      defaultDashboardsTimezone: 'America/Toronto'
 
     kubeStateMetrics:
       enabled: true
