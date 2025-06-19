@@ -18,6 +18,8 @@ spec:
     # Managed in standalone chart
     grafana:
       enabled: true
+      serviceMonitor:
+        enabled: true
       persistence:
         enabled: false
       envFromSecrets:

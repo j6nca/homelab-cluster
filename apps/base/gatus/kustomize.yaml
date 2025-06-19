@@ -8,6 +8,8 @@ spec:
   commonMetadata:
     labels:
       service: gatus
+  dependsOn:
+    - name: kube-prometheus-stack
   interval: 5m
   path: ./apps/base/gatus/release
   prune: true

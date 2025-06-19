@@ -21,6 +21,8 @@ spec:
         k8s.grafana.com/metrics-scheme: "http"
     persistence:
       enabled: false
+    serviceMonitor:
+      enabled: true
     config:
       storage:
         type: memory

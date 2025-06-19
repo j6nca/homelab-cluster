@@ -10,6 +10,9 @@ spec:
   commonMetadata:
     labels:
       service: kube-prometheus-stack
+  dependsOn:
+    - name: external-secrets
+    - name: longhorn
   interval: 5m
   path: ./apps/base/kube-prometheus-stack/release
   prune: true
