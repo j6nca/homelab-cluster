@@ -93,4 +93,5 @@ spec:
     
     prometheusOperator:
       prometheusSpec:
+        serviceMonitorSelectorNilUsesHelmValues: false
         retention: "15d"
