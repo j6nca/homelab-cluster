@@ -18,6 +18,8 @@ spec:
     # Managed in standalone chart
     grafana:
       enabled: true
+      persistence:
+        enabled: false
       envFromSecrets:
         - name: grafana-oidc
       grafana.ini:
@@ -50,36 +52,35 @@ spec:
         existingSecret: "grafana-admin"
         userKey: admin-user
         passwordKey: admin-password
-      sidecar:
-        # Plugins
-        plugins: []
+      # Plugins
+      plugins: []
 
-        ## Configure grafana datasources
-        ## ref: http://docs.grafana.org/administration/provisioning/#datasources
-        datasources:
-          datasources.yaml:
-            apiVersion: 1
-            datasources:
-            - name: Prometheus
-              type: prometheus
-              url: http://prometheus-server.prometheus
-              access: proxy
-              isDefault: true
-        #    - name: CloudWatch
-        #      type: cloudwatch
-        #      access: proxy
-        #      uid: cloudwatch
-        #      editable: false
-        #      jsonData:
-        #        authType: default
-        #        defaultRegion: us-east-1
-        #    deleteDatasources: []
-        #    - name: Prometheus
+      ## Configure grafana datasources
+      ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+          - name: Prometheus
+            type: prometheus
+            url: http://prometheus-server.prometheus
+            access: proxy
+            isDefault: true
+      #    - name: CloudWatch
+      #      type: cloudwatch
+      #      access: proxy
+      #      uid: cloudwatch
+      #      editable: false
+      #      jsonData:
+      #        authType: default
+      #        defaultRegion: us-east-1
+      #    deleteDatasources: []
+      #    - name: Prometheus
 
-        ## NOTE: To use dashboards you must also enable/configure dashboardProviders
-        ## ref: https://grafana.com/dashboards
-        ## dashboards per provider, use provider name as key.
-        dashboards: {}
+      ## NOTE: To use dashboards you must also enable/configure dashboardProviders
+      ## ref: https://grafana.com/dashboards
+      ## dashboards per provider, use provider name as key.
+      dashboards: {}
 
     kubeStateMetrics:
       enabled: true
