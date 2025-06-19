@@ -78,14 +78,16 @@ spec:
             - "[BODY].database == ok"
         - name: AlertManager
           group: Observability
-          url: http://kube-prometheus-stack-alertmanager.kube-prometheus-stack:9093
+          url: http://kube-prometheus-stack-alertmanager.kube-prometheus-stack:9093/-/healthy
           conditions:
             - "[STATUS] <= 299"
+            - "[BODY] == OK"
         - name: Prometheus
           group: Observability
-          url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack:9090
+          url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack:9090/-/healthy
           conditions:
             - "[STATUS] <= 299"
+            - "[BODY] == Prometheus Server is Healthy."
         - name: Actual
           group: Tools
           url: https://actual.j6n.ca
