@@ -69,7 +69,7 @@ spec:
           url: https://status.j6n.dev/health
           conditions:
             - "[STATUS] <= 299"
-            - "[BODY].status == up"
+            - "[BODY].status == UP"
         - name: Grafana
           group: Observability
           url: https://grafana.j6n.dev/api/health
