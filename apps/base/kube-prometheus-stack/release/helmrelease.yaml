@@ -164,5 +164,8 @@ spec:
     
     prometheus:
       prometheusSpec:
+        image:
+          repository: prompp/prompp
+          tag: 2.53.2-0.2.6
         serviceMonitorSelectorNilUsesHelmValues: false
         retention: "15d"
