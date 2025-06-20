@@ -14,3 +14,6 @@ spec:
   interval: 10m
   values:
     replicaCount: 2
+    metrics:
+      serviceMonitor:
+        enabled: true
