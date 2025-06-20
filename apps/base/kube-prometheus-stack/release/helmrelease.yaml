@@ -13,8 +13,23 @@ spec:
       version: 75.3.3
   interval: 15m
   values:
+    # Enable cleaner resource names
+    cleanPrometheusOperatorObjectNames: true
     crds:
       enabled: true
+    alertmanager:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              resources:
+                requests:
+                  storage: 1Gi
+
     # Managed in standalone chart
     grafana:
       enabled: true
@@ -177,6 +192,15 @@ spec:
           fsGroup: 64535
           runAsGroup: 64535
           runAsNonRoot: true
-          runAsUser: 64535 
+          runAsUser: 64535
         serviceMonitorSelectorNilUsesHelmValues: false
-        retention: "15d"
+        podMonitorSelectorNilUsesHelmValues: false
+        retention: 15d
+        retentionSize: 15GB
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              resources:
+                requests:
+                  storage: 15Gi
