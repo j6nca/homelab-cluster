@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configMapGenerator:
+- name: datasource-status-dashboard
+  files:
+  - ../../../../dashboards/system/datasource_status.json
+
+generatorOptions:
+  annotations:
+    grafana_folder: System
+  labels:
+    grafana_dashboard: "1"
