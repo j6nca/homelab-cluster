@@ -4,7 +4,7 @@ kind: Kustomization
 configMapGenerator:
 - name: datasource-status-dashboard
   files:
-  - ../../../../dashboards/system/datasource_status.json
+  - ../../../../dashboards/system/datasources_status.json
 
 generatorOptions:
   annotations:
