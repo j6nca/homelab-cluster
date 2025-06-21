@@ -36,6 +36,14 @@ spec:
       # Deploy grafana dashboards associated with this chart
       forceDeployDashboards: true
       defaultDashboardsEnabled: true
+      sidecar:
+        dashboards:
+          enabled: false
+          # Store default dashboards in 'Kubernetes' folder. A lot of these are defaults already but this gives better visibility
+          # of their settings in such a complex chart.
+          # Ref: https://github.com/grafana/helm-charts/issues/527#issuecomment-982319638
+          annotations:
+            grafana_folder: Kubernetes
 
     kubeStateMetrics:
       enabled: true
