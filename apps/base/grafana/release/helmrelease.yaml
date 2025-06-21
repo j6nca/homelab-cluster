@@ -60,11 +60,13 @@ spec:
         datasources:
         - name: Prometheus
           type: prometheus
+          uid: prometheus
           url: http://kps-prometheus.kube-prometheus-stack:9090
           access: proxy
           isDefault: true
         - name: AlertManager
           type: alertmanager
+          uid: alertmanager
           url: http://kps-alertmanager.kube-prometheus-stack:9093
           access: proxy
           jsonData:
