@@ -36,3 +36,20 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kube-prometheus-stack-replication
+  namespace: flux-system
+spec:
+  targetNamespace: kube-prometheus-stack
+  dependsOn:
+    - name: volsync
+    - name: kube-prometheus-stack
+  interval: 5m
+  path: ./apps/base/kube-prometheus-stack/storage
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

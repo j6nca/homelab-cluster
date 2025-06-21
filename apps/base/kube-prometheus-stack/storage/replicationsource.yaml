@@ -1,0 +1,37 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+   name: prometheus
+spec:
+  sourcePVC: prometheus-kps-prometheus-db-prometheus-kps-prometheus-0
+  trigger:
+    # Run backup daily @ midnight
+    schedule: "0 0 * * *"
+  restic:
+    pruneIntervalDays: 7
+    # Name of secret with bucket config
+    repository: prometheus-replication
+    # Backup retention policy
+    retain:
+      daily: 7
+    # Use Snapshot method for longhorn
+    copyMethod: Snapshot
+---
+# apiVersion: volsync.backube/v1alpha1
+# kind: ReplicationSource
+# metadata:
+#    name: alertmanager
+# spec:
+#   sourcePVC: alertmanager-kps-alertmanager-db-alertmanager-kps-alertmanager-0
+#   trigger:
+#     # Run backup daily @ midnight
+#     schedule: "0 0 * * *"
+#   restic:
+#     pruneIntervalDays: 7
+#     # Name of secret with bucket config
+#     repository: alertmanager-replication
+#     # Backup retention policy
+#     retain:
+#       daily: 7
+#     # Use Snapshot method for longhorn
+#     copyMethod: Snapshot
