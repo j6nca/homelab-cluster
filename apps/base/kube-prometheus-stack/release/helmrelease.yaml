@@ -13,8 +13,8 @@ spec:
       version: 75.3.3
   interval: 15m
   values:
-    # Enable cleaner resource names
-    cleanPrometheusOperatorObjectNames: true
+    # Shorten resource names
+    fullnameOverride: kps
     crds:
       enabled: true
     alertmanager:
