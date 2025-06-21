@@ -60,7 +60,7 @@ spec:
         datasources:
         - name: Prometheus
           type: prometheus
-          url: http://ksp-prometheus.kube-prometheus-stack
+          url: http://ksp-prometheus.kube-prometheus-stack:9090
           access: proxy
           isDefault: true
 
@@ -141,11 +141,6 @@ spec:
         label: grafana_dashboard
         labelValue: "1"
         searchNamespace: ALL
-        # Store default dashboards in 'Kubernetes' folder. A lot of these are defaults already but this gives better visibility
-        # of their settings in such a complex chart.
-        # Ref: https://github.com/grafana/helm-charts/issues/527#issuecomment-982319638
-        annotations:
-          grafana_folder: Kubernetes
         folderAnnotation: grafana_folder
         folder: /tmp/dashboards
         provider:
