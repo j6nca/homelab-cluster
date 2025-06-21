@@ -1,3 +1,4 @@
+
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -10,8 +11,28 @@ spec:
       service: grafana
   dependsOn:
     - name: external-secrets-resources
+    - name: grafana-database
   interval: 5m
   path: ./apps/base/grafana/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: grafana-dashboards
+  namespace: flux-system
+spec:
+  targetNamespace: grafana
+  commonMetadata:
+    labels:
+      service: grafana
+  dependsOn:
+    - name: grafana
+  interval: 5m
+  path: ./apps/base/grafana/dashboards
   prune: true
   sourceRef:
     kind: GitRepository

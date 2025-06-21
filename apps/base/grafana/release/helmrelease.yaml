@@ -13,6 +13,10 @@ spec:
       version: 9.2.1
   interval: 10m
   values:
+    serviceMonitor:
+      enabled: true
+    persistence:
+      enabled: false
     envFromSecrets:
       - name: grafana-oidc
     grafana.ini:
@@ -56,21 +60,94 @@ spec:
         datasources:
         - name: Prometheus
           type: prometheus
-          url: http://prometheus-server.prometheus
+          url: http://ksp-prometheus.kube-prometheus-stack
           access: proxy
           isDefault: true
-    #    - name: CloudWatch
-    #      type: cloudwatch
-    #      access: proxy
-    #      uid: cloudwatch
-    #      editable: false
-    #      jsonData:
-    #        authType: default
-    #        defaultRegion: us-east-1
-    #    deleteDatasources: []
-    #    - name: Prometheus
 
     ## NOTE: To use dashboards you must also enable/configure dashboardProviders
     ## ref: https://grafana.com/dashboards
     ## dashboards per provider, use provider name as key.
-    dashboards: {}
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+          - name: system
+            orgId: 1
+            folder: System
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/system      
+          - name: kubernetes
+            orgId: 1
+            folder: Kubernetes
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/kubernetes
+          - name: network
+            orgId: 1
+            folder: Network
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/network
+          - name: storage
+            orgId: 1
+            folder: Storage
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/storage
+          - name: database
+            orgId: 1
+            folder: Database
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/database
+    dashboards:
+      storage:
+        longhorn:
+          gnetId: 16888
+          revision: 9
+          datasource: Prometheus
+      # system:
+      #   gatus:
+      #     url: https://raw.githubusercontent.com/j6nca/homelab-cluster/refs/heads/main/dashboards/system/gatus.json
+      #     datasource: Prometheus
+      # network:
+      #   cloudflared:
+      #     gnetId: 17457
+      #     revision: 6
+      #     datasource: Prometheus
+      
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+        # Store default dashboards in 'Kubernetes' folder. A lot of these are defaults already but this gives better visibility
+        # of their settings in such a complex chart.
+        # Ref: https://github.com/grafana/helm-charts/issues/527#issuecomment-982319638
+        annotations:
+          grafana_folder: Kubernetes
+        folderAnnotation: grafana_folder
+        folder: /tmp/dashboards
+        provider:
+          allowUiUpdates: true
+          foldersFromFilesStructure: true
