@@ -428,7 +428,9 @@
   ],
   "preload": false,
   "schemaVersion": 41,
-  "tags": [],
+  "tags": [
+    "home"
+  ],
   "templating": {
     "list": [
       {
