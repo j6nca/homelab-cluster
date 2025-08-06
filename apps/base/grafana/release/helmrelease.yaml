@@ -151,6 +151,22 @@ spec:
           gnetId: 16888
           revision: 9
           datasource: Prometheus
+      fitness:
+        strava_activity_analysis:
+          url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_activity_analysis.json
+          datasource: Strava
+        strava_activity_overview:
+          url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_activity_overview.json
+          datasource: Strava
+        strava_athlete_dashboard:
+          url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_athlete_dashboard.json
+          datasource: Strava
+        strava_datasource:
+          url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_datasource.json
+          datasource: Strava
+        strava_segment_overview:
+          url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_segment_overview.json
+          datasource: Strava
       # system:
       #   gatus:
       #     url: https://raw.githubusercontent.com/j6nca/homelab-cluster/refs/heads/main/dashboards/system/gatus.json
