@@ -43,6 +43,12 @@ spec:
         org_name: Main Org.
         org_role: Viewer
         hide_version: true
+
+      feature_toggles:
+        externalServiceAccounts: true
+
+      panels:
+        enable_alpha: true
     # Use an existing secret for the admin user.
     admin:
       ## Name of the secret. Can be templated.
@@ -50,7 +56,8 @@ spec:
       userKey: admin_user
       passwordKey: admin_password
     # Plugins
-    plugins: []
+    plugins:
+    - grafana-strava-datasource
 
     ## Configure grafana datasources
     ## ref: http://docs.grafana.org/administration/provisioning/#datasources
@@ -67,6 +74,16 @@ spec:
         - name: AlertManager
           type: alertmanager
           uid: alertmanager
+          url: http://kps-alertmanager.kube-prometheus-stack:9093
+          access: proxy
+          jsonData:
+            # Valid options for implementation include mimir, cortex and prometheus
+            implementation: prometheus
+            # Whether or not Grafana should send alert instances to this Alertmanager
+            handleGrafanaManagedAlerts: false
+        - name: Strava
+          type: strava
+          uid: strava
           url: http://kps-alertmanager.kube-prometheus-stack:9093
           access: proxy
           jsonData:
@@ -157,3 +174,7 @@ spec:
         provider:
           allowUiUpdates: true
           foldersFromFilesStructure: true
+      datasources:
+        enabled: true
+        skipReload: false
+        reloadURL: http://grafana.grafana.svc.cluster.local/api/admin/provisioning/datasources/reload
