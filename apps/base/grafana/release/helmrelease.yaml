@@ -81,16 +81,6 @@ spec:
             implementation: prometheus
             # Whether or not Grafana should send alert instances to this Alertmanager
             handleGrafanaManagedAlerts: false
-        - name: Strava
-          type: strava
-          uid: strava
-          url: http://kps-alertmanager.kube-prometheus-stack:9093
-          access: proxy
-          jsonData:
-            # Valid options for implementation include mimir, cortex and prometheus
-            implementation: prometheus
-            # Whether or not Grafana should send alert instances to this Alertmanager
-            handleGrafanaManagedAlerts: false
 
     ## NOTE: To use dashboards you must also enable/configure dashboardProviders
     ## ref: https://grafana.com/dashboards
