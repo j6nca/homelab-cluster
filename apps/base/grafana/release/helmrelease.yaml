@@ -137,6 +137,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/database
+          - name: fitness
+            orgId: 1
+            folder: Fitness
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/fitness
     dashboards:
       storage:
         longhorn:
