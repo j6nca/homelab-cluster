@@ -11,3 +11,21 @@ generatorOptions:
     grafana_folder: System
   labels:
     grafana_dashboard: "1"
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configMapGenerator:
+- name: strava-dashboards
+  files:
+  - ../../../../dashboards/fitness/strava_activity_analysis.json
+  - ../../../../dashboards/fitness/strava_activity_overview.json
+  - ../../../../dashboards/fitness/strava_athlete_dashboard.json
+  - ../../../../dashboards/fitness/strava_datasource.json
+  - ../../../../dashboards/fitness/strava_segment_overview.json
+
+generatorOptions:
+  annotations:
+    grafana_folder: Fitness
+  labels:
+    grafana_dashboard: "1"
