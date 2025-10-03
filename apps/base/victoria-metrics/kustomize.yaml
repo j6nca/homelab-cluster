@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: victoria-metrics
+  namespace: flux-system
+spec:
+  targetNamespace: kube-system
+  commonMetadata:
+    labels:
+      service: victoria-metrics
+  interval: 5m
+  path: ./apps/base/victoria-metrics/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

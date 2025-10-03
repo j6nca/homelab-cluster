@@ -1,0 +1,31 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics-k8s-stack
+spec:
+  chart:
+    spec:
+      chart: victoria-metrics-k8s-stack
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+        namespace: flux-system
+      version: 0.60.1
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+  interval: 15m
+  values:
+    vmselect:
+      serviceMonitor:
+        enabled: true
+    vmstorage:
+      serviceMonitor:
+        enabled: true
+    vminsert:
+      serviceMonitor:
+        enabled: true
+    grafana:
+      enabled: false
