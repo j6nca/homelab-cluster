@@ -10,7 +10,7 @@ spec:
         kind: HelmRepository
         name: vm
         namespace: flux-system
-      version: 0.60.1
+      version: 0.54.0
   install:
     crds: CreateReplace
   upgrade:
