@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app victoria-metrics-k8s-stack
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+        namespace: flux-system
+      version: 0.60.1
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+  interval: 15m
+  values:
+    # Disable VMSingle and create VMCluster
+    vmsingle:
+      enabled: false
+    vmcluster:
+      enabled: true
+    # Deploy operator separately
+    victoria-metrics-operator:
+      enabled: false
+    # Deploy grafana separately
+    grafana:
+      enabled: false
+    # Include dashboards from chart
+    defaultDashboards:
+      enabled: true

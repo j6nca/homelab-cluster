@@ -1,11 +1,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: victoria-metrics-k8s-stack
+  name: &app victoria-metrics-operator
 spec:
   chart:
     spec:
-      chart: victoria-metrics-k8s-stack
+      chart: *app
       sourceRef:
         kind: HelmRepository
         name: vm
@@ -18,14 +18,7 @@ spec:
     cleanupOnFail: true
   interval: 15m
   values:
-    vmselect:
-      serviceMonitor:
-        enabled: true
-    vmstorage:
-      serviceMonitor:
-        enabled: true
-    vminsert:
-      serviceMonitor:
-        enabled: true
-    grafana:
-      enabled: false
+    crds:
+      plain: true
+    serviceMonitor:
+      enabled: true

@@ -1,11 +1,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: alertmanager
+  name: &app alertmanager
 spec:
   chart:
     spec:
-      chart: alertmanager
+      chart: *app
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
