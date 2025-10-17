@@ -1,11 +1,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app vmks
+  name: vmks
 spec:
   chart:
     spec:
-      chart: *app
+      chart: &app victoria-metrics-k8s-stack
       sourceRef:
         kind: HelmRepository
         name: vm
