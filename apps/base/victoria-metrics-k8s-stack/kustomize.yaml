@@ -8,6 +8,8 @@ spec:
   commonMetadata:
     labels:
       service: *app
+  dependsOn:
+    - name: victoria-metrics-operator
   interval: 5m
   path: ./apps/base/victoria-metrics-k8s-stack/release
   prune: true
