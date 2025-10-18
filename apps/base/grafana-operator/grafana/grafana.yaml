@@ -14,34 +14,34 @@ spec:
     #   - name: grafana-oidc
     # grafana.ini:
     server:
-      root_url: https://grafana.j6n.dev
+      root_url: "https://grafana.j6n.dev"
     # OIDC
     auth:
-      signout_redirect_url: https://auth.j6n.ca/application/o/grafana/end-session/
-      disable_login_form: 'true'
-      oauth_allow_insecure_email_lookup: 'true'
+      signout_redirect_url: "https://auth.j6n.ca/application/o/grafana/end-session/"
+      disable_login_form: "true"
+      oauth_allow_insecure_email_lookup: "true"
 
       generic_oauth:
-        name: authentik
-        enabled: 'true'
-        scopes: openid email profile
-        auth_url: https://auth.j6n.ca/application/o/authorize/
-        token_url: https://auth.j6n.ca/application/o/token/
-        api_url: https://auth.j6n.ca/application/o/userinfo/
+        name: "authentik"
+        enabled: "true"
+        scopes: "openid email profile"
+        auth_url: "https://auth.j6n.ca/application/o/authorize/"
+        token_url: "https://auth.j6n.ca/application/o/token/"
+        api_url: "https://auth.j6n.ca/application/o/userinfo/"
         # Map user groups to Grafana roles
-        role_attribute_path: contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_editor') && 'Editor' || 'Viewer'
+        role_attribute_path: "contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_editor') && 'Editor' || 'Viewer'"
       # Enable public viewer
       anonymous:
-        enabled: 'true'
-        org_name: Main Org.
-        org_role: Viewer
-        hide_version: 'true'
+        enabled: "true"
+        org_name: "Main Org."
+        org_role: "Viewer"
+        hide_version: "true"
 
     feature_toggles:
-      externalServiceAccounts: 'true'
+      externalServiceAccounts: "true"
 
     panels:
-      enable_alpha: 'true'
+      enable_alpha: "true"
     # Use an existing secret for the admin user.
     # admin:
     #   ## Name of the secret. Can be templated.
