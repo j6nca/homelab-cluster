@@ -1,0 +1,227 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: homelab
+  labels:
+    dashboards: "homelab"
+spec:
+  config:
+    # serviceMonitor:
+    #   enabled: true
+    # persistence:
+    #   enabled: false
+    # envFromSecrets:
+    #   - name: grafana-oidc
+    # grafana.ini:
+    server:
+      root_url: https://grafana.j6n.dev
+    # OIDC
+    auth:
+      signout_redirect_url: https://auth.j6n.ca/application/o/grafana/end-session/
+      disable_login_form: true
+      oauth_allow_insecure_email_lookup: true
+
+    auth.generic_oauth:
+      name: authentik
+      enabled: true
+      scopes: openid email profile
+      auth_url: https://auth.j6n.ca/application/o/authorize/
+      token_url: https://auth.j6n.ca/application/o/token/
+      api_url: https://auth.j6n.ca/application/o/userinfo/
+      # Map user groups to Grafana roles
+      role_attribute_path: contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_editor') && 'Editor' || 'Viewer'
+    # Enable public viewer
+    auth.anonymous:
+      enabled: true
+      org_name: Main Org.
+      org_role: Viewer
+      hide_version: true
+
+    feature_toggles:
+      externalServiceAccounts: true
+
+    panels:
+      enable_alpha: true
+    # Use an existing secret for the admin user.
+    # admin:
+    #   ## Name of the secret. Can be templated.
+    #   existingSecret: "grafana-admin"
+    #   userKey: admin_user
+    #   passwordKey: admin_password
+    # # Plugins
+    # plugins:
+    # - grafana-strava-datasource
+
+    # ## Configure grafana datasources
+    # ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+    # datasources:
+    #   datasources.yaml:
+    #     apiVersion: 1
+    #     datasources:
+    #     # - name: Prometheus
+    #     #   type: prometheus
+    #     #   uid: prometheus
+    #     #   url: http://kps-prometheus.kube-prometheus-stack:9090
+    #     #   access: proxy
+    #     #   isDefault: true
+    #     # - name: AlertManager
+    #     #   type: alertmanager
+    #     #   uid: alertmanager
+    #     #   url: http://kps-alertmanager.kube-prometheus-stack:9093
+    #     #   access: proxy
+    #     - name: VictoriaMetrics
+    #       type: prometheus
+    #       uid: prometheus
+    #       url: http://<vmselect-addr>.observability:8481/select/<tenant>/prometheus
+    #       access: proxy
+    #       isDefault: true
+    #     - name: AlertManager
+    #       type: alertmanager
+    #       uid: alertmanager
+    #       url: http://vmalertmanager-victoria-metrics-k8s-stack.observability:8481/select/<tenant>/prometheus
+    #       access: proxy
+    #       jsonData:
+    #         # Valid options for implementation include mimir, cortex and prometheus
+    #         implementation: prometheus
+    #         # Whether or not Grafana should send alert instances to this Alertmanager
+    #         handleGrafanaManagedAlerts: false
+
+    # ## NOTE: To use dashboards you must also enable/configure dashboardProviders
+    # ## ref: https://grafana.com/dashboards
+    # ## dashboards per provider, use provider name as key.
+    # dashboardProviders:
+    #   dashboardproviders.yaml:
+    #     apiVersion: 1
+    #     providers:
+    #       - name: default
+    #         orgId: 1
+    #         folder: ""
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/default
+    #       - name: system
+    #         orgId: 1
+    #         folder: System
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/system      
+    #       - name: kubernetes
+    #         orgId: 1
+    #         folder: Kubernetes
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/kubernetes
+    #       - name: network
+    #         orgId: 1
+    #         folder: Network
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/network
+    #       - name: storage
+    #         orgId: 1
+    #         folder: Storage
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/storage
+    #       - name: database
+    #         orgId: 1
+    #         folder: Database
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/database
+    #       - name: fitness
+    #         orgId: 1
+    #         folder: Fitness
+    #         type: file
+    #         disableDeletion: false
+    #         editable: true
+    #         options:
+    #           path: /var/lib/grafana/dashboards/fitness
+    # dashboards:
+    #   storage:
+    #     longhorn:
+    #       gnetId: 16888
+    #       revision: 9
+    #       datasource: Prometheus
+    #   fitness:
+    #     strava_activity_analysis:
+    #       url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_activity_analysis.json
+    #       datasource: Strava
+    #     strava_activity_overview:
+    #       url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_activity_overview.json
+    #       datasource: Strava
+    #     strava_athlete_dashboard:
+    #       url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_athlete_dashboard.json
+    #       datasource: Strava
+    #     strava_datasource:
+    #       url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_datasource.json
+    #       datasource: Strava
+    #     strava_segment_overview:
+    #       url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_segment_overview.json
+    #       datasource: Strava
+    #   # system:
+    #   #   gatus:
+    #   #     url: https://raw.githubusercontent.com/j6nca/homelab-cluster/refs/heads/main/dashboards/system/gatus.json
+    #   #     datasource: Prometheus
+    #   # network:
+    #   #   cloudflared:
+    #   #     gnetId: 17457
+    #   #     revision: 6
+    #   #     datasource: Prometheus
+      
+    # sidecar:
+    #   dashboards:
+    #     enabled: true
+    #     label: grafana_dashboard
+    #     labelValue: "1"
+    #     searchNamespace: ALL
+    #     folderAnnotation: grafana_folder
+    #     folder: /tmp/dashboards
+    #     provider:
+    #       allowUiUpdates: true
+    #       foldersFromFilesStructure: true
+    #   datasources:
+    #     enabled: true
+    #     skipReload: false
+    #     reloadURL: http://grafana.grafana.svc.cluster.local/api/admin/provisioning/datasources/reload
+  # Default secret with admin credentials is disabled as the username and password are supplied externally
+  disableDefaultAdminSecret: true
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: grafana
+              env:
+                - name: GF_SECURITY_ADMIN_USER
+                  valueFrom:
+                    secretKeyRef:
+                      key: GF_SECURITY_ADMIN_USER
+                      name: grafana-admin
+                - name: GF_SECURITY_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: GF_SECURITY_ADMIN_PASSWORD
+                      name: grafana-admin
+                - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+                      name: grafana-oidc
+                - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+                      name: grafana-oidc
