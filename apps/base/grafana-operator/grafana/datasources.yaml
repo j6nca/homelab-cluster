@@ -1,0 +1,40 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: victoria-metrics
+spec:
+  datasource:
+    access: proxy
+    type: prometheus
+    jsonData:
+      timeInterval: 5s
+      tlsSkipVerify: true
+    name: VictoriaMetrics
+    url: http://vmks-vm-select:8481/select/0/prometheus
+  instanceSelector:
+    matchLabels:
+      dashboards: &instance homelab
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: github
+spec:
+  datasource:
+    access: proxy
+    type: &github grafana-github-datasource
+    jsonData:
+      selectedAuthType: github-app
+      appId: <your_app_id>
+      installationId: <your_installation_id>
+    secureJsonData:
+      privateKey: <your_private_key>
+    name: GitHub
+  instanceSelector:
+    matchLabels:
+      dashboards: *instance
+  plugins:
+    - name: *github
+      version: 2.3.0
+---
+

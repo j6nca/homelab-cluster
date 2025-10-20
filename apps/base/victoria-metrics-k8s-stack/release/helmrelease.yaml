@@ -23,6 +23,19 @@ spec:
       enabled: false
     vmcluster:
       enabled: true
+      spec:
+        vstorage:
+          enabled: true
+          replicaCount: 2
+          storageDataPath: /vm-data
+          storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: longhorn
+                resources:
+                  requests:
+                    storage: 15Gi
+
     # Deploy operator separately
     victoria-metrics-operator:
       enabled: false

@@ -1,0 +1,18 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: victoria-metrics
+spec:
+  sourcePVC: prometheus-kps-prometheus-db-prometheus-kps-prometheus-0
+  trigger:
+    # Run backup daily @ midnight
+    schedule: "0 0 * * *"
+  restic:
+    pruneIntervalDays: 7
+    # Name of secret with bucket config
+    repository: victoria-metrics-replication
+    # Backup retention policy
+    retain:
+      daily: 7
+    # Use Snapshot method for longhorn
+    copyMethod: Snapshot

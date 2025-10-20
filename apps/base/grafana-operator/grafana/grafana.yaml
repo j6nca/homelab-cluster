@@ -3,7 +3,7 @@ kind: Grafana
 metadata:
   name: grafana
   labels:
-    dashboards: "homelab"
+    dashboards: homelab
 spec:
   config:
     # serviceMonitor:
@@ -108,7 +108,7 @@ spec:
     #         disableDeletion: false
     #         editable: true
     #         options:
-    #           path: /var/lib/grafana/dashboards/system      
+    #           path: /var/lib/grafana/dashboards/system
     #       - name: kubernetes
     #         orgId: 1
     #         folder: Kubernetes
@@ -180,7 +180,7 @@ spec:
     #   #     gnetId: 17457
     #   #     revision: 6
     #   #     datasource: Prometheus
-      
+
     # sidecar:
     #   dashboards:
     #     enabled: true
