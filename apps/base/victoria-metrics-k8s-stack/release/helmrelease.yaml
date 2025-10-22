@@ -24,7 +24,7 @@ spec:
     vmcluster:
       enabled: true
       spec:
-        vstorage:
+        vmstorage:
           enabled: true
           replicaCount: 2
           storageDataPath: /vm-data
