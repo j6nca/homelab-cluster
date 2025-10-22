@@ -10,7 +10,7 @@ spec:
       timeInterval: 5s
       tlsSkipVerify: true
     name: VictoriaMetrics
-    url: http://vmks-vm-select:8481/select/0/prometheus
+    url: http://vmselect-vmks-victoria-metrics-k8s-stack:8481/select/0/prometheus
   instanceSelector:
     matchLabels:
       dashboards: homelab
@@ -26,6 +26,9 @@ spec:
     jsonData:
       timeInterval: 5s
       tlsSkipVerify: true
+      implementation: prometheus
+      # Whether or not Grafana should send alert instances to this Alertmanager
+      handleGrafanaManagedAlerts: false
     name: AlertManager
     url: http://vmalertmanager-vmks-victoria-metrics-k8s-stack:9093
   instanceSelector:
