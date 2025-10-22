@@ -1,16 +1,16 @@
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: victoria-metrics
+  name: vmks
 spec:
-  sourcePVC: prometheus-kps-prometheus-db-prometheus-kps-prometheus-0
+  sourcePVC: vmcluster-victoria-metrics-k8s-stack
   trigger:
     # Run backup daily @ midnight
     schedule: "0 0 * * *"
   restic:
     pruneIntervalDays: 7
     # Name of secret with bucket config
-    repository: victoria-metrics-replication
+    repository: vmks-replication
     # Backup retention policy
     retain:
       daily: 7
