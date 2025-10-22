@@ -20,15 +20,31 @@ kind: GrafanaDatasource
 metadata:
   name: github
 spec:
+  valuesFrom:
+    - targetPath: "jsonData.appId"
+      valueFrom:
+        secretKeyRef:
+          name: grafana-github-datasource
+          key: app_id
+    - targetPath: "jsonData.installationId"
+      valueFrom:
+        secretKeyRef:
+          name: grafana-github-datasource
+          key: installation_id
+    - targetPath: "secureJsonData.privateKey"
+      valueFrom:
+        secretKeyRef:
+          name: grafana-github-datasource
+          key: private_key
   datasource:
     access: proxy
     type: &datasource grafana-github-datasource
     jsonData:
       selectedAuthType: github-app
-      appId: <your_app_id>
-      installationId: <your_installation_id>
+      appId: "${app_id}"
+      installationId: "${installation_id}"
     secureJsonData:
-      privateKey: <your_private_key>
+      privateKey: "${private_key}"
     name: GitHub
   instanceSelector:
     matchLabels:
