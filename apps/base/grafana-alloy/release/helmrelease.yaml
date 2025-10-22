@@ -118,6 +118,9 @@ spec:
 
           prometheus.remote_write "prometheus" {
             endpoint {
-              url = "http://prometheus-server.prometheus/api/v1/write"
+              // Prometheus
+              // url = "http://prometheus-server.prometheus/api/v1/write"
+              // VictoriaMetrics
+              url = "http://vminsert-vmks-victoria-metrics-k8s-stack.observability:8480/api/v1/write"
             }
           }

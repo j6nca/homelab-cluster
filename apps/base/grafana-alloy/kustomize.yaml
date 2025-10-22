@@ -5,12 +5,10 @@ metadata:
   name: grafana-alloy
   namespace: flux-system
 spec:
-  targetNamespace: grafana-alloy
+  targetNamespace: observability
   commonMetadata:
     labels:
       service: grafana-alloy
-  dependsOn:
-    - name: prometheus
   interval: 5m
   path: ./apps/base/grafana-alloy/release
   prune: true

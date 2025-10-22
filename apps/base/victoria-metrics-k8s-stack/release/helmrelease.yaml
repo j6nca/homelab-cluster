@@ -24,6 +24,8 @@ spec:
     vmcluster:
       enabled: true
       spec:
+        vmagent:
+          enabled: false
         vmstorage:
           enabled: true
           replicaCount: 2
