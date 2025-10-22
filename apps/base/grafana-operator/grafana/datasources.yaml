@@ -13,7 +13,7 @@ spec:
     url: http://vmks-vm-select:8481/select/0/prometheus
   instanceSelector:
     matchLabels:
-      dashboards: &instance homelab
+      dashboards: homelab
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
@@ -22,7 +22,7 @@ metadata:
 spec:
   datasource:
     access: proxy
-    type: &github grafana-github-datasource
+    type: &datasource grafana-github-datasource
     jsonData:
       selectedAuthType: github-app
       appId: <your_app_id>
@@ -32,9 +32,9 @@ spec:
     name: GitHub
   instanceSelector:
     matchLabels:
-      dashboards: *instance
+      dashboards: homelab
   plugins:
-    - name: *github
+    - name: *datasource
       version: 2.3.0
 ---
 
