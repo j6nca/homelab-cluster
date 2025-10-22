@@ -18,6 +18,23 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
 metadata:
+  name: alertmanager
+spec:
+  datasource:
+    access: proxy
+    type: alertmanager
+    jsonData:
+      timeInterval: 5s
+      tlsSkipVerify: true
+    name: AlertManager
+    url: http://vmalertmanager-vmks-victoria-metrics-k8s-stack:9093
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
   name: github
 spec:
   valuesFrom:
