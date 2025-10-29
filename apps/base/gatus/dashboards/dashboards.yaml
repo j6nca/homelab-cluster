@@ -1,0 +1,12 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: Gatus
+  namespace: grafana-operator
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folder: "Services"
+  json: >
+  {{ .Files.Get "../../../../dashboards/system/gatus_endpoints.json" | indent 2 }}
