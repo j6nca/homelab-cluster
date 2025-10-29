@@ -4,13 +4,14 @@ metadata:
   name: victoria-metrics
 spec:
   datasource:
-    access: proxy
+    name: VictoriaMetrics
+    uid: prometheus
     type: prometheus
     jsonData:
       timeInterval: 5s
       tlsSkipVerify: true
-    name: VictoriaMetrics
     url: http://vmselect-vmks-victoria-metrics-k8s-stack:8481/select/0/prometheus
+    access: proxy
   instanceSelector:
     matchLabels:
       dashboards: homelab
@@ -21,7 +22,8 @@ metadata:
   name: alertmanager
 spec:
   datasource:
-    access: proxy
+    name: AlertManager
+    uid: alertmanager
     type: alertmanager
     jsonData:
       timeInterval: 5s
@@ -29,8 +31,9 @@ spec:
       implementation: prometheus
       # Whether or not Grafana should send alert instances to this Alertmanager
       handleGrafanaManagedAlerts: false
-    name: AlertManager
+
     url: http://vmalertmanager-vmks-victoria-metrics-k8s-stack:9093
+    access: proxy
   instanceSelector:
     matchLabels:
       dashboards: homelab
@@ -57,6 +60,8 @@ spec:
           name: grafana-github-datasource
           key: private_key
   datasource:
+    name: GitHub
+    uid: github
     access: proxy
     type: &datasource grafana-github-datasource
     jsonData:
@@ -65,7 +70,6 @@ spec:
       installationId: "${installation_id}"
     secureJsonData:
       privateKey: "${private_key}"
-    name: GitHub
   instanceSelector:
     matchLabels:
       dashboards: homelab
