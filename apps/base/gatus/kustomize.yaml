@@ -21,7 +21,7 @@ metadata:
   name: gatus-dashboards
   namespace: flux-system
 spec:
-  targetNamespace: gatus
+  targetNamespace: observability
   commonMetadata:
     labels:
       service: gatus
