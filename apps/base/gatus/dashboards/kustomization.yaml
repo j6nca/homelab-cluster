@@ -3,13 +3,14 @@ kind: Kustomization
 
 resources:
   - ./dashboards.yaml
-# configMapGenerator:
-# - name: gatus-endpoints-dashboard
-#   files:
-#   - ../../../../dashboards/system/gatus_endpoints.json
 
-# generatorOptions:
-#   annotations:
-#     grafana_folder: System
-#   labels:
-#     grafana_dashboard: "1"
+configMapGenerator:
+- name: gatus-endpoints-dashboard
+  files:
+  - ../../../../dashboards/system/gatus_endpoints.json
+
+generatorOptions:
+  annotations:
+    grafana_folder: System
+  labels:
+    grafana_dashboard: "1"
