@@ -3,9 +3,9 @@ kind: GrafanaDatasource
 metadata:
   name: victoria-metrics
 spec:
+  uid: prometheus
   datasource:
     name: VictoriaMetrics
-    uid: prometheus
     type: prometheus
     jsonData:
       timeInterval: 5s
@@ -21,9 +21,9 @@ kind: GrafanaDatasource
 metadata:
   name: alertmanager
 spec:
+  uid: alertmanager
   datasource:
     name: AlertManager
-    uid: alertmanager
     type: alertmanager
     jsonData:
       timeInterval: 5s
@@ -59,9 +59,9 @@ spec:
         secretKeyRef:
           name: grafana-github-datasource
           key: private_key
+  uid: github
   datasource:
     name: GitHub
-    uid: github
     access: proxy
     type: &datasource grafana-github-datasource
     jsonData:
