@@ -9,4 +9,4 @@ spec:
       dashboards: homelab
   folder: "Services"
   json: >
-  {{ .Files.Get "../../../../dashboards/system/gatus_endpoints.json" | indent 2 }}
+{{ .Files.Get "../../../../dashboards/system/gatus_endpoints.json" | indent 2 }}
