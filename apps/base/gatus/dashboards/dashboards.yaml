@@ -2,7 +2,7 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
   name: gatus-endpoints
-  namespace: grafana-operator
+  namespace: observability
 spec:
   instanceSelector:
     matchLabels:
