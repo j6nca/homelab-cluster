@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 31,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -73,7 +73,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           }
@@ -104,7 +105,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "",
+      "pluginVersion": "11.3.0",
       "targets": [
         {
           "datasource": {
@@ -136,7 +137,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -172,7 +174,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "",
+      "pluginVersion": "11.3.0",
       "targets": [
         {
           "editorMode": "code",
@@ -248,7 +250,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -280,7 +283,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "",
+      "pluginVersion": "11.3.0",
       "targets": [
         {
           "editorMode": "code",
@@ -304,11 +307,14 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -344,7 +350,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "",
+      "pluginVersion": "11.3.0",
       "targets": [
         {
           "editorMode": "code",
@@ -372,7 +378,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red"
+                "color": "red",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -412,7 +419,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "",
+      "pluginVersion": "11.3.0",
       "targets": [
         {
           "editorMode": "code",
@@ -427,7 +434,7 @@
     }
   ],
   "preload": false,
-  "schemaVersion": 41,
+  "schemaVersion": 40,
   "tags": [
     "home"
   ],
@@ -435,12 +442,17 @@
     "list": [
       {
         "allValue": ".*",
-        "allowCustomValue": false,
         "current": {
-          "text": "All",
+          "text": [
+            "All"
+          ],
           "value": [
             "$__all"
           ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(gatus_results_total,group)",
         "includeAll": true,
@@ -458,12 +470,17 @@
       },
       {
         "allValue": ".*",
-        "allowCustomValue": false,
         "current": {
-          "text": "All",
+          "text": [
+            "All"
+          ],
           "value": [
             "$__all"
           ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(gatus_results_total{group=~\"$group\"},name)",
         "includeAll": true,
@@ -489,5 +506,6 @@
   "timezone": "browser",
   "title": "Gatus",
   "uid": "gatus_endpoints",
-  "version": 8
+  "version": 4,
+  "weekStart": ""
 }
