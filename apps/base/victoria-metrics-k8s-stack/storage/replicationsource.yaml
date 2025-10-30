@@ -1,9 +1,28 @@
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: vmks
+  name: vmks-0
 spec:
-  sourcePVC: vmcluster-victoria-metrics-k8s-stack
+  sourcePVC: vmstorage-db-vmstorage-vmks-victoria-metrics-k8s-stack-0
+  trigger:
+    # Run backup daily @ midnight
+    schedule: "0 0 * * *"
+  restic:
+    pruneIntervalDays: 7
+    # Name of secret with bucket config
+    repository: vmks-replication
+    # Backup retention policy
+    retain:
+      daily: 7
+    # Use Snapshot method for longhorn
+    copyMethod: Snapshot
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: vmks-1
+spec:
+  sourcePVC: vmstorage-db-vmstorage-vmks-victoria-metrics-k8s-stack-1
   trigger:
     # Run backup daily @ midnight
     schedule: "0 0 * * *"
