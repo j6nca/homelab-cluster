@@ -10,7 +10,7 @@ spec:
   restic:
     pruneIntervalDays: 7
     # Name of secret with bucket config
-    repository: vmks-replication
+    repository: vmks-0-replication
     # Backup retention policy
     retain:
       daily: 7
@@ -29,7 +29,7 @@ spec:
   restic:
     pruneIntervalDays: 7
     # Name of secret with bucket config
-    repository: vmks-replication
+    repository: vmks-1-replication
     # Backup retention policy
     retain:
       daily: 7
