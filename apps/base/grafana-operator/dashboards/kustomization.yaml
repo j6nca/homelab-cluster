@@ -5,9 +5,15 @@ configMapGenerator:
 - name: datasource-status-dashboard
   files:
   - ../../../../dashboards/system/datasources_status.json
+- name: home-dashboard
+  files:
+  - ../../../../dashboards/system/home.json
 
 generatorOptions:
   annotations:
     grafana_folder: System
   labels:
     grafana_dashboard: "1"
+
+resources:
+  - ./dashboards.yaml
