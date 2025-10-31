@@ -11,6 +11,7 @@ generatorOptions:
     grafana_folder: Storage
   labels:
     grafana_dashboard: "1"
+  disableNameSuffixHash: true
 
 resources:
   - ./dashboards.yaml
