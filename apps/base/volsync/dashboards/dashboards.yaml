@@ -7,7 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  folder: "Storage"
+  folderRef: Storage
   configMapRef:
     name: volsync-dashboard
     key: volsync.json

@@ -7,7 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  folder: "Storage"
+  folderRef: Storage
   configMapRef:
     name: longhorn-dashboard
     key: longhorn.json

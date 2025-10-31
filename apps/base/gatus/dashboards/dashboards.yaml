@@ -7,9 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  folder: "System"
+  folderRef: System
   configMapRef:
     name: gatus-endpoints-dashboard
-    key: gatus_endpoints.json
-#   json: >
-# {{ .Files.Get "../../../../dashboards/system/gatus_endpoints.json" | indent 2 }}
+    key: gatus_endpoints.jsonW

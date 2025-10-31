@@ -37,6 +37,25 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: grafana-folders
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: grafana
+  dependsOn:
+    - name: grafana
+  interval: 5m
+  path: ./apps/base/grafana-operator/folders
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: grafana-dashboards
   namespace: flux-system
 spec:

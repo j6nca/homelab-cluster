@@ -7,7 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  folder: "System"
+  folderRef: System
   configMapRef:
     name: datasource-status-dashboard
     key: datasource-status.json
@@ -21,6 +21,8 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
+  # Using empty object for dashboard in root folder.
+  folderRef: {}
   configMapRef:
     name: home-dashboard
     key: home.json
