@@ -10,6 +10,7 @@ spec:
       service: *app
   dependsOn:
     - name: victoria-metrics-operator
+    - name: grafana-operator
   interval: 5m
   path: ./apps/base/victoria-metrics-k8s-stack/release
   prune: true
@@ -29,6 +30,8 @@ spec:
       service: &app victoria-metrics
   dependsOn:
     - name: *app
+    - name: external-secrets
+    - name: volsync
   interval: 5m
   path: ./apps/base/victoria-metrics-k8s-stack/storage
   prune: true
