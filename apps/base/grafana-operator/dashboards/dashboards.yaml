@@ -22,7 +22,7 @@ spec:
     matchLabels:
       dashboards: homelab
   # Using empty object for dashboard in root folder.
-  folderRef: {}
+  folderRef: ""
   configMapRef:
     name: home-dashboard
     key: home.json
