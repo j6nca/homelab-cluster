@@ -21,7 +21,6 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  # Using empty object for dashboard in root folder.
   folderRef: System
   configMapRef:
     name: home-dashboard
@@ -36,7 +35,6 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  # Using empty object for dashboard in root folder.
   folderRef: Kubernetes
   configMapRef:
     name: grafana-operator-dashboard
@@ -51,7 +49,6 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  # Using empty object for dashboard in root folder.
   folderRef: Observability
   configMapRef:
     name: alerts-dashboard

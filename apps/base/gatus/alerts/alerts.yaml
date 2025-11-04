@@ -1,0 +1,13 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: gatus-endpoints
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: System
+  configMapRef:
+    name: gatus-endpoints-dashboard
+    key: gatus_endpoints.json
