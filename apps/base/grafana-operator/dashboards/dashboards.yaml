@@ -41,3 +41,18 @@ spec:
   configMapRef:
     name: grafana-operator-dashboard
     key: grafana-operator.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: alerts
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  # Using empty object for dashboard in root folder.
+  folderRef: System
+  configMapRef:
+    name: grafana-operator-dashboard
+    key: grafana-operator.json
