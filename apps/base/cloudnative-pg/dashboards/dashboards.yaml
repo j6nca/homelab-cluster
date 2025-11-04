@@ -7,4 +7,5 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
+  folderRef: Databases
   url: "https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/refs/heads/main/charts/cluster/grafana-dashboard.json"
