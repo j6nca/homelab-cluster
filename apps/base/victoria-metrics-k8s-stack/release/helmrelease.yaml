@@ -55,3 +55,21 @@ spec:
             matchLabels:
               dashboards: homelab
           folderRef: Kubernetes
+      dashboards:
+        victoriametrics-vmalert:
+          enabled: true
+        victoriametrics-operator:
+          enabled: true
+        node-exporter-full:
+          enabled: true
+    defaultRules:
+      create: true
+      # Joined with Values.global.clusterLabel `cluster`
+      additionalGroupByLabels:
+        - severity
+        - owner
+        - service
+      groups:
+        gatus:
+          create: true
+          rules: {}

@@ -35,7 +35,7 @@ spec:
             - "[STATUS] <= 299"
         - name: Blog
           group: Projects
-          url: https://notes.j6n.ca
+          url: https://blog.j6n.ca
           conditions:
             - "[STATUS] <= 299"
         - name: kube-cats
@@ -78,16 +78,40 @@ spec:
             - "[BODY].database == ok"
         - name: AlertManager
           group: Observability
-          url: http://kps-alertmanager.kube-prometheus-stack:9093/-/healthy
+          url: http://vmalertmanager-vmks-victoria-metrics-k8s-stack.observability:9093/-/healthy
           conditions:
             - "[STATUS] <= 299"
             - "[BODY] == OK"
-        - name: Prometheus
+        - name: VictoriaMetrics - Alert
           group: Observability
-          url: http://kps-prometheus.kube-prometheus-stack:9090/-/healthy
+          url: http://vmalert-vmks-victoria-metrics-k8s-stack.observability:8080/-/healthy
           conditions:
             - "[STATUS] <= 299"
-            - "[BODY] == Prometheus Server is Healthy."
+            - "[BODY] == VictoriaMetrics is Healthy."
+        - name: VictoriaMetrics - Agent
+          group: Observability
+          url: http://vmagent-vmks-victoria-metrics-k8s-stack.observability:8429/-/healthy
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY] == VictoriaMetrics is Healthy."
+        - name: VictoriaMetrics - Insert
+          group: Observability
+          url: http://vminsert-vmks-victoria-metrics-k8s-stack.observability:8480/-/healthy
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY] == VictoriaMetrics is Healthy."
+        - name: VictoriaMetrics - Select
+          group: Observability
+          url: http://vmselect-vmks-victoria-metrics-k8s-stack.observability:8481/-/healthy
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY] == VictoriaMetrics is Healthy."
+        - name: VictoriaMetrics - Storage
+          group: Observability
+          url: http://vmstorage-vmks-victoria-metrics-k8s-stack.observability:8482/-/healthy
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY] == VictoriaMetrics is Healthy."
         - name: Actual
           group: Tools
           url: https://actual.j6n.ca
