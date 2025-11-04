@@ -15,21 +15,21 @@ spec:
     kind: GitRepository
     name: flux-system
 ---
-# apiVersion: kustomize.toolkit.fluxcd.io/v1
-# kind: Kustomization
-# metadata:
-#   name: gatus-dashboards
-#   namespace: flux-system
-# spec:
-#   targetNamespace: observability
-#   commonMetadata:
-#     labels:
-#       service: gatus
-#   dependsOn:
-#     - name: grafana
-#   interval: 5m
-#   path: ./apps/base/gatus/dashboards
-#   prune: true
-#   sourceRef:
-#     kind: GitRepository
-#     name: flux-system
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cnpg-dashboards
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: cnpg
+  dependsOn:
+    - name: grafana-operator
+  interval: 5m
+  path: ./apps/base/cloudnative-pg/dashboards
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
