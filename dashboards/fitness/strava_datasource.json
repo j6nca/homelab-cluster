@@ -916,7 +916,9 @@
   "preload": false,
   "refresh": "",
   "schemaVersion": 41,
-  "tags": [],
+  "tags": [
+    "fitness"
+  ],
   "templating": {
     "list": []
   },

@@ -2288,9 +2288,9 @@
   "refresh": "5m",
   "schemaVersion": 40,
   "tags": [
-    "Storage",
-    "K8s",
-    "Longhorn"
+    "storage",
+    "kubernetes",
+    "longhorn"
   ],
   "templating": {
     "list": [

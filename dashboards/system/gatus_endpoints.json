@@ -436,7 +436,7 @@
   "preload": false,
   "schemaVersion": 40,
   "tags": [
-    "home"
+    "featured"
   ],
   "templating": {
     "list": [

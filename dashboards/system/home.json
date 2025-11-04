@@ -18,9 +18,34 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 37,
+  "id": 32,
   "links": [],
   "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Welcome to my homelab-cluster!",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.3.0",
+      "title": "",
+      "type": "text"
+    },
     {
       "fieldConfig": {
         "defaults": {},
@@ -30,7 +55,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 2
       },
       "id": 1,
       "options": {
@@ -44,16 +69,52 @@
         "showSearch": true,
         "showStarred": false,
         "tags": [
-          "home"
+          "featured"
         ]
       },
-      "pluginVersion": "12.0.0+security-01",
+      "pluginVersion": "11.3.0",
       "title": "Featured Dashboards",
       "type": "dashlist"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
+      "id": 3,
+      "options": {
+        "edges": {},
+        "nodes": {}
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "",
+          "instant": false,
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Infrastructure Map",
+      "type": "nodeGraph"
     }
   ],
   "preload": false,
-  "schemaVersion": 41,
+  "schemaVersion": 40,
   "tags": [],
   "templating": {
     "list": []
@@ -66,5 +127,6 @@
   "timezone": "browser",
   "title": "Home",
   "uid": "home",
-  "version": 4
+  "version": 6,
+  "weekStart": ""
 }
