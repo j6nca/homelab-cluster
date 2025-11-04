@@ -53,3 +53,16 @@ spec:
   configMapRef:
     name: alerts-dashboard
     key: alerts.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: alertmanager
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: Observability
+  grafanaCom:
+    id: 21864
