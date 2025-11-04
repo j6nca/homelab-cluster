@@ -11,6 +11,9 @@ configMapGenerator:
 - name: grafana-operator-dashboard
   files:
   - ../../../../dashboards/kubernetes/grafana-operator.json
+- name: alerts-dashboard
+  files:
+  - ../../../../dashboards/observabiity/alerts.json
 
 generatorOptions:
   annotations:

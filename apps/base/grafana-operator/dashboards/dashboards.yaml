@@ -52,7 +52,7 @@ spec:
     matchLabels:
       dashboards: homelab
   # Using empty object for dashboard in root folder.
-  folderRef: System
+  folderRef: Observability
   configMapRef:
-    name: grafana-operator-dashboard
-    key: grafana-operator.json
+    name: alerts-dashboard
+    key: alerts.json
