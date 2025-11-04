@@ -10,4 +10,4 @@ spec:
   folderRef: System
   configMapRef:
     name: gatus-endpoints-dashboard
-    key: gatus_endpoints.jsonW
+    key: gatus_endpoints.json
