@@ -70,21 +70,21 @@ spec:
         - owner
         - service
         - alertname
-      groups:
-        gatus:
-          create: true
-          rules:
-            - alert: GatusEndpointDown
-              expr: rate(gatus_results_total{success="false"}[5m])/rate(gatus_results_total[5m]) > 0.5
-              for: 5m
-              labels:
-                severity: high
-              annotations:
-                summary: "Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} is down"
-            - alert: GatusHighLatency
-              expr: avg_over_time(gatus_results_duration_seconds[5m]) > 0.5
-              for: 5m
-              labels:
-                severity: medium
-              annotations:
-                summary: "Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} has had high latency for the last 5min"
+      # groups:
+      #   gatus:
+      #     create: true
+      #     rules:
+      #       - alert: GatusEndpointDown
+      #         expr: rate(gatus_results_total{success="false"}[5m])/rate(gatus_results_total[5m]) > 0.5
+      #         for: 5m
+      #         labels:
+      #           severity: high
+      #         annotations:
+      #           summary: "Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} is down"
+      #       - alert: GatusHighLatency
+      #         expr: avg_over_time(gatus_results_duration_seconds[5m]) > 0.5
+      #         for: 5m
+      #         labels:
+      #           severity: medium
+      #         annotations:
+      #           summary: "Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} has had high latency for the last 5min"
