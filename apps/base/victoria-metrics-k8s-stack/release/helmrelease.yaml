@@ -24,6 +24,8 @@ spec:
     vmcluster:
       enabled: true
       spec:
+        retentionPeriod: "1"
+        replicationFactor: 2
         vmagent:
           enabled: true
         vmstorage:
@@ -46,14 +48,6 @@ spec:
     # Include dashboards from chart
     defaultDashboards:
       enabled: true
-      grafanaOperator:
-        # -- Create dashboards as CRDs (requires grafana-operator to be installed)
-        enabled: true
-        spec:
-          instanceSelector:
-            matchLabels:
-              dashboards: homelab
-          folderRef: kubernetes
       dashboards:
         victoriametrics-vmalert:
           enabled: true

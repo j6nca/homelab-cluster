@@ -1,62 +1,6 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: datasource-status
-  namespace: observability
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: homelab
-  folderRef: system
-  configMapRef:
-    name: datasource-status-dashboard
-    key: datasource-status.json
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: home
-  namespace: observability
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: homelab
-  folderRef: system
-  configMapRef:
-    name: home-dashboard
-    key: home.json
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: grafana-operator
-  namespace: observability
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: homelab
-  folderRef: kubernetes
-  configMapRef:
-    name: grafana-operator-dashboard
-    key: grafana-operator.json
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: alerts
-  namespace: observability
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: homelab
-  folderRef: observability
-  configMapRef:
-    name: alerts-dashboard
-    key: alerts.json
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
   name: alertmanager
   namespace: observability
 spec:

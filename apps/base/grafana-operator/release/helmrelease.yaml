@@ -13,3 +13,8 @@ spec:
     crds: CreateReplace
     cleanupOnFail: true
   interval: 15m
+  values:
+    dashboard:
+      enabled: true
+    serviceMonitor:
+      enabled: true

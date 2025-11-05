@@ -19,6 +19,7 @@ spec:
   interval: 15m
   values:
     crds:
+      enabled: true
       plain: true
     serviceMonitor:
       enabled: true

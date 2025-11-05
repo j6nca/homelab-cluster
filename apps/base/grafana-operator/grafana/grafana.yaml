@@ -37,6 +37,8 @@ spec:
       enable_alpha: "true"
     unified_alerting:
       enabled: "false"
+    serviceMonitor:
+      enabled: "true"
   # Default secret with admin credentials is disabled as the username and password are supplied externally
   disableDefaultAdminSecret: true
   deployment:
@@ -66,3 +68,26 @@ spec:
                     secretKeyRef:
                       key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
                       name: grafana-oidc
+              volumeMounts:
+                - mountPath: /etc/grafana/provisioning/dashboards
+                  name: provisioning-config
+                - mountPath: /var/lib/grafana/dashboards
+                  name: dashboards
+            # This container watches the namespace for configmaps with the `dashboards` label
+            # and creates files for all their keys under `FOLDER`
+            - image: 'ghcr.io/kiwigrid/k8s-sidecar:1.24.5'
+              name: k8s-sidecar
+              env:
+                - name: LABEL
+                  value: "grafana_dashboard"
+                - name: LABEL_VALUE
+                  value: "1"
+                - name: FOLDER
+                  value: /var/lib/grafana/dashboards
+                - name: NAMESPACE
+                  value: ALL
+                - name: RESOURCE
+                  value: configmap
+              volumeMounts:
+                - mountPath: /var/lib/grafana/dashboards
+                  name: dashboards                
