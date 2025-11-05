@@ -37,7 +37,10 @@ spec:
                 resources:
                   requests:
                     storage: 15Gi
-
+    kubeDns:
+      enabled: true
+    coreDns:
+      enabled: false
     # Deploy operator separately
     victoria-metrics-operator:
       enabled: false
