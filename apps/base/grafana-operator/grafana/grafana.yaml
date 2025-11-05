@@ -45,6 +45,13 @@ spec:
     spec:
       template:
         spec:
+          # The volumes for dashboards and provisioning config
+          volumes:
+            - name: dashboards
+              emptyDir: { }
+            - name: provisioning-config
+              configMap:
+                name: provisioning-config
           containers:
             - name: grafana
               env:
