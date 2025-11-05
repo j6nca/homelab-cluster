@@ -80,11 +80,11 @@ spec:
               labels:
                 severity: high
               annotations:
-                summary: Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} is down
+                summary: "Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} is down"
             - alert: GatusHighLatency
               expr: avg_over_time(gatus_results_duration_seconds[5m]) > 0.5
               for: 5m
               labels:
                 severity: medium
               annotations:
-                summary: Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} has had high latency for the last 5min
+                summary: "Gatus Endpoint ${{ .Labels.group }}/${{ .Labels.name }} has had high latency for the last 5min"
