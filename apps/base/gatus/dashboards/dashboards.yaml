@@ -7,7 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  folderRef: System
+  folderRef: system
   configMapRef:
     name: gatus-endpoints-dashboard
     key: gatus_endpoints.json

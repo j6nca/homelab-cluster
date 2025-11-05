@@ -54,7 +54,7 @@ spec:
           instanceSelector:
             matchLabels:
               dashboards: homelab
-          folderRef: Kubernetes
+          folderRef: kubernetes
       dashboards:
         victoriametrics-vmalert:
           enabled: true
