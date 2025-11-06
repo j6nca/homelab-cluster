@@ -10,7 +10,6 @@ spec:
       service: *app
   dependsOn:
     - name: victoria-metrics-operator
-    - name: grafana-operator
   interval: 5m
   path: ./apps/base/victoria-metrics-k8s-stack/release
   prune: true
