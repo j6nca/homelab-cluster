@@ -57,7 +57,7 @@ spec:
       passwordKey: admin_password
     # Plugins
     plugins:
-    - grafana-strava-datasource
+      - grafana-strava-datasource
 
     ## Configure grafana datasources
     ## ref: http://docs.grafana.org/administration/provisioning/#datasources
@@ -65,33 +65,33 @@ spec:
       datasources.yaml:
         apiVersion: 1
         datasources:
-        # - name: Prometheus
-        #   type: prometheus
-        #   uid: prometheus
-        #   url: http://kps-prometheus.kube-prometheus-stack:9090
-        #   access: proxy
-        #   isDefault: true
-        # - name: AlertManager
-        #   type: alertmanager
-        #   uid: alertmanager
-        #   url: http://kps-alertmanager.kube-prometheus-stack:9093
-        #   access: proxy
-        - name: VictoriaMetrics
-          type: prometheus
-          uid: prometheus
-          url: http://<vmselect-addr>.observability:8481/select/<tenant>/prometheus
-          access: proxy
-          isDefault: true
-        - name: AlertManager
-          type: alertmanager
-          uid: alertmanager
-          url: http://vmalertmanager-victoria-metrics-k8s-stack.observability:8481/select/<tenant>/prometheus
-          access: proxy
-          jsonData:
-            # Valid options for implementation include mimir, cortex and prometheus
-            implementation: prometheus
-            # Whether or not Grafana should send alert instances to this Alertmanager
-            handleGrafanaManagedAlerts: false
+          # - name: Prometheus
+          #   type: prometheus
+          #   uid: prometheus
+          #   url: http://kps-prometheus.kube-prometheus-stack:9090
+          #   access: proxy
+          #   isDefault: true
+          # - name: AlertManager
+          #   type: alertmanager
+          #   uid: alertmanager
+          #   url: http://kps-alertmanager.kube-prometheus-stack:9093
+          #   access: proxy
+          - name: VictoriaMetrics
+            type: prometheus
+            uid: prometheus
+            url: http://<vmselect-addr>.observability:8481/select/<tenant>/prometheus
+            access: proxy
+            isDefault: true
+          - name: AlertManager
+            type: alertmanager
+            uid: alertmanager
+            url: http://vmalertmanager-victoria-metrics-k8s-stack.observability:8481/select/<tenant>/prometheus
+            access: proxy
+            jsonData:
+              # Valid options for implementation include mimir, cortex and prometheus
+              implementation: prometheus
+              # Whether or not Grafana should send alert instances to this Alertmanager
+              handleGrafanaManagedAlerts: false
 
     ## NOTE: To use dashboards you must also enable/configure dashboardProviders
     ## ref: https://grafana.com/dashboards
@@ -115,7 +115,7 @@ spec:
             disableDeletion: false
             editable: true
             options:
-              path: /var/lib/grafana/dashboards/system      
+              path: /var/lib/grafana/dashboards/system
           - name: kubernetes
             orgId: 1
             folder: Kubernetes
@@ -156,6 +156,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/fitness
+          - name: observability
+            orgId: 1
+            folder: Observability
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/observability
     dashboards:
       storage:
         longhorn:
@@ -187,7 +195,7 @@ spec:
       #     gnetId: 17457
       #     revision: 6
       #     datasource: Prometheus
-      
+
     sidecar:
       dashboards:
         enabled: true

@@ -1,4 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+configMapGenerator:
+  - name: volsync-dashboard
+    files:
+      - ../../../../dashboards/storage/volsync.json
+
+generatorOptions:
+  annotations:
+    grafana_folder: Storage
+  labels:
+    grafana_dashboard: "1"
+  disableNameSuffixHash: true
+
 resources:
   - ./helmrelease.yaml
