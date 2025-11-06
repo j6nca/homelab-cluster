@@ -33,15 +33,70 @@ data:
   provisioning.yaml: |-
     apiVersion: 1
     providers:
-      - name: 'configmap-dashboard-provider'
+      # Setting 'editable' to true to allow us to temporarily tweak dashboards as needed.
+      - name: default
         orgId: 1
-        folder: ''
-        folderUid: ''
+        folder: ""
         type: file
         disableDeletion: false
-        updateIntervalSeconds: 10
-        allowUiUpdates: false
+        editable: true
         options:
-          path: /var/lib/grafana/dashboards
-          foldersFromFilesStructure: true
+          path: /var/lib/grafana/dashboards/default
+      - name: system
+        orgId: 1
+        folder: System
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/system      
+      - name: kubernetes
+        orgId: 1
+        folder: Kubernetes
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/kubernetes
+      - name: network
+        orgId: 1
+        folder: Network
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/network
+      - name: storage
+        orgId: 1
+        folder: Storage
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/storage
+      - name: databases
+        orgId: 1
+        folder: Databases
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/databases
+      - name: fitness
+        orgId: 1
+        folder: Fitness
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/fitness
+      - name: observability
+        orgId: 1
+        folder: Observability
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/observability
 ---
+
