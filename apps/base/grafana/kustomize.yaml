@@ -5,7 +5,7 @@ metadata:
   name: grafana
   namespace: flux-system
 spec:
-  targetNamespace: grafana
+  targetNamespace: observability
   commonMetadata:
     labels:
       service: grafana
@@ -24,7 +24,7 @@ metadata:
   name: grafana-dashboards
   namespace: flux-system
 spec:
-  targetNamespace: grafana
+  targetNamespace: observability
   commonMetadata:
     labels:
       service: grafana
