@@ -22,4 +22,4 @@ spec:
       grafanaDashboard:
         create: true
         annotations:
-          grafana_folder: Storage
+          grafana_folder: Databases
