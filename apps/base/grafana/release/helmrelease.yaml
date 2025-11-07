@@ -140,9 +140,9 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/storage
-          - name: database
+          - name: databases
             orgId: 1
-            folder: Database
+            folder: Databases
             type: file
             disableDeletion: false
             editable: true
