@@ -21,3 +21,5 @@ spec:
     monitoring:
       grafanaDashboard:
         create: true
+        annotations:
+          grafana_folder: System
