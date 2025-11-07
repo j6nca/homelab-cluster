@@ -79,13 +79,13 @@ spec:
           - name: VictoriaMetrics
             type: prometheus
             uid: prometheus
-            url: http://<vmselect-addr>.observability:8481/select/<tenant>/prometheus
+            url: http://vmselect-vmks-victoria-metrics-k8s-stack.observability:8481/select/<tenant>/prometheus
             access: proxy
             isDefault: true
           - name: AlertManager
             type: alertmanager
             uid: alertmanager
-            url: http://vmalertmanager-victoria-metrics-k8s-stack.observability:8481/select/<tenant>/prometheus
+            url: http://vmalertmanager-vmks-victoria-metrics-k8s-stack.observability:8481/select/<tenant>/prometheus
             access: proxy
             jsonData:
               # Valid options for implementation include mimir, cortex and prometheus
