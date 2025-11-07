@@ -1,16 +1,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: external-secrets
+  name: &app external-dns
 spec:
   chart:
     spec:
-      chart: external-secrets
+      chart: *app
       sourceRef:
         kind: HelmRepository
-        name: external-secrets
+        name: *app
         namespace: flux-system
-      version: 0.19.2
+      version: 0.19.0
   install:
     crds: CreateReplace
   upgrade:
@@ -19,4 +19,3 @@ spec:
   interval: 15m
   # values.yaml
   values:
-    installCRDs: true
