@@ -17,9 +17,3 @@ spec:
     crds: CreateReplace
     cleanupOnFail: true
   interval: 15m
-  values:
-    monitoring:
-      grafanaDashboard:
-        create: true
-        annotations:
-          grafana_folder: Databases
