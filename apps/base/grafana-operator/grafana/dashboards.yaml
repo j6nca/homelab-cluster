@@ -8,6 +8,9 @@ spec:
     matchLabels:
       dashboards: homelab
   folderRef: observability
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
   grafanaCom:
     id: 21864
 ---
@@ -21,4 +24,7 @@ spec:
     matchLabels:
       dashboards: homelab
   folderRef: system
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
   url: https://github.com/j6nca/homelab-cluster/blob/main/dashboards/system/datasources_status.json

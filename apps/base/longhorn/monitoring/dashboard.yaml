@@ -8,5 +8,8 @@ spec:
     matchLabels:
       dashboards: homelab
   folderRef: storage
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
   grafanaCom:
     id: 16888
