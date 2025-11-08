@@ -17,7 +17,7 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: alertmanager
+  name: datasource-status
   namespace: observability
 spec:
   instanceSelector:
