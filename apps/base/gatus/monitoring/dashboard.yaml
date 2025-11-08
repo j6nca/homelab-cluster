@@ -11,4 +11,4 @@ spec:
   datasources:
     - datasourceName: prometheus
       inputName: DS_PROMETHEUS
-  url: https://raw.githubusercontent.com/j6nca/homelab-cluster/c47ee55b96b52d46c48e907ba52219cbac2fda7e/dashboards/system/gatus_endpoints.json
+  url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboards/system/gatus_endpoints.json
