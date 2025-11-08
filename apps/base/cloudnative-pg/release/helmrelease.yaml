@@ -17,3 +17,6 @@ spec:
     crds: CreateReplace
     cleanupOnFail: true
   interval: 15m
+  values:
+    monitoring:
+      podMonitorEnabled: true
