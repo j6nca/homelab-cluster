@@ -26,6 +26,6 @@ resources:
   - ./externalsecrets.yaml
   - ./grafana.yaml
   - ./datasources.yaml
-  # - ./folders.yaml
+  - ./folders.yaml
   - ./dashboards.yaml
   - ./clusterrole.yaml
