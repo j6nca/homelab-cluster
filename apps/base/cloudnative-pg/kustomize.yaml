@@ -25,6 +25,8 @@ spec:
   commonMetadata:
     labels:
       service: cnpg
+  dependsOn:
+    - name: grafana-operator
   interval: 5m
   path: ./apps/base/cloudnative-pg/monitoring
   prune: true
