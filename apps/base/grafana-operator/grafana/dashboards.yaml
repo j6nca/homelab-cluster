@@ -10,3 +10,15 @@ spec:
   folderRef: observability
   grafanaCom:
     id: 21864
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: alertmanager
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: system
+  url: https://github.com/j6nca/homelab-cluster/blob/main/dashboards/system/datasources_status.json
