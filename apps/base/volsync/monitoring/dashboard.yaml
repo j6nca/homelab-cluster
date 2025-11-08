@@ -7,6 +7,6 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
-  folderRef: observability
+  folderRef: storage
   grafanaCom:
     id: 21356
