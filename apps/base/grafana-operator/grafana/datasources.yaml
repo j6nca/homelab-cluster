@@ -12,6 +12,7 @@ spec:
       tlsSkipVerify: true
     url: http://vmselect-vmks-victoria-metrics-k8s-stack:8481/select/0/prometheus
     access: proxy
+    basicAuth: false
   instanceSelector:
     matchLabels:
       dashboards: homelab
@@ -31,9 +32,9 @@ spec:
       implementation: prometheus
       # Whether or not Grafana should send alert instances to this Alertmanager
       handleGrafanaManagedAlerts: false
-
     url: http://vmalertmanager-vmks-victoria-metrics-k8s-stack:9093
     access: proxy
+    basicAuth: false
   instanceSelector:
     matchLabels:
       dashboards: homelab
