@@ -20,3 +20,4 @@ resources:
   - ./folders.yaml
   - ./dashboards.yaml
   - ./clusterrole.yaml
+  - ./provisioning.yaml
