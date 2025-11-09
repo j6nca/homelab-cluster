@@ -14,11 +14,5 @@ spec:
     cleanupOnFail: true
   interval: 15m
   values:
-    dashboard:
-      enabled: true
-      annotations:
-        grafana_folder: Kubernetes
-      labels:
-        grafana_dashboard: "1"
     serviceMonitor:
       enabled: true
