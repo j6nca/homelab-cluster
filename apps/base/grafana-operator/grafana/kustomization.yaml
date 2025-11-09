@@ -8,7 +8,7 @@ configMapGenerator:
 
 generatorOptions:
   annotations:
-    grafana_folder: System
+    grafana_folder: ""
   labels:
     grafana_dashboard: "1"
   disableNameSuffixHash: true
