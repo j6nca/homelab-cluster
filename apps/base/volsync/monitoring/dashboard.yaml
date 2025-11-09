@@ -10,6 +10,6 @@ spec:
   folderRef: storage
   datasources:
     - datasourceName: prometheus
-      inputName: DS_PROMETHEUS
+      inputName: datasource
   grafanaCom:
     id: 21356
