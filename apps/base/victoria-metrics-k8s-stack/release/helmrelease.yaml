@@ -39,6 +39,11 @@ spec:
                 resources:
                   requests:
                     storage: 15Gi
+    vmagent:
+      enabled: true
+      spec:
+        externalLabels:
+          cluster: homelab
     # Deploy operator separately
     victoria-metrics-operator:
       enabled: false
