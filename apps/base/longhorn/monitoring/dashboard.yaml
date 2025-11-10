@@ -9,7 +9,7 @@ spec:
       dashboards: homelab
   folderRef: storage
   datasources:
-    - datasourceName: prometheus
-      inputName: DS_PROMETHEUS
+    - datasourceName: VictoriaMetrics
+      inputName: datasource
   grafanaCom:
     id: 16888
