@@ -33,7 +33,7 @@ spec:
     feature_toggles:
       externalServiceAccounts: "true"
     dashboards:
-      default_home_dashboard_path: /var/lib/grafana/dashboards/system/home.json
+      default_home_dashboard_path: /var/lib/grafana/dashboards/home.json
     panels:
       enable_alpha: "true"
     unified_alerting:
