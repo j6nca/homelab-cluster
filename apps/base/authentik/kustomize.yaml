@@ -1,3 +1,23 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: authentik-data
+  namespace: flux-system
+spec:
+  targetNamespace: authentik
+  commonMetadata:
+    labels:
+      service: authentik
+  dependsOn:
+    - name: cnpg
+  interval: 5m
+  path: ./apps/base/authentik/data
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -8,8 +28,29 @@ spec:
   commonMetadata:
     labels:
       service: authentik
+  dependsOn:
+    - name: authentik-data
   interval: 5m
   path: ./apps/base/authentik/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: authentik-monitoring
+  namespace: flux-system
+spec:
+  targetNamespace: authentik
+  commonMetadata:
+    labels:
+      service: authentik
+  dependsOn:
+    - name: grafana-operator
+  interval: 5m
+  path: ./apps/base/authentik/monitoring
   prune: true
   sourceRef:
     kind: GitRepository

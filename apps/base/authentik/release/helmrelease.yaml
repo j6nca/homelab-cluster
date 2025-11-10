@@ -12,3 +12,14 @@ spec:
         namespace: flux-system
       version: 2025.8.4
   interval: 15m
+  values:
+    server:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+    worker:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true

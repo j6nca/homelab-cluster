@@ -1,0 +1,15 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: authentik
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: system
+  datasources:
+    - datasourceName: VictoriaMetrics
+      inputName: Prometheus
+  grafanaCom:
+    id: 14837

@@ -1,0 +1,15 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudflare
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: network
+  datasources:
+    - datasourceName: VictoriaMetrics
+      inputName: __expr__Prometheus
+  grafanaCom:
+    id: 23115
