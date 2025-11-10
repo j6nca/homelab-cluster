@@ -9,7 +9,7 @@ spec:
       dashboards: homelab
   folderRef: observability
   datasources:
-    - datasourceName: VictoriaMetrics
+    - datasourceName: prometheus
       inputName: DS_PROMETHEUS
   grafanaCom:
     id: 21864
@@ -25,7 +25,7 @@ spec:
       dashboards: homelab
   folderRef: system
   datasources:
-    - datasourceName: VictoriaMetrics
+    - datasourceName: prometheus
       inputName: DS_PROMETHEUS
   url: https://github.com/j6nca/homelab-cluster/blob/main/dashboards/system/datasources_status.json
 ---
@@ -40,36 +40,6 @@ spec:
       dashboards: homelab
   folderRef: kubernetes
   datasources:
-    - datasourceName: VictoriaMetrics
+    - datasourceName: prometheus
       inputName: datasource
   url: https://raw.githubusercontent.com/grafana/grafana-operator/refs/heads/master/deploy/helm/grafana-operator/files/dashboard.json
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: flux-cluster
-  namespace: observability
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: homelab
-  folderRef: kubernetes
-  datasources:
-    - datasourceName: VictoriaMetrics
-      inputName: DS_PROMETHEUS
-  url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/cluster.json
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: fluxcd-controlplane
-  namespace: observability
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: homelab
-  folderRef: kubernetes
-  datasources:
-    - datasourceName: VictoriaMetrics
-      inputName: DS_PROMETHEUS
-  url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/control-plane.json

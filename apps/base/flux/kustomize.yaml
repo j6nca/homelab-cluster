@@ -10,6 +10,7 @@ spec:
       service: gatus
   dependsOn:
     - victoria-metrics
+    - grafana-operator
   interval: 5m
   path: ./apps/base/flux/monitoring
   prune: true
