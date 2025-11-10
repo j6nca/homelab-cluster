@@ -6,3 +6,4 @@ spec:
   chartRef:
     kind: OCIRepository
     name: dragonfly-operator
+  interval: 15m

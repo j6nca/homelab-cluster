@@ -9,7 +9,7 @@ spec:
       dashboards: homelab
   folderRef: observability
   datasources:
-    - datasourceName: prometheus
+    - datasourceName: VictoriaMetrics
       inputName: DS_PROMETHEUS
   grafanaCom:
     id: 21864
@@ -25,7 +25,7 @@ spec:
       dashboards: homelab
   folderRef: system
   datasources:
-    - datasourceName: prometheus
+    - datasourceName: VictoriaMetrics
       inputName: DS_PROMETHEUS
   url: https://github.com/j6nca/homelab-cluster/blob/main/dashboards/system/datasources_status.json
 ---
@@ -40,6 +40,22 @@ spec:
       dashboards: homelab
   folderRef: kubernetes
   datasources:
-    - datasourceName: prometheus
+    - datasourceName: VictoriaMetrics
       inputName: datasource
   url: https://raw.githubusercontent.com/grafana/grafana-operator/refs/heads/master/deploy/helm/grafana-operator/files/dashboard.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: fluxcd
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: kubernetes
+  datasources:
+    - datasourceName: VictoriaMetrics
+      inputName: DS_PROMETHEUS
+  grafanaCom:
+    id: 16714
