@@ -8,6 +8,8 @@ spec:
     name: dragonfly-operator
   interval: 15m
   values:
+    serviceMonitor:
+      enabled: true
     grafanaDashboard:
       enabled: true
       folder: databases
