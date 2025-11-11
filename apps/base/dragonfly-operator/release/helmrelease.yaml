@@ -6,6 +6,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: dragonfly-operator
+    namespace: flux-system
   interval: 15m
   values:
     serviceMonitor:
