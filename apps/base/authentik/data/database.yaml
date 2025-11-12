@@ -7,7 +7,9 @@ spec:
   managed:
     roles:
       - name: authentik
-        passwordSecret: authentik-postgres
+        passwordSecret:
+          name: authentik-postgres
+          key: password
   storage:
     storageClass: longhorn
     size: 1Gi
