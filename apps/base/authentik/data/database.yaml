@@ -19,7 +19,8 @@ kind: Database
 metadata:
   name: authentik-postgres
 spec:
-  cluster: authentik-postgres
+  cluster: 
+    name: authentik-postgres
   name: &app authentik
   owner: *app
 ---
