@@ -11,6 +11,7 @@ spec:
       service: authentik
   dependsOn:
     - name: cnpg
+    - name: dragonfly-operator
   interval: 5m
   path: ./apps/base/authentik/data
   prune: true

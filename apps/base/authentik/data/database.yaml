@@ -9,7 +9,6 @@ spec:
       - name: authentik
         passwordSecret:
           name: authentik-postgres
-          key: password
   storage:
     storageClass: longhorn
     size: 1Gi
