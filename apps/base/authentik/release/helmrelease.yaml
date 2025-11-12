@@ -29,6 +29,11 @@ spec:
             secretKeyRef:
               name: authentik-postgres
               key: password
+        - name: AUTHENTIK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: authentik-config
+              key: password
     authentik:
       redis:
         host: authentik-dragonfly
