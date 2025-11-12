@@ -13,13 +13,44 @@ spec:
       version: 2025.8.4
   interval: 15m
   values:
+    # Disable dep charts
+    redis:
+      enabled: false
+    postgresql:
+      enabled: false
+    global:
+      env:
+        - name: AUTHENTIK_POSTGRESQL__NAME
+          value: authentik
+        - name: AUTHENTIK_POSTGRESQL__USER
+          value: authentik
+        - name: AUTHENTIK_POSTGRESQL__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authentik-postgres
+              key: password
+    authentik:
+      redis:
+        host: authentik-dragonfly
+      postgresql:
+        host: authentik-postgres
     server:
+      autoscaling:
+        enabled: true
+        minReplicas: 1
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
     worker:
+      autoscaling:
+        enabled: true
+        minReplicas: 1
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
+    prometheus:
+      rules:
+        enabled: true
+        namespace: observability

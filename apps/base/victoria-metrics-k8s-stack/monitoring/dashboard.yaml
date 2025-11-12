@@ -1,0 +1,14 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: gatus-endpoints
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: system
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
+  url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboards/system/gatus_endpoints.json
