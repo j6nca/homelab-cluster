@@ -33,7 +33,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: authentik-config
-              key: password
+              key: secretkey
     authentik:
       redis:
         host: authentik-dragonfly
