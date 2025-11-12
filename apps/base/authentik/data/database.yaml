@@ -13,3 +13,13 @@ spec:
   storage:
     storageClass: longhorn
     size: 1Gi
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: authentik-postgres
+spec:
+  cluster: authentik-postgres
+  name: &app authentik
+  owner: *app
+---
