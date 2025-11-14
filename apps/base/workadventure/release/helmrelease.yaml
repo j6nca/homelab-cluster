@@ -12,3 +12,4 @@ spec:
         namespace: flux-system
       version: 0.0.9-dev1
   interval: 15m
+  values:

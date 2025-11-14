@@ -23,6 +23,24 @@ spec:
       enabled: false
     serviceMonitor:
       enabled: true
+    env:
+      GATUS_CONFIG_PATH: /config/config.yaml
+    sidecarContainers:
+      - name: gatus-sidecar
+        image: ghcr.io/home-operations/gatus-sidecar:latest
+        args:
+          - --auto-routes
+          - --auto-ingresses
+          - --auto-services
+          - --auto-group
+          - --gateway-name=production-gateway
+          - --output=/config/gatus-sidecar.yaml
+        volumeMounts:
+          - name: gatus-dynamic-config
+            mountPath: /dynamic-config
+    extraVolumeMounts:
+      - name: gatus-dynamic-config
+        mountPath: /dynamic-config
     config:
       storage:
         type: memory
