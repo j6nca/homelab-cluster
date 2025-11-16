@@ -4,15 +4,15 @@ metadata:
   name: &app spegel
 spec:
   endpoints:
-  - honorLabels: true
-    interval: 1m
-    path: /metrics
-    scheme: http
+  - interval: 60s
+    port: metrics
     scrapeTimeout: 30s
   jobLabel: *app
   namespaceSelector:
     matchNames:
-    - *app
+    - kube-utils
   selector:
     matchLabels:
       app.kubernetes.io/instance: *app
+      app.kubernetes.io/name: *app
+      app.kubernetes.io/component: metrics
