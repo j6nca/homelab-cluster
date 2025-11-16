@@ -46,7 +46,7 @@ spec:
       metrics:
         enabled: true
         serviceMonitor:
-          enabled: true
+          enabled: false
     worker:
       autoscaling:
         enabled: true
@@ -54,7 +54,7 @@ spec:
       metrics:
         enabled: true
         serviceMonitor:
-          enabled: true
+          enabled: false
     prometheus:
       rules:
         enabled: true

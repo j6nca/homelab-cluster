@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: VMServiceScrape
+metadata:
+  name: &app gatus
+spec:
+  endpoints:
+  - honorLabels: true
+    interval: 1m
+    path: /metrics
+    scheme: http
+    scrapeTimeout: 30s
+  jobLabel: *app
+  namespaceSelector:
+    matchNames:
+    - *app
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: *app
+      app.kubernetes.io/name: *app

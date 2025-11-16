@@ -1,0 +1,53 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: VMPodScrape
+metadata:
+  name: authentik-postgres
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: authentik-postgres
+  podMetricsEndpoints:
+  - port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: VMServiceScrape
+metadata:
+  name: &app authentik
+spec:
+  endpoints:
+  - honorLabels: true
+    interval: 1m
+    path: /metrics
+    scheme: http
+    scrapeTimeout: 30s
+  jobLabel: *app
+  namespaceSelector:
+    matchNames:
+    - *app
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: *app
+      app.kubernetes.io/name: *app
+      app.kubernetes.io/component: server-metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: VMServiceScrape
+metadata:
+  name: &app authentik
+spec:
+  endpoints:
+  - honorLabels: true
+    interval: 1m
+    path: /metrics
+    scheme: http
+    scrapeTimeout: 30s
+  jobLabel: *app
+  namespaceSelector:
+    matchNames:
+    - *app
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: *app
+      app.kubernetes.io/name: *app
+      app.kubernetes.io/component: worker-metrics

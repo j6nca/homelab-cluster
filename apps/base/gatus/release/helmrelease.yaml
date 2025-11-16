@@ -22,7 +22,7 @@ spec:
     persistence:
       enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
     env:
       GATUS_CONFIG_PATH: /config/config.yaml
     sidecarContainers:

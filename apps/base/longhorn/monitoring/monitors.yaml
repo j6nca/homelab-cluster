@@ -1,0 +1,15 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: VMServiceScrape
+metadata:
+  name: &app longhorn
+spec:
+  jobLabel: *app
+  endpoints:
+  - port: manager
+  namespaceSelector:
+    matchNames:
+    - longhorn-system
+  selector:
+    matchLabels:
+      app: longhorn-manager

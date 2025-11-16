@@ -16,4 +16,4 @@ spec:
     replicaCount: 2
     metrics:
       serviceMonitor:
-        enabled: true
+        enabled: false

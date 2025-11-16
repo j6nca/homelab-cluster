@@ -21,3 +21,4 @@ resources:
   - ./dashboards.yaml
   - ./clusterrole.yaml
   - ./provisioning.yaml
+  - ./monitors.yaml
