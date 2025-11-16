@@ -1,5 +1,5 @@
 ---
-apiVersion: monitoring.coreos.com/v1
+apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
 metadata:
   name: authentik-postgres
@@ -10,10 +10,10 @@ spec:
   podMetricsEndpoints:
   - port: metrics
 ---
-apiVersion: monitoring.coreos.com/v1
+apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMServiceScrape
 metadata:
-  name: &app authentik
+  name: &app authentik-server
 spec:
   endpoints:
   - honorLabels: true
@@ -31,10 +31,10 @@ spec:
       app.kubernetes.io/name: *app
       app.kubernetes.io/component: server-metrics
 ---
-apiVersion: monitoring.coreos.com/v1
+apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMServiceScrape
 metadata:
-  name: &app authentik
+  name: &app authentik-worker
 spec:
   endpoints:
   - honorLabels: true

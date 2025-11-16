@@ -15,4 +15,4 @@ spec:
   interval: 15m
   values:
     serviceMonitor:
-      enabled: true
+      enabled: false
