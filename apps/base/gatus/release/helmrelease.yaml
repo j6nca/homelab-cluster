@@ -46,6 +46,11 @@ spec:
     config:
       storage:
         type: memory
+      ui:
+        dark-mode: true
+        default-sort-by: group
+        logo: https://avatars.githubusercontent.com/u/72368152
+        link: https://grafana.j6n.dev
       metrics: true
       endpoints:
         - name: Personal
