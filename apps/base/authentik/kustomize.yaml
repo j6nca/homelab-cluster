@@ -44,7 +44,7 @@ metadata:
   name: authentik-monitoring
   namespace: flux-system
 spec:
-  targetNamespace: authentik
+  targetNamespace: observability
   commonMetadata:
     labels:
       service: authentik

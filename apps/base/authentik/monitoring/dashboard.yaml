@@ -10,6 +10,6 @@ spec:
   folderRef: system
   datasources:
     - datasourceName: VictoriaMetrics
-      inputName: Prometheus
+      inputName: DS_PROMETHEUS
   grafanaCom:
     id: 14837
