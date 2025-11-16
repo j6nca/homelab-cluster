@@ -29,14 +29,17 @@ spec:
       gatus-sidecar:
         image: ghcr.io/home-operations/gatus-sidecar:0.0.9
         args:
-          - --auto-routes
-          - --auto-ingresses
-          - --auto-services
-          - --auto-group
+          - --auto-httproute
+          - --auto-ingress
+          - --auto-service
           - --output=/dynamic-config/gatus-sidecar.yaml
         volumeMounts:
           - name: gatus-dynamic-config
             mountPath: /dynamic-config
+    serviceAccount: 
+      name: gatus-sidecar
+      create: false
+      autoMount: true
     extraVolumeMounts:
       - name: gatus-dynamic-config
         mountPath: /dynamic-config
