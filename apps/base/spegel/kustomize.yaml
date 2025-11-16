@@ -1,0 +1,33 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app spegel
+  namespace: flux-system
+spec:
+  targetNamespace: kube-utils
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/spegel/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app spegel-monitoring
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/spegel/monitoring
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
