@@ -4,7 +4,7 @@ metadata:
   name: &app external-dns
   namespace: flux-system
 spec:
-  targetNamespace: *app
+  targetNamespace: network
   commonMetadata:
     labels:
       service: *app
