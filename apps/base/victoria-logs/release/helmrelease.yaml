@@ -1,0 +1,46 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app vlc
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+        namespace: flux-system
+      version: 0.0.13
+  interval: 15m
+  values:
+    vmServiceScrape:
+      enabled: true
+    vmauth:
+      enabled: false
+    vlstorage:
+      enabled: true
+      retentionPeriod: 1w
+      replicaCount: 2
+      persistentVolume:
+        enabled: true
+        name: vlstorage-volume
+        storageClassName: longhorn
+        size: 15Gi
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app victoria-logs-collector
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: vm
+        namespace: flux-system
+      version: 0.0.5
+  interval: 15m
+  values:
+    remoteWrite:
+      - url: http://vlc-victoria-logs-cluster:9471
