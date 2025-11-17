@@ -6,7 +6,7 @@ spec:
   uid: prometheus
   datasource:
     name: VictoriaMetrics
-    type: prometheus
+    type: victoriametrics-metrics-datasource
     jsonData:
       timeInterval: 5s
       tlsSkipVerify: true
@@ -16,6 +16,9 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: homelab
+  plugins:
+    - name: *datasource
+      version: 0.19.7
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
