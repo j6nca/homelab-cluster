@@ -17,6 +17,10 @@ spec:
       enabled: true
     vmauth:
       enabled: false
+    vlselect:
+      enabled: true
+    vlinsert:
+      enabled: true
     vlstorage:
       enabled: true
       retentionPeriod: 1w
@@ -43,4 +47,4 @@ spec:
   interval: 15m
   values:
     remoteWrite:
-      - url: http://vlc-victoria-logs-cluster:9471
+      - url: http:/vlinsert-vlc-victoria-logs-cluster:9481
