@@ -36,9 +36,7 @@ spec:
         volumeMounts:
           - name: gatus-dynamic-config
             mountPath: /dynamic-config
-    serviceAccount: 
-      name: gatus-sidecar
-      create: false
+    serviceAccount:
       autoMount: true
     extraVolumeMounts:
       - name: gatus-dynamic-config

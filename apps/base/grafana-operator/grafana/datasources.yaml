@@ -78,4 +78,16 @@ spec:
     - name: *datasource
       version: 2.3.0
 ---
-
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: infinity
+spec:
+  uid: infinity
+  datasource:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  plugins:
+    - name: yesoreyeram-infinity-datasource
+      version: 3.6.0

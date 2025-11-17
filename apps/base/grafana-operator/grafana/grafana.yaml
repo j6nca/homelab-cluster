@@ -39,7 +39,7 @@ spec:
     unified_alerting:
       enabled: "false"
     serviceMonitor:
-      enabled: "true"
+      enabled: "false"
   # Default secret with admin credentials is disabled as the username and password are supplied externally
   disableDefaultAdminSecret: true
   deployment:
@@ -49,7 +49,7 @@ spec:
           # The volumes for dashboards and provisioning config
           volumes:
             - name: dashboards
-              emptyDir: { }
+              emptyDir: {}
             - name: provisioning-config
               configMap:
                 name: provisioning-config
@@ -83,7 +83,7 @@ spec:
                   name: dashboards
             # This container watches the namespace for configmaps with the `dashboards` label
             # and creates files for all their keys under `FOLDER`
-            - image: 'ghcr.io/kiwigrid/k8s-sidecar:1.24.5'
+            - image: "ghcr.io/kiwigrid/k8s-sidecar:1.24.5"
               name: k8s-sidecar
               env:
                 - name: LABEL
@@ -98,4 +98,4 @@ spec:
                   value: configmap
               volumeMounts:
                 - mountPath: /var/lib/grafana/dashboards
-                  name: dashboards                
+                  name: dashboards
