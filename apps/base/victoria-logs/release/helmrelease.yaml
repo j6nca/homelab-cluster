@@ -5,7 +5,7 @@ metadata:
 spec:
   chart:
     spec:
-      chart: *app
+      chart: victoria-logs-cluster
       sourceRef:
         kind: HelmRepository
         name: vm
@@ -47,4 +47,4 @@ spec:
   interval: 15m
   values:
     remoteWrite:
-      - url: http:/vlinsert-vlc-victoria-logs-cluster:9481
+      - url: http:/vlc-victoria-logs-cluster-vlinsert:9481

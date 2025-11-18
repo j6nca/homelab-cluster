@@ -6,7 +6,7 @@ spec:
   uid: prometheus
   datasource:
     name: VictoriaMetrics
-    type: victoriametrics-metrics-datasource
+    type: &datasource victoriametrics-metrics-datasource
     jsonData:
       timeInterval: 5s
       tlsSkipVerify: true
@@ -54,7 +54,7 @@ spec:
     jsonData:
       timeInterval: 5s
       tlsSkipVerify: true
-    url: http://vlselect-vlc-victoria-logs-cluster:9471/select/0/prometheus
+    url: http://vlc-victoria-logs-cluster-vlselect:9471
     access: proxy
     basicAuth: false
   instanceSelector:
@@ -110,6 +110,7 @@ metadata:
 spec:
   uid: infinity
   datasource:
+    name: Infinity
   instanceSelector:
     matchLabels:
       dashboards: homelab
