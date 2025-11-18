@@ -53,6 +53,15 @@ spec:
     # Include dashboards from chart
     defaultDashboards:
       enabled: true
+      grafanaOperator:
+        # -- Create dashboards as CRDs (requires grafana-operator to be installed)
+        enabled: true
+        spec:
+          instanceSelector:
+            matchLabels:
+              dashboards: homelab
+          folderRef: kubernetes
+          allowCrossNamespaceImport: false
       dashboards:
         victoriametrics-vmalert:
           enabled: true
