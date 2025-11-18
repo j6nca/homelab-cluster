@@ -23,3 +23,5 @@ spec:
         folder: System
     serviceMonitor:
       enabled: false
+    spegel:
+      containerdRegistryConfigPath: /etc/cri/conf.d/hosts
