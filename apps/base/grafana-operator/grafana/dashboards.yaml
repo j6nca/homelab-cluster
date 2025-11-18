@@ -41,3 +41,78 @@ spec:
     - datasourceName: prometheus
       inputName: datasource
   url: https://raw.githubusercontent.com/grafana/grafana-operator/refs/heads/master/deploy/helm/grafana-operator/files/dashboard.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: strava-activity-analysis
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: fitness
+  datasources:
+    - datasourceName: strava
+      inputName: DS_STRAVA
+  url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_activity_analysis.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: strava-activity-overview
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: fitness
+  datasources:
+    - datasourceName: strava
+      inputName: DS_STRAVA
+  url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_activity_overview.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: strava-athlete-dashboard
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: fitness
+  datasources:
+    - datasourceName: strava
+      inputName: DS_STRAVA
+  url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_athlete_dashboard.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: strava-datasource
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: fitness
+  datasources:
+    - datasourceName: strava
+      inputName: DS_STRAVA
+  url: https://raw.githubusercontent.com/grafana/strava-datasource/refs/heads/main/src/dashboards/strava_datasource.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: strava-segment-overview
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: fitness
+  datasources:
+    - datasourceName: strava
+      inputName: DS_STRAVA
+  url: https://github.com/grafana/strava-datasource/blob/main/src/dashboards/strava_segment_overview.json
