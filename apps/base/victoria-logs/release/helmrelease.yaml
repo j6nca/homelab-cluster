@@ -47,4 +47,7 @@ spec:
   interval: 15m
   values:
     remoteWrite:
-      - url: http:/vlc-victoria-logs-cluster-vlinsert:9481
+      - url: http:/vlc-victoria-logs-cluster-vlinsert:9481/insert/jsonline
+        extraFields:
+          cluster: homelab
+          job: victoria-logs-collector
