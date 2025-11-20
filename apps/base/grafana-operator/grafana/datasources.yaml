@@ -1,9 +1,28 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
 metadata:
-  name: victoria-metrics
+  name: prometheus
 spec:
   uid: prometheus
+  datasource:
+    name: Prometheus
+    type: prometheus
+    jsonData:
+      timeInterval: 5s
+      tlsSkipVerify: true
+    url: http://vmselect-vmks-victoria-metrics-k8s-stack:8481/select/0/prometheus
+    access: proxy
+    basicAuth: false
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: victoria-metrics
+spec:
+  uid: victoria-metrics
   datasource:
     name: VictoriaMetrics
     type: &datasource victoriametrics-metrics-datasource
