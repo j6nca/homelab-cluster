@@ -13,6 +13,7 @@ spec:
     url: http://vmselect-vmks-victoria-metrics-k8s-stack:8481/select/0/prometheus
     access: proxy
     basicAuth: false
+    isDefault: true
   instanceSelector:
     matchLabels:
       dashboards: homelab
