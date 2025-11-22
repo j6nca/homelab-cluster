@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app jellyfin
+  namespace: flux-system
+spec:
+  targetNamespace: media
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/jellyfin/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

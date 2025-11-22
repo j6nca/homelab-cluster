@@ -1,0 +1,37 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: vlc-0
+spec:
+  sourcePVC: vlstorage-volume-vlc-victoria-logs-cluster-vlstorage-0
+  trigger:
+    # Run backup daily @ midnight
+    schedule: "0 0 * * *"
+  restic:
+    pruneIntervalDays: 7
+    # Name of secret with bucket config
+    repository: vlc-0-replication
+    # Backup retention policy
+    retain:
+      daily: 7
+    # Use Snapshot method for longhorn
+    copyMethod: Snapshot
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: vmks-1
+spec:
+  sourcePVC: vlstorage-volume-vlc-victoria-logs-cluster-vlstorage-1
+  trigger:
+    # Run backup daily @ midnight
+    schedule: "0 0 * * *"
+  restic:
+    pruneIntervalDays: 7
+    # Name of secret with bucket config
+    repository: vlc-1-replication
+    # Backup retention policy
+    retain:
+      daily: 7
+    # Use Snapshot method for longhorn
+    copyMethod: Snapshot
