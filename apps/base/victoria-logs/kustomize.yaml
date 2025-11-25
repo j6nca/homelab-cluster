@@ -26,7 +26,7 @@ spec:
     labels:
       service: *app
   dependsOn:
-    - victoria-logs-cluster
+    - name: victoria-logs-cluster
   interval: 5m
   path: ./apps/base/victoria-logs/storage
   prune: true
