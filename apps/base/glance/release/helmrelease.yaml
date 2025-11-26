@@ -10,7 +10,7 @@ spec:
         kind: HelmRepository
         name: j6nca
         namespace: flux-system
-      version: 0.1.0
+      version: 0.1.1
   interval: 15m
   # values.yaml
   values:
