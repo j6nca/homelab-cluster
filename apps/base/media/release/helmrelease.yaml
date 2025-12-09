@@ -13,3 +13,28 @@ spec:
         namespace: flux-system
       version: 2.5.0
   interval: 15m
+  values:
+    persistence:
+      # Jellyfin configs
+      config:
+        enabled: true
+        type: pvc
+        storageClass: longhorn
+      # Jellyfin metadata (not to be confused with actual media files)
+      media:
+        enabled: true
+        type: pvc
+        storageClass: longhorn
+
+    volumes:
+      - name: media
+        nfs:
+          server: nasj6n.home
+          path: /volume2/kubernetes/media/data/media
+
+    volumeMounts:
+      - mountPath: /media
+        name: media
+        readOnly: true
+    metrics:
+      enabled: true
