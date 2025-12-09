@@ -24,17 +24,17 @@ spec:
         enabled: true
         type: pvc
         storageClass: longhorn
-
+    # Here we mount the actual media files via NFS
     volumes:
-      - name: media
+      - name: data
         nfs:
           server: nasj6n.home
           path: /volume2/kubernetes
 
     volumeMounts:
-      - mountPath: /media
-        name: media
+      - mountPath: /data
+        name: data
         readOnly: true
-        subPath: media
+        subPath: media/data/media
     metrics:
       enabled: true
