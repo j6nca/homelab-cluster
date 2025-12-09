@@ -11,14 +11,13 @@ spec:
         kind: HelmRepository
         name: *app
         namespace: flux-system
-      version: 2.5.0
+      version: 2.6.0
   interval: 15m
   values:
     persistence:
       # Jellyfin configs
       config:
         enabled: true
-        type: pvc
         storageClass: longhorn
       # Jellyfin metadata (not to be confused with actual media files)
       media:
