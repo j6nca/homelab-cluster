@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: authentik-data
+  name: authentik-storage
   namespace: flux-system
 spec:
   targetNamespace: authentik
@@ -13,7 +13,7 @@ spec:
     - name: cnpg
     - name: dragonfly-operator
   interval: 5m
-  path: ./apps/base/authentik/data
+  path: ./apps/base/authentik/storage
   prune: true
   sourceRef:
     kind: GitRepository
@@ -30,7 +30,7 @@ spec:
     labels:
       service: authentik
   dependsOn:
-    - name: authentik-data
+    - name: authentik-storage
   interval: 5m
   path: ./apps/base/authentik/release
   prune: true

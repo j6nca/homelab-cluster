@@ -12,3 +12,17 @@ spec:
         namespace: flux-system
       version: 4.12.1
   interval: 15m
+  values:
+    storageClass:
+      create: true
+      name: nfs
+      parameters:
+        server: nasj6n.home
+        share: /volume2/kubernetes
+      mountOptions:
+        - nfsvers=4.2
+        - nconnect=16
+        - hard
+        - noatime
+      reclaimPolicy: Delete
+      volumeBindingMode: Immediate
