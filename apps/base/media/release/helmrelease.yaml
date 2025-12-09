@@ -35,6 +35,6 @@ spec:
       - mountPath: /media
         name: media
         readOnly: true
-        subPath: media/data/media
+        subPath: media
     metrics:
       enabled: true
