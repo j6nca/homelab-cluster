@@ -30,11 +30,12 @@ spec:
       - name: media
         nfs:
           server: nasj6n.home
-          path: /volume2/kubernetes/media/data/media
+          path: /volume2/kubernetes
 
     volumeMounts:
       - mountPath: /media
         name: media
         readOnly: true
+        subPath: media/data/media
     metrics:
       enabled: true
