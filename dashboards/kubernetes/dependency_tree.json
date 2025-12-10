@@ -1,0 +1,283 @@
+[
+  {
+    "namespace": "flux-system",
+    "name": "authentik",
+    "dependsOn": [
+      {
+        "name": "authentik-storage"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "authentik-monitoring",
+    "dependsOn": [
+      {
+        "name": "grafana-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "authentik-storage",
+    "dependsOn": [
+      {
+        "name": "cnpg"
+      },
+      {
+        "name": "dragonfly-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "cloudflare-monitoring",
+    "dependsOn": [
+      {
+        "name": "grafana-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "cloudflare-tunnel",
+    "dependsOn": [
+      {
+        "name": "external-secrets-resources"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "cnpg",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "cnpg-monitoring",
+    "dependsOn": [
+      {
+        "name": "grafana-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "csi-driver-nfs",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "dragonfly-operator",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "envoy-gateway",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "envoy-gateway-monitoring",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "envoy-gateway-network",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "external-dns",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "external-secrets",
+    "dependsOn": [
+      {
+        "name": "onepassword-connect"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "external-secrets-resources",
+    "dependsOn": [
+      {
+        "name": "external-secrets"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "flux-system",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "gatus",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "gatus-monitoring",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "glance",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "goldpinger",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "grafana",
+    "dependsOn": [
+      {
+        "name": "grafana-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "grafana-operator",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "headlamp",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "it-tools",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "longhorn",
+    "dependsOn": [
+      {
+        "name": "snapshot-controller"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "longhorn-monitoring",
+    "dependsOn": [
+      {
+        "name": "grafana-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "media",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "media-storage",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "onepassword-connect",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "reloader",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "snapshot-controller",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "spegel",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "spegel-monitoring",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "victoria-logs",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "victoria-logs-storage",
+    "dependsOn": [
+      {
+        "name": "victoria-logs"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "victoria-metrics",
+    "dependsOn": [
+      {
+        "name": "victoria-metrics-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "victoria-metrics-operator",
+    "dependsOn": []
+  },
+  {
+    "namespace": "flux-system",
+    "name": "victoria-metrics-storage",
+    "dependsOn": [
+      {
+        "name": "victoria-metrics"
+      },
+      {
+        "name": "external-secrets"
+      },
+      {
+        "name": "volsync"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "volsync",
+    "dependsOn": [
+      {
+        "name": "external-secrets-resources"
+      },
+      {
+        "name": "snapshot-controller"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "volsync-monitoring",
+    "dependsOn": [
+      {
+        "name": "grafana-operator"
+      }
+    ]
+  },
+  {
+    "namespace": "flux-system",
+    "name": "yopass",
+    "dependsOn": []
+  }
+]

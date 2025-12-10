@@ -1,0 +1,102 @@
+[
+  {
+    "id": "authentik-authentik-storage",
+    "source": "flux-system/authentik",
+    "target": "flux-system/authentik-storage"
+  },
+  {
+    "id": "authentik-monitoring-grafana-operator",
+    "source": "flux-system/authentik-monitoring",
+    "target": "flux-system/grafana-operator"
+  },
+  {
+    "id": "authentik-storage-cnpg",
+    "source": "flux-system/authentik-storage",
+    "target": "flux-system/cnpg"
+  },
+  {
+    "id": "authentik-storage-dragonfly-operator",
+    "source": "flux-system/authentik-storage",
+    "target": "flux-system/dragonfly-operator"
+  },
+  {
+    "id": "cloudflare-monitoring-grafana-operator",
+    "source": "flux-system/cloudflare-monitoring",
+    "target": "flux-system/grafana-operator"
+  },
+  {
+    "id": "cloudflare-tunnel-external-secrets-resources",
+    "source": "flux-system/cloudflare-tunnel",
+    "target": "flux-system/external-secrets-resources"
+  },
+  {
+    "id": "cnpg-monitoring-grafana-operator",
+    "source": "flux-system/cnpg-monitoring",
+    "target": "flux-system/grafana-operator"
+  },
+  {
+    "id": "external-secrets-onepassword-connect",
+    "source": "flux-system/external-secrets",
+    "target": "flux-system/onepassword-connect"
+  },
+  {
+    "id": "external-secrets-resources-external-secrets",
+    "source": "flux-system/external-secrets-resources",
+    "target": "flux-system/external-secrets"
+  },
+  {
+    "id": "grafana-grafana-operator",
+    "source": "flux-system/grafana",
+    "target": "flux-system/grafana-operator"
+  },
+  {
+    "id": "longhorn-snapshot-controller",
+    "source": "flux-system/longhorn",
+    "target": "flux-system/snapshot-controller"
+  },
+  {
+    "id": "longhorn-monitoring-grafana-operator",
+    "source": "flux-system/longhorn-monitoring",
+    "target": "flux-system/grafana-operator"
+  },
+  {
+    "id": "victoria-logs-storage-victoria-logs",
+    "source": "flux-system/victoria-logs-storage",
+    "target": "flux-system/victoria-logs"
+  },
+  {
+    "id": "victoria-metrics-victoria-metrics-operator",
+    "source": "flux-system/victoria-metrics",
+    "target": "flux-system/victoria-metrics-operator"
+  },
+  {
+    "id": "victoria-metrics-storage-victoria-metrics",
+    "source": "flux-system/victoria-metrics-storage",
+    "target": "flux-system/victoria-metrics"
+  },
+  {
+    "id": "victoria-metrics-storage-external-secrets",
+    "source": "flux-system/victoria-metrics-storage",
+    "target": "flux-system/external-secrets"
+  },
+  {
+    "id": "victoria-metrics-storage-volsync",
+    "source": "flux-system/victoria-metrics-storage",
+    "target": "flux-system/volsync"
+  },
+  {
+    "id": "volsync-external-secrets-resources",
+    "source": "flux-system/volsync",
+    "target": "flux-system/external-secrets-resources"
+  },
+  {
+    "id": "volsync-snapshot-controller",
+    "source": "flux-system/volsync",
+    "target": "flux-system/snapshot-controller"
+  },
+  {
+    "id": "volsync-monitoring-grafana-operator",
+    "source": "flux-system/volsync-monitoring",
+    "target": "flux-system/grafana-operator"
+  }
+]

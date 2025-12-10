@@ -1,0 +1,207 @@
+[
+  {
+    "id": "flux-system/authentik",
+    "title": "authentik",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/authentik-monitoring",
+    "title": "authentik-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/authentik-storage",
+    "title": "authentik-storage",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/cloudflare-monitoring",
+    "title": "cloudflare-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/cloudflare-tunnel",
+    "title": "cloudflare-tunnel",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/cnpg",
+    "title": "cnpg",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/cnpg-monitoring",
+    "title": "cnpg-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/csi-driver-nfs",
+    "title": "csi-driver-nfs",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/dragonfly-operator",
+    "title": "dragonfly-operator",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/envoy-gateway",
+    "title": "envoy-gateway",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/envoy-gateway-monitoring",
+    "title": "envoy-gateway-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/envoy-gateway-network",
+    "title": "envoy-gateway-network",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/external-dns",
+    "title": "external-dns",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/external-secrets",
+    "title": "external-secrets",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/external-secrets-resources",
+    "title": "external-secrets-resources",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/flux-system",
+    "title": "flux-system",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/gatus",
+    "title": "gatus",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/gatus-monitoring",
+    "title": "gatus-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/glance",
+    "title": "glance",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/goldpinger",
+    "title": "goldpinger",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/grafana",
+    "title": "grafana",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/grafana-operator",
+    "title": "grafana-operator",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/headlamp",
+    "title": "headlamp",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/it-tools",
+    "title": "it-tools",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/longhorn",
+    "title": "longhorn",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/longhorn-monitoring",
+    "title": "longhorn-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/media",
+    "title": "media",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/media-storage",
+    "title": "media-storage",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/onepassword-connect",
+    "title": "onepassword-connect",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/reloader",
+    "title": "reloader",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/snapshot-controller",
+    "title": "snapshot-controller",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/spegel",
+    "title": "spegel",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/spegel-monitoring",
+    "title": "spegel-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/victoria-logs",
+    "title": "victoria-logs",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/victoria-logs-storage",
+    "title": "victoria-logs-storage",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/victoria-metrics",
+    "title": "victoria-metrics",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/victoria-metrics-operator",
+    "title": "victoria-metrics-operator",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/victoria-metrics-storage",
+    "title": "victoria-metrics-storage",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/volsync",
+    "title": "volsync",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/volsync-monitoring",
+    "title": "volsync-monitoring",
+    "subTitle": "flux-system"
+  },
+  {
+    "id": "flux-system/yopass",
+    "title": "yopass",
+    "subTitle": "flux-system"
+  }
+]
