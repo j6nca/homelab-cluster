@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 32,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -111,6 +111,80 @@
       ],
       "title": "Infrastructure Map",
       "type": "nodeGraph"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "af6mtxsxayigwb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "edges": {
+          "mainStatUnit": "string"
+        },
+        "nodes": {
+          "arcs": [],
+          "mainStatUnit": "string"
+        }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "columns": [],
+          "data": "[\n  {\n    \"id\": \"flux-system/infra-crds\",\n    \"title\": \"infra-crds\",\n    \"subTitle\": \"flux-system\"\n  },\n  {\n    \"id\": \"flux-system/infra-components\",\n    \"title\": \"infra-components\",\n    \"subTitle\": \"flux-system\"\n  }\n]",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
+          "filters": [],
+          "format": "as-is",
+          "global_query_id": "",
+          "parser": "jq-backend",
+          "refId": "A",
+          "root_selector": "",
+          "source": "inline",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        {
+          "columns": [],
+          "data": "[\n  {\n    \"id\": \"infra-components-infra-crds\",\n    \"source\": \"flux-system/infra-components\",\n    \"target\": \"flux-system/infra-crds\"\n  }\n]",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "infinity"
+          },
+          "filters": [],
+          "format": "node-graph-edges",
+          "global_query_id": "",
+          "hide": false,
+          "parser": "jq-backend",
+          "refId": "B",
+          "root_selector": "",
+          "source": "inline",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Flux Dependency Tree",
+      "type": "nodeGraph"
     }
   ],
   "preload": false,
@@ -127,6 +201,6 @@
   "timezone": "browser",
   "title": "Home",
   "uid": "home",
-  "version": 6,
+  "version": 1,
   "weekStart": ""
 }

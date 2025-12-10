@@ -131,11 +131,14 @@ spec:
   uid: infinity
   datasource:
     name: Infinity
+    type: &datasource yesoreyeram-infinity-datasource
+    basicAuth: false
+    access: proxy
   instanceSelector:
     matchLabels:
       dashboards: homelab
   plugins:
-    - name: yesoreyeram-infinity-datasource
+    - name: *datasource
       version: 3.6.0
 ---
 apiVersion: grafana.integreatly.org/v1beta1
@@ -146,10 +149,11 @@ spec:
   uid: strava
   datasource:
     name: Strava
+    type: &datasource grafana-strava-datasource
   instanceSelector:
     matchLabels:
       dashboards: homelab
   plugins:
-    - name: grafana-strava-datasource
+    - name: *datasource
       version: 1.7.2
 ---
