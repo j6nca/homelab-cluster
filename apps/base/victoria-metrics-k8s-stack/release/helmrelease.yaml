@@ -65,13 +65,14 @@ spec:
             - datasourceName: prometheus
               inputName: datasource
           allowCrossNamespaceImport: false
+      # Disable these so we can provision them in a different folder
       dashboards:
         victoriametrics-vmalert:
-          enabled: true
+          enabled: false
         victoriametrics-operator:
-          enabled: true
+          enabled: false
         node-exporter-full:
-          enabled: true
+          enabled: false
     defaultRules:
       create: true
       # Joined with Values.global.clusterLabel `cluster`

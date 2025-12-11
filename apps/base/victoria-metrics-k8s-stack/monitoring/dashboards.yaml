@@ -1,0 +1,64 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: vmks-cluster
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: observability
+  datasources:
+    - datasourceName: prometheus
+      inputName: ds
+  grafanaCom:
+    id: 11176
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: vmks-vmagent
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: observability
+  datasources:
+    - datasourceName: prometheus
+      inputName: ds
+  grafanaCom:
+    id: 12683
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: vm-operator
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: observability
+  datasources:
+    - datasourceName: prometheus
+      inputName: ds
+  grafanaCom:
+    id: 17869
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: vmks-vmalert
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: observability
+  datasources:
+    - datasourceName: prometheus
+      inputName: ds
+  grafanaCom:
+    id: 14950
+---

@@ -20,7 +20,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &storage victoria-metrics-storage
+  name: victoria-metrics-storage
   namespace: flux-system
 spec:
   targetNamespace: observability
@@ -33,6 +33,25 @@ spec:
     - name: volsync
   interval: 5m
   path: ./apps/base/victoria-metrics-k8s-stack/storage
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app victoria-metrics-monitoring
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: victoria-metrics
+  dependsOn:
+    - name: grafana-operator
+  interval: 5m
+  path: ./apps/base/victoria-metrics/monitoring
   prune: true
   sourceRef:
     kind: GitRepository
