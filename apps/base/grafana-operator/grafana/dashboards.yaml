@@ -116,3 +116,19 @@ spec:
     - datasourceName: strava
       inputName: DS_STRAVA
   url: https://github.com/grafana/strava-datasource/blob/main/src/dashboards/strava_segment_overview.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: persistentvolumes
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: kubernetes
+  datasources:
+    - datasourceName: prometheus
+      inputName: datasource
+  grafanaCom:
+    id: 13646
