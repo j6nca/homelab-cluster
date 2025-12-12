@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app gatekeeper
+  namespace: flux-system
+spec:
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/gatekeeper/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
