@@ -19,7 +19,7 @@ spec:
               tag: preview-OIDC
             env:
               DB_TYPE: "postgres"
-              DB_HOST: "media-postgres.media.svc"
+              DB_HOST: "media-postgres-rw"
               DB_PORT: "5432"
               DB_USER: "{{ .Release.Name }}"
               DB_PASS:
@@ -31,6 +31,6 @@ spec:
               LOG_LEVEL: "info"
               PORT: &port 80
               TZ: America/Toronto
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+            # envFrom:
+            #   - secretRef:
+            #       name: "{{ .Release.Name }}-secret"
