@@ -6,10 +6,14 @@ spec:
   instances: 3
   managed:
     roles:
-      - name: jellyfin
+      - name: jellyseerr
         login: true
         passwordSecret:
-          name: jellyfin-postgres
+          name: jellyseerr-postgres
+      - name: jellystat
+        login: true
+        passwordSecret:
+          name: jellystat-postgres
   storage:
     storageClass: longhorn
     size: 5Gi
@@ -17,10 +21,20 @@ spec:
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
-  name: jellyfin-postgres
+  name: jellyseerr-postgres
 spec:
   cluster: 
     name: media-postgres
-  name: &app jellyfin
+  name: &app jellyseerr
+  owner: *app
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: jellystat-postgres
+spec:
+  cluster: 
+    name: media-postgres
+  name: &app jellystat
   owner: *app
 ---
