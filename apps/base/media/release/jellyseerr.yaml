@@ -34,3 +34,28 @@ spec:
             # envFrom:
             #   - secretRef:
             #       name: "{{ .Release.Name }}-secret"
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+
+    persistence:
+      config:
+        globalMounts:
+          - path: /app/config
+            readOnly: false
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 1Gi
+        accessMode: ReadWriteOnce
+      tmp:
+        type: emptyDir            
