@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: seerr
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: oci://ghcr.io/fallenbagel/jellyseerr/jellyseerr-chart
+  ref:
+    semver: 3.0.0

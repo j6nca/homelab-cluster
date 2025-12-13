@@ -29,7 +29,7 @@ spec:
                     key: password
               DB_NAME: "{{ .Release.Name }}"
               LOG_LEVEL: "info"
-              PORT: &port 80
+              PORT: &port 5055
               TZ: America/Toronto
             # envFrom:
             #   - secretRef:
