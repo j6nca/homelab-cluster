@@ -31,9 +31,9 @@ spec:
               LOG_LEVEL: "info"
               PORT: &port 5055
               TZ: America/Toronto
-            # envFrom:
-            #   - secretRef:
-            #       name: "{{ .Release.Name }}-secret"
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
