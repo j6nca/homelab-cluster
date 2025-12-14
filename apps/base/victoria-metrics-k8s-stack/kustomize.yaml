@@ -51,7 +51,7 @@ spec:
   dependsOn:
     - name: grafana-operator
   interval: 5m
-  path: ./apps/base/victoria-metrics/monitoring
+  path: ./apps/base/victoria-metrics-k8s-stack/monitoring
   prune: true
   sourceRef:
     kind: GitRepository
