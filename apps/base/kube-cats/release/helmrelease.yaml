@@ -1,15 +1,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: kube-ops-view
-  namespace: kube-ops-view
+  name: &app kube-cats
 spec:
   chart:
     spec:
-      chart: kube-ops-view
+      chart: *app
       sourceRef:
         kind: HelmRepository
         name: j6nca
         namespace: flux-system
-      version: 1.0.0
+      version: 1.0.6
   interval: 15m
+  commonMetadata:
+    labels:
+      service: *app
