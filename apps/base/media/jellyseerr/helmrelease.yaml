@@ -29,11 +29,14 @@ spec:
                     key: password
               DB_NAME: "{{ .Release.Name }}"
               LOG_LEVEL: "info"
-              PORT: &port 5055
               TZ: America/Toronto
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
+            ports:
+              - containerPort: 5055
+                name: http
+                protocol: TCP
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true

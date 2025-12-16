@@ -28,11 +28,14 @@ spec:
                     key: password
               POSTGRES_DB: "{{ .Release.Name }}"
               LOG_LEVEL: "info"
-              PORT: &port 3000
               TZ: America/Toronto
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
+            ports:
+              - containerPort: 3000
+                name: http
+                protocol: TCP
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
