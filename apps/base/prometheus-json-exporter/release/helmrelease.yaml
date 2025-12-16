@@ -1,0 +1,54 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app prometheus-json-exporter
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      version: 0.19.2
+  interval: 15m
+  values:
+    configuration:
+      config: |
+        ---
+        modules:
+          jellyfin:
+            headers:
+              Authorization: MediaBrowser Token=ADD_TOKEN_HERE
+              Content-Type: application/json
+              accept: application/json
+
+            # The body is no longer needed since this is now GET
+
+            # This will return all active sessions regardless of
+            # whether something is playing. You can use a combination
+            # of label and value filters in Grafana to only get actively
+            # playing sessions
+            metrics:
+            - name: jellyfin
+              type: object
+              help: User playback metrics from Jellyfin
+              # Only look at sessions with the NowPlayingItem key
+              path: '{ [?(@.NowPlayingItem)] }'
+              labels:
+                user_name: '{ .UserName }'
+                # Use PromQL label_join and label_replace to concatenate
+                # these values into a nice item description
+                item_type: '{ .NowPlayingItem.Type }'
+                item_name: '{ .NowPlayingItem.Name }'
+                item_path: '{ .NowPlayingItem.Path }'
+                series_name: '{ .NowPlayingItem.SeriesName }'
+                episode_index: 'e{ .NowPlayingItem.IndexNumber }'
+                season_index: 's{ .NowPlayingItem.ParentIndexNumber }'
+                client_name: '{ .Client }'
+                device_name: '{ .DeviceName }'
+                # Include the unique session ID in case the above
+                # labels aren't a unique combination
+                session_id: '{ .Id }'
+              values:
+                is_paused: '{ .PlayState.IsPaused }'

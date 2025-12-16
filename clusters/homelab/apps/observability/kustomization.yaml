@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../../../apps/base/victoria-metrics-k8s-stack/kustomize.yaml
   - ../../../../apps/base/victoria-logs/kustomize.yaml
+  - ../../../../apps/base/prometheus-json-exporter/kustomize.yaml
   - ./namespace.yaml
 commonLabels:
   cluster: homelab

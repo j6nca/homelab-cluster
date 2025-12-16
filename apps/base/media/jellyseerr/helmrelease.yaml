@@ -34,7 +34,7 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
             ports:
-              - containerPort: 5055
+              - containerPort: &port 5055
                 name: http
                 protocol: TCP
     defaultPodOptions:
