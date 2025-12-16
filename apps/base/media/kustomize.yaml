@@ -63,6 +63,8 @@ spec:
   commonMetadata:
     labels:
       service: *app
+  dependsOn:
+    - name: media-storage
   interval: 5m
   path: ./apps/base/media/jellystat
   prune: true

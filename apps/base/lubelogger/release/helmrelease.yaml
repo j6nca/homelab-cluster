@@ -1,0 +1,51 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app lubelogger
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      lubelogger:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/hargata/lubelogger
+              tag: 1.5.5
+            env:
+              LOG_LEVEL: "info"
+              TZ: America/Toronto
+            ports:
+              - containerPort: &port 8080
+                name: http
+                protocol: TCP
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+
+    persistence:
+      config:
+        globalMounts:
+          - path: /App/data
+            readOnly: false
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 1Gi
+        accessMode: ReadWriteOnce
+      tmp:
+        type: emptyDir  
