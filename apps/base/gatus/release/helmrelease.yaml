@@ -79,9 +79,21 @@ spec:
             - "[STATUS] <= 299"
         - name: Jellyseerr
           group: Media
-          url: https://requests.j6n.dev
+          url: https://reqs.j6n.dev
           conditions:
             - "[STATUS] <= 299"
+        - name: Sonarr
+          group: Media
+          url: http://sonarr.media:8989/ping
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY].status == OK"
+        - name: Radarr
+          group: Media
+          url: http://radarr.media:7878/ping
+          conditions:
+            - "[STATUS] <= 299"
+            - "[BODY].status == OK"
         - name: Photos
           group: Media
           url: https://photos.j6n.ca
