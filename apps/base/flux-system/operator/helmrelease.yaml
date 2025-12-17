@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app flux-operator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: *app
+    namespace: flux-system
+  dependsOn: []
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+  interval: 15m
+  # values.yaml
+  values:
+    installCRDs: true

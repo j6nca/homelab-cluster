@@ -1,0 +1,38 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app flux-instance
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: *app
+    namespace: flux-system
+  dependsOn: []
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+  interval: 15m
+  # values.yaml
+  values:
+    instance:
+      distribution:
+        version: "2.7.x"
+        artifact: oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests:v0.37.0
+      components:
+        - source-controller
+        - kustomize-controller
+        - helm-controller
+        - notification-controller
+      cluster:
+        type: kubernetes
+        multitenant: false
+        networkPolicy: false
+        domain: "cluster.local"
+      sync:
+        kind: GitRepository
+        name: flux-system
+        url: "ssh://git@github.com/j6nca/homelab-cluster.git"
+        ref: "refs/heads/main"
+        path: "clusters/homelab"
