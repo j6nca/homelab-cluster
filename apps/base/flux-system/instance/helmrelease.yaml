@@ -33,6 +33,6 @@ spec:
       sync:
         kind: GitRepository
         name: flux-system
-        url: "ssh://git@github.com/j6nca/homelab-cluster.git"
+        url: "https://github.com/j6nca/homelab-cluster"
         ref: "refs/heads/main"
         path: "clusters/homelab"
