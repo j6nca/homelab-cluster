@@ -75,6 +75,23 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &app gluetun
+  namespace: flux-system
+spec:
+  targetNamespace: media
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/media/gluetun
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app sonarr
   namespace: flux-system
 spec:
@@ -84,6 +101,7 @@ spec:
       service: *app
   dependsOn:
     - name: media-storage
+    - name: gluetun
   interval: 5m
   path: ./apps/base/media/sonarr
   prune: true
@@ -103,6 +121,7 @@ spec:
       service: *app
   dependsOn:
     - name: media-storage
+    - name: gluetun
   interval: 5m
   path: ./apps/base/media/radarr
   prune: true

@@ -43,6 +43,19 @@ spec:
               - containerPort: *port
                 name: http
                 protocol: TCP
+        initContainers:
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.40.0
+            env:
+            envFrom:
+              - secretRef:
+                  name: "gluetun-secret"
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+            restartPolicy: Always
 
     defaultPodOptions:
       securityContext:
