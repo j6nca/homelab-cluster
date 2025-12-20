@@ -1,0 +1,7 @@
+alertmanager:
+  interval: 60s
+  servers:
+    - name: homelab
+      uri: http://vmalertmanager-vmks-victoria-metrics-k8s-stack.observability:9093
+      timeout: 10s
+      readonly: true

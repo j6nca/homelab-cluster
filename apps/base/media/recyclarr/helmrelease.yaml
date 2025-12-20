@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app karma
+  name: &app recyclarr
 spec:
   chartRef:
     kind: OCIRepository
@@ -11,20 +11,23 @@ spec:
   interval: 15m
   values:
     controllers:
-      karma:
+      jellyseerr:
         containers:
           app:
             image:
-              repository: ghcr.io/prymitive/karma
-              tag: v0.122
+              repository:	ghcr.io/recyclarr/recyclarr
+              tag: 7.5.2
             env:
-              CONFIG_FILE: &config "/config/karma.yaml"
-              LOG_LEVEL: "info"
+              CRON_SCHEDULE: "@daily"
               TZ: America/Toronto
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             ports:
-              - containerPort: &port 8080
+              - containerPort: *port
                 name: http
                 protocol: TCP
+
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -38,14 +41,16 @@ spec:
         ports:
           http:
             port: *port
-
+      
     persistence:
-      config-file:
-        type: configMap
-        name: karma-config
+      config:
         globalMounts:
-          - path: *config
-            subPath: config.yaml
-            readOnly: true
+          - path: /config
+            readOnly: false
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 500Mi
+        accessMode: ReadWriteOnce
       tmp:
         type: emptyDir
+s

@@ -5,6 +5,7 @@ resources:
   - ../../../../apps/base/victoria-logs/kustomize.yaml
   - ../../../../apps/base/prometheus-json-exporter/kustomize.yaml
   - ../../../../apps/base/prometheus-snmp-exporter/kustomize.yaml
+  - ../../../../apps/base/karma/kustomize.yaml
   - ./namespace.yaml
 commonLabels:
   cluster: homelab
