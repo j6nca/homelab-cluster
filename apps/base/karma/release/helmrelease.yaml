@@ -45,7 +45,7 @@ spec:
         name: karma-config
         globalMounts:
           - path: *config
-            subPath: config.yaml
+            subPath: karma.yaml
             readOnly: true
       tmp:
         type: emptyDir
