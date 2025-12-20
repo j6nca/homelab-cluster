@@ -93,11 +93,12 @@ spec:
           conditions:
             - "[STATUS] <= 299"
             - "[BODY].status == OK"
-        - name: Photos
+        - name: Prowlarr
           group: Media
-          url: https://photos.j6n.ca
+          url: http://prowlarr.media:9696/ping
           conditions:
             - "[STATUS] <= 299"
+            - "[BODY].status == OK"
         - name: Gatus
           group: Observability
           url: https://status.j6n.dev/health
