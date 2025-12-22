@@ -1,0 +1,132 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app minecraft
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    fullnameOverride: *app
+    image:
+      repository: ghcr.io/itzg/minecraft-server
+      tag: 2025.12.0@sha256:4eb78cc5f3f4e87e281d38590deca2a4a74afaa9f351210059cb2786443994f2
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 200m
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+    securityContext:
+      runAsUser: 1000
+      fsGroup: 100
+    livenessProbe:
+      initialDelaySeconds: 30
+    readinessProbe:
+      initialDelaySeconds: 30
+    startupProbe:
+        enabled: true
+    extraEnv:
+      TZ: America/Toronto
+    persistence:
+      dataDir:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 15Gi
+        accessModes: 
+          - ReadWriteOnce
+        
+    minecraftServer:
+      serviceType: NodePort
+      ## Set the port used if the serviceType is NodePort
+      nodePort: 30000
+      eula: true
+      version: 1.21.11
+      ## The type of Minecraft server to run, check for related settings below
+      ## Common types: "VANILLA", "FABRIC", "FORGE", "SPIGOT", "BUKKIT", "PAPER",
+      ## "FTBA", "SPONGEVANILLA", "AUTO_CURSEFORGE"
+      ## ref: https://docker-minecraft-server.readthedocs.io/en/latest/types-and-platforms
+      type: FABRIC
+      # Optional URI to a resource pack. The player may choose to use it.
+      resourcePackUrl:
+      # Optional SHA-1 digest of the resource pack, in lowercase hexadecimal.
+      # It is recommended to specify this, because it is used to verify the integrity of the resource pack.
+      resourcePackSha:
+      # When true, players will be prompted for a response and will be disconnected if they decline the required pack
+      resourcePackEnforce: false
+      overrideServerProperties: true
+      jvmXXOpts: "-XX:MaxRAMPercentage=75"
+      difficulty: normal
+      spawnProtection: 0
+      gameMode: survival
+      pvp: false
+      onlineMode: true
+      whitelist: "turtlescute"
+      ops: "turtlescute"
+      motd: "hello world"
+      worldSaveName: survival_world
+      viewDistance: 12
+      levelSeed: "888887712656620816"
+      modUrls:
+      # Fabric API
+      - "https://cdn.modrinth.com/data/P7dR8mSH/versions/gB6TkYEJ/fabric-api-0.140.2%2B1.21.11.jar"
+      # FerriteCore
+      - "https://cdn.modrinth.com/data/uXXizFIs/versions/eRLwt73x/ferritecore-8.0.3-fabric.jar"
+      # Lithium
+      - "https://cdn.modrinth.com/data/gvQqBUqZ/versions/4DdLmtyz/lithium-fabric-0.21.1%2Bmc1.21.11.jar"
+      # # Krypton
+      # - "https://cdn.modrinth.com/data/fQEb0iXm/versions/O9LmWYR7/krypton-0.2.10.jar"
+      # # ModernFixes
+      # - "https://cdn.modrinth.com/data/nmDcB62a/versions/ZGxQddYr/modernfix-fabric-5.20.3%2Bmc1.21.4.jar"
+      # Clumps
+      - "https://cdn.modrinth.com/data/Wnxd13zP/versions/OgBE8Rz4/Clumps-fabric-1.21.11-29.0.0.1.jar"
+      # # Debugify
+      # - "https://cdn.modrinth.com/data/QwxR6Gcd/versions/i4mzYGzu/debugify-1.21.10%2B1.1.jar"
+      # Concurrent Chunk Management Engine
+      - "https://cdn.modrinth.com/data/VSNURh3q/versions/DLKF3HZk/c2me-fabric-mc1.21.11-0.3.6%2Bbeta.1.0.jar"
+      # Distant-Horizons
+      - "https://cdn.modrinth.com/data/uCdwusMi/versions/OmG1jkba/DistantHorizons-2.4.3-b-1.21.11-fabric-neoforge.jar"
+      # Packet Fixer
+      - "https://cdn.modrinth.com/data/c7m1mi73/versions/LFMYVIc7/packetfixer-fabric-3.3.2-1.21.11.jar"
+      # Jade
+      - "https://cdn.modrinth.com/data/nvQzSEkH/versions/7cBo3s22/Jade-1.21.11-Fabric-21.0.1.jar"
+      # Simple Voice Chat
+      - "https://cdn.modrinth.com/data/9eGKb6K1/versions/T42QJY4i/voicechat-fabric-1.21.11-2.6.10.jar"
+      # Just Enough Items
+      - "https://cdn.modrinth.com/data/u6dRKJwZ/versions/YBnHTs4N/jei-1.21.11-fabric-27.3.0.10.jar"
+      # bluemap
+      - "https://cdn.modrinth.com/data/swbUV1cr/versions/gpuTeXXq/bluemap-5.15-fabric.jar"
+      # simpleskills
+      - "https://cdn.modrinth.com/data/5UzHLVS5/versions/iT76WRwK/simpleskills-1.4.3.jar"
+
+      rcon:
+        enabled: true
+        existingSecret: minecraft-secret
+        secretKey: rcon_password
+
+      # These options allow you to expose another port from the Minecraft server, plugins such
+      # as dynmap (8123) and bluemap (8100) will require this for access to their web interfaces
+      extraPorts:
+        - name: bluemap
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            embedded: false
+            type: ClusterIP
+            internalTrafficPolicy: Cluster
+            port: 8100
+        - name: voice-chat
+          containerPort: 24454
+          protocol: UDP
+          service:
+            enabled: true
+            embedded: false
+            type: ClusterIP
+            internalTrafficPolicy: Cluster
+            port: 24454

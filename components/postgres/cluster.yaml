@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: ${APP}-postgres
+spec:
+  instances: ${POSTGRES_REPLICAS}
+  managed:
+    roles:
+      - name: ${APP}
+        login: true
+        passwordSecret:
+          name: ${APP}-postgres
+  storage:
+    storageClass: longhorn
+    size: ${POSTGRES_SIZE}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: ${APP}-postgres
+spec:
+  cluster: 
+    name: ${APP}-postgres
+  name: &app ${APP}
+  owner: *app
+---
