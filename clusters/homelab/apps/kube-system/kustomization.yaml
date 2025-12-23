@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - ../../../../apps/base/snapshot-controller/kustomize.yaml
   - ../../../../apps/base/csi-driver-nfs/kustomize.yaml
+  - ../../../../apps/base/metrics-server/kustomize.yaml
 commonLabels:
   cluster: homelab
