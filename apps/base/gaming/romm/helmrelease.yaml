@@ -37,7 +37,7 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
             ports:
-              - containerPort: &port 3000
+              - containerPort: &port 8080
                 name: http
                 protocol: TCP
     defaultPodOptions:
@@ -52,4 +52,21 @@ spec:
       app:
         ports:
           http:
-            port: *port          
+            port: *port
+    persistence:
+      config:
+        type: configMap
+        name: romm-config
+        globalMounts:
+          - path: /romm/config/config.yml
+            subPath: /romm/config/config.yml
+            readOnly: true
+      library:
+        type: nfs
+        server: nasj6n.home
+        path: /volume2/kubernetes/gaming/romm/library
+        globalMounts:
+          - path: /romm/library
+      
+      tmp:
+        type: emptyDir

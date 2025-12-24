@@ -3,3 +3,9 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml  
   - ./externalsecrets.yaml
+configMapGenerator:
+- name: romm-config
+  files:
+    - ./config/config.yml
+  options:
+    disableNameSuffixHash: true
