@@ -1,5 +1,5 @@
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
 metadata:
   name: ${APP}-dragonfly
 spec:

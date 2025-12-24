@@ -6,15 +6,15 @@ metadata:
   namespace: flux-system
 spec:
   components:
-    - ../../../components/dragonfly
-    - ../../../components/postgres
-    # - ../../../components/volsync
+    - ../../../../components/dragonfly
+    - ../../../../components/postgres
+    # - ../../../../components/volsync
   postBuild:
     substitute:
       APP: *app
-      DRAGONFLY_REPLICAS: 1
+      DRAGONFLY_REPLICAS: "1"
       DRAGONFLY_MAX_MEMORY: 500Mi
-      POSTGRES_REPLICAS: 1
+      POSTGRES_REPLICAS: "1"
       POSTGRES_SIZE: 1Gi
       VOLSYNC_CAPACITY: 5Gi
   targetNamespace: gaming
