@@ -13,6 +13,9 @@ spec:
       version: 1.4.4
   interval: 15m
   values:
+    image:
+      # Override version here as latest chart is not yet caught up
+      tag: v5.33.1
     service:
       annotations:
         k8s.grafana.com/scrape: "true"
