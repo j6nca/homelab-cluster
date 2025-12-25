@@ -46,8 +46,14 @@ spec:
       ui:
         dark-mode: true
         default-sort-by: group
-        logo: https://avatars.githubusercontent.com/u/72368152
-        link: https://grafana.j6n.dev
+        logo: https://minecraft.wiki/images/thumb/Sticky_Piston_%28U%29_JE3.gif/150px-Sticky_Piston_%28U%29_JE3.gif
+        link: https://github.com/j6nca
+        buttons:
+          - name: Github
+            link: https://github.com/j6nca/homelab-cluster
+          - name: Kubernetes
+            link: https://meow.j6n.dev
+
       metrics: true
       connectivity:
         checker:
@@ -57,21 +63,21 @@ spec:
         - name: Cloudflare
           group: connectivity
           url: icmp://1.1.1.1
-          interval: 1m
+          interval: 5m
           conditions:
             - "[CONNECTED] == true"
 
         - name: Google
           group: connectivity
           url: icmp://8.8.8.8
-          interval: 1m
+          interval: 5m
           conditions:
             - "[CONNECTED] == true"
 
         - name: Quad9
           group: connectivity
           url: icmp://9.9.9.9
-          interval: 1m
+          interval: 5m
           conditions:
             - "[CONNECTED] == true"
 
