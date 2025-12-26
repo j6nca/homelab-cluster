@@ -24,7 +24,7 @@ spec:
                 valueFrom:
                   secretKeyRef:
                     name: "{{ .Release.Name }}-postgres"
-                    key: user
+                    key: username
               DB_PASSWD:
                 valueFrom:
                   secretKeyRef:
@@ -59,7 +59,7 @@ spec:
         name: romm-config
         globalMounts:
           - path: /romm/config/config.yml
-            subPath: /romm/config/config.yml
+            subPath: config.yml
             readOnly: true
       library:
         type: nfs
