@@ -1,11 +1,11 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
 metadata:
-  name: ${APP}-dragonfly
+  name: ${APP}-postgres
 spec:
   selector:
     matchLabels:
-      app: ${APP}-dragonfly
+      app: ${APP}-postgres
   podTargetLabels: ["app"]
   podMetricsEndpoints:
     - port: admin

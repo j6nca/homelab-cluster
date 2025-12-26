@@ -50,10 +50,10 @@ spec:
         dark-mode: true
         default-sort-by: group
         logo: https://minecraft.wiki/images/thumb/Sticky_Piston_%28U%29_JE3.gif/150px-Sticky_Piston_%28U%29_JE3.gif
-        link: https://github.com/j6nca
+        link: https://status.j6n.dev
         buttons:
           - name: Github
-            link: https://github.com/j6nca/homelab-cluster
+            link: https://github.com/j6nca
           - name: Kubernetes
             link: https://meow.j6n.dev
 
