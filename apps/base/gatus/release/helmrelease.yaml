@@ -83,7 +83,16 @@ spec:
           interval: 5m
           conditions:
             - "[CONNECTED] == true"
-
+        - name: Minecraft Server
+          group: Gaming
+          url: https://mc-map.j6n.dev
+          conditions:
+            - "[STATUS] <= 299"
+        - name: Romm
+          group: Gaming
+          url: https://emu.j6n.dev
+          conditions:
+            - "[STATUS] <= 299"
         - name: Personal
           group: Projects
           url: https://j6n.ca

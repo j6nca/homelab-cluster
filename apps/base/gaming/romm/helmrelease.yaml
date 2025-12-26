@@ -58,9 +58,11 @@ spec:
                 name: http
                 protocol: TCP
     defaultPodOptions:
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
+        # NAS k8s user
+        runAsUser: 1031 
         runAsGroup: 100
         fsGroup: 100
         fsGroupChangePolicy: OnRootMismatch
@@ -78,6 +80,18 @@ spec:
           - path: /romm/config/config.yml
             subPath: config.yml
             readOnly: true
+      data:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 1Gi
+        accessMode: ReadWriteOnce
+        advancedMounts:
+          romm:
+            app:
+              - path: /romm/assets
+                subPath: assets
+              - path: /romm/resources
+                subPath: resources
       library:
         type: nfs
         server: nasj6n.home
