@@ -49,7 +49,7 @@ spec:
       ui:
         dark-mode: true
         default-sort-by: group
-        logo: https://minecraft.wiki/images/thumb/Sticky_Piston_%28U%29_JE3.gif/150px-Sticky_Piston_%28U%29_JE3.gif
+        logo: https://res.cloudinary.com/drwjkxxud/image/upload/v1769112783/150px-Sticky_Piston__U__JE3_i4agw4.webp
         link: https://status.j6n.dev
         buttons:
           - name: Github
