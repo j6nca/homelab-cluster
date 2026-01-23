@@ -1,0 +1,86 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app cobblemon
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    fullnameOverride: *app
+    image:
+      repository: ghcr.io/itzg/minecraft-server
+      tag: 2025.12.0@sha256:4eb78cc5f3f4e87e281d38590deca2a4a74afaa9f351210059cb2786443994f2
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 200m
+      limits:
+        cpu: 2000m
+        memory: 6Gi
+    securityContext:
+      runAsUser: 1000
+      fsGroup: 100
+    livenessProbe:
+      initialDelaySeconds: 30
+    readinessProbe:
+      initialDelaySeconds: 30
+    startupProbe:
+      enabled: true
+    extraEnv:
+      TZ: America/Toronto
+    persistence:
+      dataDir:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 15Gi
+        accessModes:
+          - ReadWriteOnce
+
+    minecraftServer:
+      serviceType: NodePort
+      ## Set the port used if the serviceType is NodePort
+      nodePort: 30000
+      eula: true
+      version: 1.21.1
+      ## The type of Minecraft server to run, check for related settings below
+      ## Common types: "VANILLA", "FABRIC", "FORGE", "SPIGOT", "BUKKIT", "PAPER",
+      ## "FTBA", "SPONGEVANILLA", "AUTO_CURSEFORGE"
+      ## ref: https://docker-minecraft-server.readthedocs.io/en/latest/types-and-platforms
+      type: FABRIC
+      # Optional URI to a resource pack. The player may choose to use it.
+      resourcePackUrl:
+      # Optional SHA-1 digest of the resource pack, in lowercase hexadecimal.
+      # It is recommended to specify this, because it is used to verify the integrity of the resource pack.
+      resourcePackSha:
+      # When true, players will be prompted for a response and will be disconnected if they decline the required pack
+      resourcePackEnforce: false
+      overrideServerProperties: true
+      jvmXXOpts: "-XX:MaxRAMPercentage=75"
+      difficulty: normal
+      spawnProtection: 0
+      gameMode: survival
+      pvp: false
+      onlineMode: true
+      whitelist: "turtlescute"
+      ops: "turtlescute"
+      motd: "Cobblemon Server"
+      worldSaveName: world
+      viewDistance: 12
+      levelSeed: "gottacatchemall"
+      modUrls: []
+      modrinth:
+        projects:
+          - "cobbleverse"
+      rcon:
+        enabled: true
+        existingSecret: minecraft-secret
+        secretKey: rcon_password
+
+      # These options allow you to expose another port from the Minecraft server, plugins such
+      # as dynmap (8123) and bluemap (8100) will require this for access to their web interfaces
+      # extraPor

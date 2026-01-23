@@ -64,21 +64,21 @@ spec:
           interval: 300s
       endpoints:
         - name: Cloudflare
-          group: connectivity
+          group: Connectivity
           url: icmp://1.1.1.1
           interval: 5m
           conditions:
             - "[CONNECTED] == true"
 
         - name: Google
-          group: connectivity
+          group: Connectivity
           url: icmp://8.8.8.8
           interval: 5m
           conditions:
             - "[CONNECTED] == true"
 
         - name: Quad9
-          group: connectivity
+          group: Connectivity
           url: icmp://9.9.9.9
           interval: 5m
           conditions:
@@ -190,6 +190,11 @@ spec:
           conditions:
             - "[STATUS] <= 299"
             - "[BODY] == VictoriaMetrics is Healthy."
+        - name: Karma
+          group: Observability
+          url: http://alerts.j6n.dev
+          conditions:
+            - "[STATUS] <= 299"
         - name: Actual
           group: Tools
           url: https://actual.j6n.ca
