@@ -32,7 +32,8 @@ spec:
       enabled: true
     extraEnv:
       TZ: America/Toronto
-      MODRINTH_MODPACK: "cobbleverse"
+      MODPACK_PLATFORM: MODRINTH
+      MODRINTH_MODPACK: cobbleverse
     persistence:
       dataDir:
         enabled: true
