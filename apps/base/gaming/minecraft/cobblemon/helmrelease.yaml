@@ -61,7 +61,7 @@ spec:
       # When true, players will be prompted for a response and will be disconnected if they decline the required pack
       resourcePackEnforce: false
       overrideServerProperties: true
-      memory: 5120
+      memory: 5120M
       jvmXXOpts: "-XX:MaxRAMPercentage=75"
       difficulty: normal
       spawnProtection: 0
