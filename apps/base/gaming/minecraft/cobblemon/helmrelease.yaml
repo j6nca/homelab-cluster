@@ -44,7 +44,7 @@ spec:
     minecraftServer:
       serviceType: NodePort
       ## Set the port used if the serviceType is NodePort
-      nodePort: 30000
+      nodePort: 30001
       eula: true
       version: 1.21.1
       ## The type of Minecraft server to run, check for related settings below
