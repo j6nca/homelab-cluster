@@ -72,9 +72,6 @@ spec:
       worldSaveName: world
       viewDistance: 12
       levelSeed: "gottacatchemall"
-      modUrls: []
-      modrinth:
-        projects: []
       rcon:
         enabled: true
         existingSecret: minecraft-secret
