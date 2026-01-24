@@ -39,7 +39,7 @@ spec:
         enabled: true
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 15Gi
+        Size: 15Gi
         accessModes:
           - ReadWriteOnce
     minecraftServer:
