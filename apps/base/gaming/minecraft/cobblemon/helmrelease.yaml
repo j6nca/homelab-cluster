@@ -32,6 +32,7 @@ spec:
       enabled: true
     extraEnv:
       TZ: America/Toronto
+      MODRINTH_MODPACK: "cobbleverse"
     persistence:
       dataDir:
         enabled: true
@@ -40,7 +41,6 @@ spec:
         size: 15Gi
         accessModes:
           - ReadWriteOnce
-
     minecraftServer:
       serviceType: NodePort
       ## Set the port used if the serviceType is NodePort
@@ -74,8 +74,7 @@ spec:
       levelSeed: "gottacatchemall"
       modUrls: []
       modrinth:
-        projects:
-          - "cobbleverse"
+        projects: []
       rcon:
         enabled: true
         existingSecret: minecraft-secret
