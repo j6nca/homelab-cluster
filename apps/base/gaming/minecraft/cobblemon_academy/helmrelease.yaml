@@ -32,11 +32,6 @@ spec:
       enabled: true
     extraEnv:
       TZ: America/Toronto
-      MODPACK_PLATFORM: AUTO_CURSEFORGE
-      CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/cobblemon-academy-2-0
-    envFrom:
-    - secretRef:
-        name: minecraft-cobblemon-academy-secret
     persistence:
       dataDir:
         enabled: true
@@ -55,7 +50,7 @@ spec:
       ## Common types: "VANILLA", "FABRIC", "FORGE", "SPIGOT", "BUKKIT", "PAPER",
       ## "FTBA", "SPONGEVANILLA", "AUTO_CURSEFORGE"
       ## ref: https://docker-minecraft-server.readthedocs.io/en/latest/types-and-platforms
-      type: FABRIC
+      type: AUTO_CURSEFORGE
       # Optional URI to a resource pack. The player may choose to use it.
       resourcePackUrl:
       # Optional SHA-1 digest of the resource pack, in lowercase hexadecimal.
@@ -79,8 +74,16 @@ spec:
       levelSeed: "cobblemonacademy"
       rcon:
         enabled: true
-        existingSecret: minecraft-secret
+        existingSecret: minecraft-cobblemon-academy-secret
         secretKey: rcon_password
+      autoCurseForge:
+        # CurseForge API key obtained from developer console
+        apiKey:
+          existingSecret: minecraft-cobblemon-academy-secret
+          secretKey: CF_API_KEY
+        # Link to modpack in general or a specific file
+        # NOTE: In case of specific file - do not point at server file
+        pageUrl: "https://www.curseforge.com/minecraft/modpacks/cobblemon-academy-2-0"
 
       # These options allow you to expose another port from the Minecraft server, plugins such
       # as dynmap (8123) and bluemap (8100) will require this for access to their web interfaces
