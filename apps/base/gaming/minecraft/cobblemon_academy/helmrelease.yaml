@@ -20,7 +20,7 @@ spec:
         cpu: 200m
       limits:
         cpu: 2000m
-        memory: 6Gi
+        memory: 7Gi
     securityContext:
       runAsUser: 1000
       fsGroup: 100
@@ -59,7 +59,7 @@ spec:
       # When true, players will be prompted for a response and will be disconnected if they decline the required pack
       resourcePackEnforce: false
       overrideServerProperties: true
-      memory: 5120M
+      memory: 6144M
       jvmXXOpts: "-XX:MaxRAMPercentage=75"
       difficulty: normal
       spawnProtection: 0
