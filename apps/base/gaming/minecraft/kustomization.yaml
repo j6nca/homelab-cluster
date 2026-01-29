@@ -5,3 +5,5 @@ resources:
   - ./externalsecrets.yaml
   - ./cobblemon/helmrelease.yaml
   - ./cobblemon/externalsecrets.yaml
+  - ./cobblemon_academy/helmrelease.yaml
+  - ./cobblemon_academy/externalsecrets.yaml
