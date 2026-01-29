@@ -32,6 +32,11 @@ spec:
       enabled: true
     extraEnv:
       TZ: America/Toronto
+      MODPACK_PLATFORM: AUTO_CURSEFORGE
+      CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/cobblemon-academy-2-0
+    envFrom:
+    - secretRef:
+        name: minecraft-cobblemon-academy-secret
     persistence:
       dataDir:
         enabled: true
@@ -72,7 +77,6 @@ spec:
       worldSaveName: world
       viewDistance: 12
       levelSeed: "cobblemonacademy"
-      downloadModpackUrl: https://www.curseforge.com/minecraft/modpacks/cobblemon-academy-2-0/download/7505960
       rcon:
         enabled: true
         existingSecret: minecraft-secret
