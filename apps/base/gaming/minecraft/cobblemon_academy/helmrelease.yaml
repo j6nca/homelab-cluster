@@ -17,10 +17,11 @@ spec:
       pullPolicy: IfNotPresent
     resources:
       requests:
-        cpu: 200m
+        cpu: 1000m
+        memory: 6Gi
       limits:
         cpu: 2000m
-        memory: 8Gi
+        memory: 9Gi
     securityContext:
       runAsUser: 1000
       fsGroup: 100
