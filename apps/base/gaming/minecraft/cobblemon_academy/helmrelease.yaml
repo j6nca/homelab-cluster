@@ -62,7 +62,12 @@ spec:
       overrideServerProperties: true
       memory: 7168M
       jvmXXOpts: "-XX:MaxRAMPercentage=75"
-      difficulty: normal
+      # World Options
+      difficulty: peaceful
+      # Determines if animals will be able to spawn.
+      spawnAnimals: false
+      # Determines if monsters will be spawned.
+      spawnMonsters: false
       spawnProtection: 0
       gameMode: survival
       pvp: false
