@@ -11,7 +11,7 @@ spec:
   interval: 15m
   values:
     workloadAsStatefulSet: true
-    updateStrategy: RollingUpdate
+    strategyType: RollingUpdate
     fullnameOverride: *app
     image:
       repository: ghcr.io/itzg/minecraft-server
