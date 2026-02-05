@@ -40,7 +40,7 @@ spec:
           # This assumes RCON is enabled and the container has rcon-cli
           command: ["/rcon-cli", "stop"]
     extraPodSpec:
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: "60"
     extraEnv:
       TZ: America/Toronto
     persistence:
