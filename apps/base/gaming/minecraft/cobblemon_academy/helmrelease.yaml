@@ -10,6 +10,8 @@ spec:
   dependsOn: []
   interval: 15m
   values:
+    workloadAsStatefulSet: true
+    updateStrategy: RollingUpdate
     fullnameOverride: *app
     image:
       repository: ghcr.io/itzg/minecraft-server
@@ -18,7 +20,7 @@ spec:
     resources:
       requests:
         cpu: 1000m
-        memory: 6Gi
+        memory: 8Gi
       limits:
         cpu: 2000m
         memory: 9Gi
@@ -31,6 +33,14 @@ spec:
       initialDelaySeconds: 30
     startupProbe:
       enabled: true
+    # Graceful shutdown for minecraft server pods
+    lifecycle:
+      preStop:
+        exec:
+          # This assumes RCON is enabled and the container has rcon-cli
+          command: ["/rcon-cli", "stop"]
+    extraPodSpec:
+      terminationGracePeriodSeconds: 60
     extraEnv:
       TZ: America/Toronto
     persistence:
@@ -60,8 +70,8 @@ spec:
       # When true, players will be prompted for a response and will be disconnected if they decline the required pack
       resourcePackEnforce: false
       overrideServerProperties: true
-      memory: 7168M
-      jvmXXOpts: "-XX:MaxRAMPercentage=75"
+      memory: 8192M
+      jvmXXOpts: "-Xms8G -XX:MaxRAMPercentage=75 -XX:+UseG1GC -XX:+ParallelRefProcEnabled"
       # World Options
       difficulty: peaceful
       # Determines if animals will be able to spawn.
@@ -76,8 +86,8 @@ spec:
       ops: "turtlescute"
       motd: "Cobblemon Academy Server"
       worldSaveName: world
-      viewDistance: 12
-      levelSeed: "cobblemonacademy"
+      viewDistance: 8
+      levelSeed: "teamrocketblastingoffagain"
       rcon:
         enabled: true
         existingSecret: minecraft-cobblemon-academy-secret
