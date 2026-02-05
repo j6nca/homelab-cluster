@@ -100,6 +100,9 @@ spec:
         # Link to modpack in general or a specific file
         # NOTE: In case of specific file - do not point at server file
         pageUrl: "https://www.curseforge.com/minecraft/modpacks/cobblemon-academy-2-0"
+        excludeMods:
+          - particle-effects-reforged
+      removeOldMods: true
 
       # These options allow you to expose another port from the Minecraft server, plugins such
       # as dynmap (8123) and bluemap (8100) will require this for access to their web interfaces
