@@ -33,6 +33,14 @@ spec:
       initialDelaySeconds: 30
     startupProbe:
       enabled: true
+    # Graceful shutdown for minecraft server pods
+    lifecycle:
+      preStop:
+        exec:
+          # This assumes RCON is enabled and the container has rcon-cli
+          command: ["/rcon-cli", "stop"]
+    extraPodSpec:
+      terminationGracePeriodSeconds: "60"
     extraEnv:
       TZ: America/Toronto
       MODPACK_PLATFORM: MODRINTH
@@ -75,13 +83,13 @@ spec:
       ops: "turtlescute"
       motd: "Cobblemon Server"
       worldSaveName: world
-      viewDistance: 12
+      viewDistance: 8
       levelSeed: "blaziken"
       rcon:
         enabled: true
-        existingSecret: minecraft-secret
+        existingSecret: minecraft-cobbleverse-secret
         secretKey: rcon_password
-
+      removeOldMods: true
       # These options allow you to expose another port from the Minecraft server, plugins such
       # as dynmap (8123) and bluemap (8100) will require this for access to their web interfaces
       # extraPor
