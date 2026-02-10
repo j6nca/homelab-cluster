@@ -10,17 +10,20 @@ spec:
   dependsOn: []
   interval: 15m
   values:
+    workloadAsStatefulSet: true
+    strategyType: RollingUpdate
     fullnameOverride: *app
     image:
       repository: ghcr.io/itzg/minecraft-server
-      tag: 2025.12.0@sha256:4eb78cc5f3f4e87e281d38590deca2a4a74afaa9f351210059cb2786443994f2
+      tag: java21
       pullPolicy: IfNotPresent
     resources:
       requests:
-        cpu: 200m
+        cpu: 1000m
+        memory: 5Gi
       limits:
         cpu: 2000m
-        memory: 6Gi
+        memory: 7Gi
     securityContext:
       runAsUser: 1000
       fsGroup: 100
@@ -62,7 +65,7 @@ spec:
       resourcePackEnforce: false
       overrideServerProperties: true
       memory: 5120M
-      jvmXXOpts: "-XX:MaxRAMPercentage=75"
+      jvmXXOpts: "-Xms5G -XX:MaxRAMPercentage=75 -XX:+UseG1GC -XX:+ParallelRefProcEnabled"
       difficulty: normal
       spawnProtection: 0
       gameMode: survival
