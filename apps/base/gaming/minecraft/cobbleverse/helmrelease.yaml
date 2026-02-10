@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app cobblemon
+  name: &app cobbleverse
 spec:
   chartRef:
     kind: OCIRepository
@@ -73,7 +73,7 @@ spec:
       motd: "Cobblemon Server"
       worldSaveName: world
       viewDistance: 12
-      levelSeed: "gottacatchemall"
+      levelSeed: "blaziken"
       rcon:
         enabled: true
         existingSecret: minecraft-secret

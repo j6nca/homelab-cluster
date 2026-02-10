@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   # - ./helmrelease.yaml
   # - ./externalsecrets.yaml
-  # - ./cobblemon/helmrelease.yaml
-  # - ./cobblemon/externalsecrets.yaml
-  - ./cobblemon_academy/helmrelease.yaml
-  - ./cobblemon_academy/externalsecrets.yaml
+  - ./cobbleverse/helmrelease.yaml
+  - ./cobbleverse/externalsecrets.yaml
+  # - ./cobblemon_academy/helmrelease.yaml
+  # - ./cobblemon_academy/externalsecrets.yaml
