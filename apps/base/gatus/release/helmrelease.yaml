@@ -235,10 +235,10 @@ spec:
           url: https://meow.j6n.dev
           interval: 24h
           conditions:
-            - "[DOMAIN_EXPIRATION] <= 720h"
+            - "[DOMAIN_EXPIRATION] >= 7d"
         - name: j6n.ca
           group: Domains
           url: https://j6n.ca
           interval: 24h
           conditions:
-            - "[DOMAIN_EXPIRATION] <= 720h"
+            - "[DOMAIN_EXPIRATION] >= 7d"
