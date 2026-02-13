@@ -232,7 +232,7 @@ spec:
             - "[STATUS] <= 299"
         - name: j6n.dev
           group: Domains
-          url: https://meow.j6n.dev
+          url: https://j6n.dev
           interval: 24h
           conditions:
             - "[DOMAIN_EXPIRATION] >= 7d"
