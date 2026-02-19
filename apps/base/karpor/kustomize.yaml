@@ -4,7 +4,7 @@ metadata:
   name: &app karpor
   namespace: flux-system
 spec:
-  targetNamespace: *app
+  targetNamespace: observability
   commonMetadata:
     labels:
       service: *app
