@@ -22,6 +22,7 @@ spec:
       enabled: true
       metricLabelsAllowlist:
         - pods=["level", "service", "cluster", "owner"]
+        - deployments=["level", "service", "cluster", "owner"]
     # Disable VMSingle and create VMCluster
     vmsingle:
       enabled: false
