@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
 commonLabels:
-  service: *app
+  service: kube-cats
   owner: j6n
   level: '3'
   group: tools
