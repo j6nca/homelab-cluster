@@ -8,11 +8,6 @@ spec:
   commonMetadata:
     labels:
       service: *app
-  commonLabels:
-    service: *app
-    owner: j6n
-    level: '3'
-    group: tools
   interval: 5m
   path: ./apps/base/kube-cats/release
   prune: true

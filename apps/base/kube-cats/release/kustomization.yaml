@@ -2,3 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./helmrelease.yaml
+commonLabels:
+  service: *app
+  owner: j6n
+  level: '3'
+  group: tools
