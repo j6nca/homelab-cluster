@@ -3,12 +3,12 @@ kind: HelmRelease
 metadata:
   name: &app kube-cats
 spec:
-  commonMetadata:
+  commonMetadata: &commonlabels
     labels:
       service: *app
       owner: j6n
       level: '3'
-      group: 'tools'
+      group: tools
   chart:
     spec:
       chart: *app
