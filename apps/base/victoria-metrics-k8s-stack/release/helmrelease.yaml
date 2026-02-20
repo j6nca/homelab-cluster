@@ -18,6 +18,10 @@ spec:
     cleanupOnFail: true
   interval: 15m
   values:
+    kube-state-metrics:
+      enabled: true
+      metricLabelsAllowlist:
+        - pods=["level", "service", "cluster", "owner"]
     # Disable VMSingle and create VMCluster
     vmsingle:
       enabled: false

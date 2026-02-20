@@ -3,6 +3,12 @@ kind: HelmRelease
 metadata:
   name: &app kube-cats
 spec:
+  commonMetadata:
+    labels:
+      service: *app
+      owner: j6n
+      level: '3'
+      group: 'tools'
   chart:
     spec:
       chart: *app
@@ -12,6 +18,3 @@ spec:
         namespace: flux-system
       version: 1.0.9
   interval: 15m
-  commonMetadata:
-    labels:
-      service: *app
