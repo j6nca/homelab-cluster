@@ -11,7 +11,7 @@ spec:
   interval: 15m
   values:
     controllers:
-      jellyseerr:
+      sonarr:
         containers:
           app:
             image:
@@ -43,19 +43,6 @@ spec:
               - containerPort: *port
                 name: http
                 protocol: TCP
-        # initContainers:
-        #   gluetun:
-        #     image:
-        #       repository: ghcr.io/qdm12/gluetun
-        #       tag: v3.40.3
-        #     envFrom:
-        #       - secretRef:
-        #           name: "gluetun-secret"
-        #     securityContext:
-        #       capabilities:
-        #         add: ["NET_ADMIN"]
-        #     # Keep gluetun running for the duration of the pod
-        #     restartPolicy: Always
 
     defaultPodOptions:
       securityContext:
@@ -80,8 +67,6 @@ spec:
         storageClass: longhorn
         size: 500Mi
         accessMode: ReadWriteOnce
-      gluetun:
-        type: emptyDir
       media:
         type: nfs
         server: nasj6n.home

@@ -11,7 +11,7 @@ spec:
   interval: 15m
   values:
     controllers:
-      jellyseerr:
+      radarr:
         containers:
           app:
             image:
