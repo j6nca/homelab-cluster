@@ -28,13 +28,13 @@ spec:
     volumes:
       - name: data
         nfs:
-          server: nasj6n.home
-          path: /volume2/kubernetes
+          server: mimir.home
+          path: /MEDIA
 
     volumeMounts:
       - mountPath: /data
         name: data
         readOnly: true
-        subPath: media/data/media
+        subPath: data/media
     metrics:
       enabled: true
