@@ -32,17 +32,25 @@ spec:
               # limits:
               #   cpu: 6
               #   memory: 16Gi
+            ports:
+              - containerPort: &port 11434
+                name: http
+                protocol: TCP
           exporter:
             image:
               repository: lucabecker42/ollama-exporter
               tag: 1.0.1@sha256:4d1d96fae76dbefd6b763d576a12fb9799913ae9a585990a464eacab2b600f55
+            ports:
+              - containerPort: &metrics 8000
+                name: http
+                protocol: TCP
     service:
       app:
         ports:
           http:
-            port: 11434
+            port: *port
           metrics:
-            port: 8000
+            port: *metrics
     persistence:
       ollama:
         type: persistentVolumeClaim
