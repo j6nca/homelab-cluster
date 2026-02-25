@@ -4,12 +4,12 @@ metadata:
   name: &app ollama
   namespace: flux-system
 spec:
-  targetNamespace: llm
+  targetNamespace: ollama
   commonMetadata:
     labels:
       service: *app
   interval: 5m
-  path: ./apps/base/llm/ollama
+  path: ./apps/base/llm/ollama/release
   prune: true
   sourceRef:
     kind: GitRepository
