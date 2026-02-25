@@ -31,9 +31,9 @@ spec:
               requests:
                 cpu: 2
                 memory: 8Gi
-              limits:
-                cpu: 6
-                memory: 16Gi
+              # limits:
+              #   cpu: 6
+              #   memory: 16Gi
           exporter:
             image:
               repository: lucabecker42/ollama-exporter
