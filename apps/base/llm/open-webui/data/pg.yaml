@@ -6,10 +6,10 @@ spec:
   instances: 1
   managed:
     roles:
-      - name: open-webui
-        login: true
-        passwordSecret:
-          name: open-webui-postgres
+      # - name: open-webui
+      #   login: true
+      #   passwordSecret:
+      #     name: open-webui-postgres
   storage:
     storageClass: longhorn
     size: 5Gi
