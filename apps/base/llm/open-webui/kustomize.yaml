@@ -23,10 +23,10 @@ metadata:
   name: &app open-webui-data
   namespace: flux-system
 spec:
-  targetNamespace: *app
+  targetNamespace: open-webui
   commonMetadata:
     labels:
-      service: *app
+      service: open-webui
   interval: 5m
   path: ./apps/base/llm/open-webui/data
   prune: true
