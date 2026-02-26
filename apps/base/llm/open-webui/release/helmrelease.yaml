@@ -41,6 +41,17 @@ spec:
               # ENABLE_WEBSOCKET_SUPPORT: "true"
               # WEBSOCKET_MANAGER: "redis"
               # WEBSOCKET_REDIS_URL: "redis://{{ .Release.Name }}-dragonfly:6379"
+              # DB CONFIG
+              DATABASE_USER: "{{ .Release.Name }}"
+              DATABASE_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ .Release.Name }}-postgres"
+                    key: password
+              DATABASE_PORT: "5432"
+              DATABASE_NAME: open-webui
+              DATABASE_TYPE: postgresql
+              DATABASE_HOST: open-webui-postgres-rw
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
