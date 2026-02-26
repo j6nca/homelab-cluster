@@ -66,6 +66,12 @@ spec:
               - containerPort: &port 8080
                 name: http
                 protocol: TCP
+        pod:
+          tolerations:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "llm"
+              effect: "NoSchedule"
     service:
       app:
         ports:

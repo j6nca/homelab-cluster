@@ -31,7 +31,7 @@ spec:
                 memory: 3Gi
               limits:
                 cpu: 3
-                memory: 8Gi
+                memory: 10Gi
             ports:
               - containerPort: &port 11434
                 name: http
@@ -44,6 +44,12 @@ spec:
               - containerPort: &metrics 8000
                 name: http
                 protocol: TCP
+        pod:
+          tolerations:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "llm"
+              effect: "NoSchedule"
     service:
       app:
         ports:
