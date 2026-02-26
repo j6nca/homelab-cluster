@@ -24,7 +24,7 @@ spec:
         root_url: https://grafana.j6n.dev
       # OIDC
       auth:
-        signout_redirect_url: https://auth.j6n.ca/application/o/grafana/end-session/
+        signout_redirect_url: https://auth.j6n.dev/application/o/grafana/end-session/
         disable_login_form: true
         oauth_allow_insecure_email_lookup: true
 
@@ -32,9 +32,9 @@ spec:
         name: authentik
         enabled: true
         scopes: openid email profile
-        auth_url: https://auth.j6n.ca/application/o/authorize/
-        token_url: https://auth.j6n.ca/application/o/token/
-        api_url: https://auth.j6n.ca/application/o/userinfo/
+        auth_url: https://auth.j6n.dev/application/o/authorize/
+        token_url: https://auth.j6n.dev/application/o/token/
+        api_url: https://auth.j6n.dev/application/o/userinfo/
         # Map user groups to Grafana roles
         role_attribute_path: contains(groups[*], 'grafana_admin') && 'Admin' || contains(groups[*], 'grafana_editor') && 'Editor' || 'Viewer'
       # Enable public viewer

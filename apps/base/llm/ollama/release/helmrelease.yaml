@@ -29,9 +29,9 @@ spec:
               requests:
                 cpu: 1
                 memory: 3Gi
-              # limits:
-              #   cpu: 6
-              #   memory: 16Gi
+              limits:
+                cpu: 3
+                memory: 8Gi
             ports:
               - containerPort: &port 11434
                 name: http
