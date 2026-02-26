@@ -9,7 +9,7 @@ spec:
     labels:
       service: it-tools
   interval: 5m
-  path: ./apps/base/it-tools/release
+  path: ./apps/base/tools/it-tools/release
   prune: true
   sourceRef:
     kind: GitRepository

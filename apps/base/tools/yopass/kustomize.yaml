@@ -9,7 +9,7 @@ spec:
     labels:
       service: yopass
   interval: 5m
-  path: ./apps/base/yopass/release
+  path: ./apps/base/tools/yopass/release
   prune: true
   sourceRef:
     kind: GitRepository

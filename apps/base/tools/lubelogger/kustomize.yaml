@@ -9,7 +9,7 @@ spec:
     labels:
       service: *app
   interval: 5m
-  path: ./apps/base/lubelogger/release
+  path: ./apps/base/tools/lubelogger/release
   prune: true
   sourceRef:
     kind: GitRepository

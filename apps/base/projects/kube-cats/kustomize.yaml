@@ -9,7 +9,7 @@ spec:
     labels:
       service: *app
   interval: 5m
-  path: ./apps/base/kube-cats/release
+  path: ./apps/base/projects/kube-cats/release
   prune: true
   sourceRef:
     kind: GitRepository
