@@ -62,6 +62,9 @@ spec:
             port: *port
     persistence:
       config:
-        enabled: true
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 5Gi
+        accessMode: ReadWriteOnce
         globalMounts:
           - path: /app/backend/data
