@@ -31,7 +31,7 @@ spec:
                 memory: 3Gi
               limits:
                 cpu: 3
-                memory: 12Gi
+                memory: 15Gi
             ports:
               - containerPort: &port 11434
                 name: http
