@@ -4,7 +4,7 @@ metadata:
   name: &app ollama
   namespace: flux-system
 spec:
-  targetNamespace: ollama
+  targetNamespace: *app
   commonMetadata:
     labels:
       service: *app

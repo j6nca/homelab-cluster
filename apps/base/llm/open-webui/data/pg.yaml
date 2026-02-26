@@ -1,0 +1,25 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: open-webui-postgres
+spec:
+  instances: 1
+  managed:
+    roles:
+      - name: open-webui
+        login: true
+        passwordSecret:
+          name: open-webui-postgres
+  storage:
+    storageClass: longhorn
+    size: 5Gi
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: open-webui-postgres
+spec:
+  cluster: 
+    name: open-webui-postgres
+  name: &app open-webui
+  owner: *app
