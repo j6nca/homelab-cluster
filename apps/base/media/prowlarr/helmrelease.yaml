@@ -16,7 +16,7 @@ spec:
           app:
             image:
               repository: linuxserver/prowlarr
-              tag: 2.3.2
+              tag: 2.3.0
             env:
               TZ: America/Toronto
               PROWLARR__APP__INSTANCENAME: "{{ .Release.Name }}"
