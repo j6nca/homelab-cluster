@@ -24,6 +24,7 @@ spec:
         enabled: true
         type: pvc
         storageClass: longhorn
+        size: 5Gi
     # Here we mount the actual media files via NFS
     volumes:
       - name: data
