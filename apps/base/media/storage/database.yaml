@@ -28,7 +28,7 @@ spec:
           name: prowlarr-postgres
   storage:
     storageClass: longhorn
-    size: 15Gi
+    size: 10Gi
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
