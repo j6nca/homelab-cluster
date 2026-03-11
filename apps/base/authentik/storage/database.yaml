@@ -3,7 +3,7 @@ kind: Cluster
 metadata:
   name: authentik-postgres
 spec:
-  instances: 3
+  instances: 1
   managed:
     roles:
       - name: authentik
@@ -12,7 +12,7 @@ spec:
           name: authentik-postgres
   storage:
     storageClass: longhorn
-    size: 1Gi
+    size: 2Gi
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
