@@ -12,7 +12,7 @@ spec:
           name: authentik-postgres
   storage:
     storageClass: longhorn
-    size: 2Gi
+    size: 3Gi
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
