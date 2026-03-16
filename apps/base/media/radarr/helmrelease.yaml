@@ -72,6 +72,7 @@ spec:
         server: mimir.home
         path: /var/nfs/shared/MEDIA
         globalMounts:
-          - path: /data
+          - subPath: data/media
+            path: /data
       tmp:
         type: emptyDir
