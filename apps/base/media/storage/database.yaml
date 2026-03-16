@@ -6,10 +6,10 @@ spec:
   instances: 1
   managed:
     roles:
-      - name: jellyseerr
+      - name: seerr
         login: true
         passwordSecret:
-          name: jellyseerr-postgres
+          name: seerr-postgres
       - name: jellystat
         login: true
         passwordSecret:
@@ -33,11 +33,11 @@ spec:
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
-  name: jellyseerr-postgres
+  name: seerr-postgres
 spec:
   cluster: 
     name: media-postgres
-  name: &app jellyseerr
+  name: &app seerr
   owner: *app
 ---
 apiVersion: postgresql.cnpg.io/v1

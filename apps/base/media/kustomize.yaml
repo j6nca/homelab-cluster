@@ -37,7 +37,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app jellyseerr
+  name: &app seerr
   namespace: flux-system
 spec:
   targetNamespace: media
@@ -47,7 +47,7 @@ spec:
   dependsOn:
     - name: media-storage
   interval: 5m
-  path: ./apps/base/media/jellyseerr
+  path: ./apps/base/media/seerr
   prune: true
   sourceRef:
     kind: GitRepository
