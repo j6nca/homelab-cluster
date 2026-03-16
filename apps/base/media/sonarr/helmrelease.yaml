@@ -71,8 +71,9 @@ spec:
         type: nfs
         server: mimir.home
         path: /var/nfs/shared/MEDIA
+        # Needs access to both downloads and media
         globalMounts:
-          - subPath: data/media
-            path: /data/media
+          - subPath: data
+            path: /data
       tmp:
         type: emptyDir
