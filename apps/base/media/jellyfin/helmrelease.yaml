@@ -36,6 +36,7 @@ spec:
       - mountPath: /data
         name: data
         readOnly: true
+        # sub path on NFS
         subPath: data/media
     metrics:
       enabled: true
