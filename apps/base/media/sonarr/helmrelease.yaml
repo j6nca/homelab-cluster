@@ -73,6 +73,6 @@ spec:
         path: /var/nfs/shared/MEDIA
         globalMounts:
           - subPath: data/media
-            path: /data
+            path: /data/media
       tmp:
         type: emptyDir
