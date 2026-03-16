@@ -139,6 +139,7 @@ spec:
       service: *app
   dependsOn:
     - name: media-storage
+    - name: gluetun
   interval: 5m
   path: ./apps/base/media/prowlarr
   prune: true

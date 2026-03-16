@@ -50,10 +50,11 @@ spec:
               tag: v3.40.3
             envFrom:
               - secretRef:
-                  name: "gluetun-secret"
+                  name: gluetun-secret
             securityContext:
               capabilities:
                 add: ["NET_ADMIN"]
+                privileged: true
             # Keep gluetun running for the duration of the pod
             restartPolicy: Always
 
