@@ -30,6 +30,10 @@ spec:
                 "{{ .Release.Name }}.downloads.svc.cluster",
                 "{{ .Release.Name }}.downloads.svc.cluster.local",
                 "localhost:8999"
+            ports:
+              - containerPort: *port
+                name: http
+                protocol: TCP
             probes:
               liveness: &probes
                 enabled: true

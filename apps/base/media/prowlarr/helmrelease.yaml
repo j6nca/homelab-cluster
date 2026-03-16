@@ -43,28 +43,28 @@ spec:
               - containerPort: *port
                 name: http
                 protocol: TCP
-        # initContainers:
-        #   gluetun:
-        #     image:
-        #       repository: ghcr.io/qdm12/gluetun
-        #       tag: v3.40.3
-        #     envFrom:
-        #       - secretRef:
-        #           name: gluetun-secret
-        #     securityContext:
-        #       capabilities:
-        #         add: ["NET_ADMIN"]
-        #         privileged: true
-        #     # Keep gluetun running for the duration of the pod
-        #     restartPolicy: Always
+        initContainers:
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.40.3
+            envFrom:
+              - secretRef:
+                  name: gluetun-secret
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+                privileged: true
+            # Keep gluetun running for the duration of the pod
+            restartPolicy: Always
 
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 100
-        fsGroup: 100
-        fsGroupChangePolicy: OnRootMismatch
+    # defaultPodOptions:
+    #   securityContext:
+    #     runAsNonRoot: true
+    #     runAsUser: 1000
+    #     runAsGroup: 100
+    #     fsGroup: 100
+    #     fsGroupChangePolicy: OnRootMismatch
 
     service:
       app:
