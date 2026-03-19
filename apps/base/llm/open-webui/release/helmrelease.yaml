@@ -31,7 +31,7 @@ spec:
               # IMAGE_STEPS: 8
               # COMFYUI_BASE_URL: 
               # Open-webui settings
-              OLLAMA_BASE_URL: http://ollama.ollama:11434
+              OLLAMA_BASE_URL: http://jarvis.home:11434
               # Enable once searxng is ready
               ENABLE_RAG_WEB_SEARCH: false
               ENABLE_SEARCH_QUERY: false
