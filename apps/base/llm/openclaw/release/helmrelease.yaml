@@ -46,3 +46,19 @@ spec:
         ports:
           http:
             port: *port
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 100MB
+        accessMode: ReadWriteOnce
+        globalMounts:
+          - path: /home/node/.openclaw
+      workspace:
+        type: nfs
+        server: mimir.home
+        path: /var/nfs/shared/LLM
+        # Needs access to media
+        globalMounts:
+          - subPath: openclaw/workspace
+            path: /home/node/.openclaw/workspace
