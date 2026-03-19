@@ -50,7 +50,7 @@ spec:
       config:
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 100MB
+        size: 100M
         accessMode: ReadWriteOnce
         globalMounts:
           - path: /home/node/.openclaw
