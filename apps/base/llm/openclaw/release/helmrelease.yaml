@@ -31,7 +31,7 @@ spec:
               limits:
                 memory: 2Gi
             ports:
-              - containerPort: &port 8080
+              - containerPort: *port
                 name: http
                 protocol: TCP
     defaultPodOptions:
