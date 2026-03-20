@@ -54,11 +54,19 @@ spec:
         accessMode: ReadWriteOnce
         globalMounts:
           - path: /home/node/.openclaw
+      # Mount secret to config file
+      openclaw-config:
+        type: secret
+        name: "{{ .Release.Name }}-config"
+        defaultMode: 0400
+        globalMounts:
+          - path: /home/node/.openclaw/openclaw.json
+            subPath: openclaw.json
+      # Workspace data
       workspace:
         type: nfs
         server: mimir.home
         path: /var/nfs/shared/LLM
-        # Needs access to media
         globalMounts:
-          - subPath: openclaw
-            path: /home/node/.openclaw
+          - subPath: openclaw/workspaces
+            path: /home/node/.openclaw/workspaces
