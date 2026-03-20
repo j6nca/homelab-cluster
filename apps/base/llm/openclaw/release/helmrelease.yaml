@@ -11,7 +11,7 @@ spec:
   interval: 15m
   values:
     controllers:
-      open-webui:
+      openclaw:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
