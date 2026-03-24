@@ -21,8 +21,8 @@ spec:
               tag: v0.8.5@sha256:2deb90b0423473d8f97febced2e62b8fd898aa3eb61877bb3aa336370214c258
             env:
               # Image Generation
-              ENABLE_OPENAI_API: False
-              ENABLE_OLLAMA_API: True
+              ENABLE_OPENAI_API: True
+              ENABLE_OLLAMA_API: False
               # Enable once comfy-ui is ready
               ENABLE_IMAGE_GENERATION: False
               # IMAGE_GENERATION_ENGINE: comfyui
@@ -31,6 +31,7 @@ spec:
               # IMAGE_STEPS: 8
               # COMFYUI_BASE_URL: 
               # Open-webui settings
+              OPENAI_API_BASE_URL: http://jarvis.home:8000/api/v1
               OLLAMA_BASE_URL: http://jarvis.home:11434
               # Enable once searxng is ready
               ENABLE_RAG_WEB_SEARCH: false
