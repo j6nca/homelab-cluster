@@ -30,7 +30,7 @@ spec:
                 name: http
                 protocol: TCP
         initContainers:
-          gluetun:
+          vpn:
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.40.3
@@ -43,6 +43,19 @@ spec:
                 # privileged: true
             # Keep gluetun running for the duration of the pod
             restartPolicy: Always
+          ping:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - |
+                while ! ping -c 1 8.8.8.8; do
+                echo "Ping failed, retrying in 5"
+                sleep 5
+                done
+                echo "ping succesfull, exiting"
 
     # defaultPodOptions:
     #   securityContext:
