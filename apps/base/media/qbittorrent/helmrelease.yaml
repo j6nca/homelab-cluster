@@ -11,7 +11,7 @@ spec:
   interval: 15m
   values:
     controllers:
-      prowlarr:
+      qbittorrent:
         containers:
           app:
             image:
