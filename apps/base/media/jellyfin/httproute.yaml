@@ -4,8 +4,7 @@ metadata:
   name: jellyfin-internal
 spec:
   hostnames:
-  - jellyfin.internal
-  - jellyfin.internal:30626
+  - "*"
   parentRefs:
   - name: envoy-internal
     namespace: network
