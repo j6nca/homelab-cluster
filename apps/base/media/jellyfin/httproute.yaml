@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: jellyfin-internal
+spec:
+  hostnames:
+  - jellyfin.internal
+  parentRefs:
+  - name: envoy-internal
+    namespace: network
+  rules:
+    backendRefs:
+    - name: jellyfin
+      port: 8096
