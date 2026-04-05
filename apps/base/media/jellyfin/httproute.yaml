@@ -9,6 +9,6 @@ spec:
   - name: envoy-internal
     namespace: network
   rules:
-    backendRefs:
+  - backendRefs:
     - name: jellyfin
       port: 8096
