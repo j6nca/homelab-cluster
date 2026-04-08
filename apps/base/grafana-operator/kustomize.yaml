@@ -1,13 +1,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: grafana-operator
+  name: &app grafana-operator
   namespace: flux-system
 spec:
-  targetNamespace: grafana-operator
+  targetNamespace: *app
   commonMetadata:
     labels:
-      service: grafana-operator
+      service: *app
   interval: 5m
   path: ./apps/base/grafana-operator/release
   prune: true
@@ -18,17 +18,34 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: grafana
+  name: &app grafana
   namespace: flux-system
 spec:
   targetNamespace: observability
   commonMetadata:
     labels:
-      service: grafana
+      service: *app 
   dependsOn:
     - name: grafana-operator
   interval: 5m
   path: ./apps/base/grafana-operator/grafana
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app grafana-mcp
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/grafana-operator/mcp
   prune: true
   sourceRef:
     kind: GitRepository
