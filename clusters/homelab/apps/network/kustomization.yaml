@@ -4,6 +4,7 @@ resources:
   - ../../../../apps/base/cloudflare-tunnel/kustomize.yaml
   - ../../../../apps/base/external-dns/kustomize.yaml
   - ../../../../apps/base/envoy-gateway/kustomize.yaml
+  - ../../../../apps/base/cert-manager/kustomize.yaml
   - ./namespace.yaml
 commonLabels:
   cluster: homelab
