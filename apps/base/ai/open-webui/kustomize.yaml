@@ -11,7 +11,7 @@ spec:
   dependsOn:
     - name: open-webui-data
   interval: 5m
-  path: ./apps/base/llm/open-webui/release
+  path: ./apps/base/ai/open-webui/release
   prune: true
   sourceRef:
     kind: GitRepository
@@ -28,7 +28,7 @@ spec:
     labels:
       service: open-webui
   interval: 5m
-  path: ./apps/base/llm/open-webui/data
+  path: ./apps/base/ai/open-webui/data
   prune: true
   sourceRef:
     kind: GitRepository

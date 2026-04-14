@@ -1,0 +1,11 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: toolhive-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: oci://ghcr.io/stacklok/toolhive/toolhive-operator
+  ref:
+    tag: v0.19.0

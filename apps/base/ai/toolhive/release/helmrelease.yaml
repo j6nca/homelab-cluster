@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: toolhive-operator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: toolhive-operator
+    namespace: flux-system
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+  interval: 15m
+  values:
+    operator:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      gc:
+        gomemlimit: 450MiB
+        gogc: 75

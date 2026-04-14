@@ -9,7 +9,7 @@ spec:
     labels:
       service: *app
   interval: 5m
-  path: ./apps/base/llm/bifrost/release
+  path: ./apps/base/ai/bifrost/release
   prune: true
   sourceRef:
     kind: GitRepository
