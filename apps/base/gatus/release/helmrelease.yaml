@@ -202,36 +202,36 @@ spec:
             - "[STATUS] <= 299"
         - name: Actual
           group: Tools
-          url: https://actual.j6n.ca
+          url: https://actual.j6n.dev
           conditions:
             - "[STATUS] <= 299"
         - name: Authentik
           group: Tools
-          url: https://auth.j6n.ca
+          url: https://auth.j6n.dev
           conditions:
             - "[STATUS] <= 299"
         - name: HomeAssistant
           group: Tools
-          url: https://hass.j6n.ca
+          url: https://hass.j6n.dev
           conditions:
             - "[STATUS] <= 299"
         - name: Moodist
-          group: Utilities
+          group: Tools
           url: https://moodist.j6n.dev
           conditions:
             - "[STATUS] <= 299"
         - name: IT-Tools
-          group: Utilities
+          group: Tools
           url: https://tools.j6n.dev
           conditions:
             - "[STATUS] <= 299"
         - name: Vert
-          group: Utilities
+          group: Tools
           url: https://convert.j6n.dev
           conditions:
             - "[STATUS] <= 299"
         - name: YoPass
-          group: Utilities
+          group: Tools
           url: https://secrets.j6n.dev
           conditions:
             - "[STATUS] <= 299"
