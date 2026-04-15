@@ -114,6 +114,11 @@ spec:
           conditions:
             - "[STATUS] <= 299"
             - "[BODY] == OK"
+        - name: Basalt
+          group: Projects
+          url: https://basalt.j6n.dev
+          conditions:
+            - "[STATUS] <= 299"
         - name: Jellyfin
           group: Media
           url: https://watch.j6n.dev
