@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gravityctl/free-games
-              tag: v0.0.3
+              tag: v0.0.4
             env:
               TZ: "America/Toronto"
               # Epic Games Store
