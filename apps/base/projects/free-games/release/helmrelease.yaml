@@ -30,12 +30,12 @@ spec:
               ENABLE_TWITCH_DROPS: false
 
               # Per-provider schedules (cron format: second minute hour day month weekday)
-              # Epic: every Thursday at midnight
-              EPIC_SCHEDULE: "8 14 * * *"
-              # Steam: daily at 9am
-              STEAM_SCHEDULE: "8 14 * * *"
+              # Epic: daily at noon
+              EPIC_SCHEDULE: "0 12 * * *"
+              # Steam: daily at noon
+              STEAM_SCHEDULE: "0 12 * * *"
               # Twitch drops: daily at noon
-              TWITCH_DROPS_SCHEDULE: "8 14 * * *"
+              TWITCH_DROPS_SCHEDULE: "0 12 * * *"
 
               # Path to notification deduplication store (avoids duplicate notifications)
               NOTIFICATION_STORE_PATH: "/data/free-games-store.json"
@@ -45,9 +45,9 @@ spec:
 
               # Custom Discord emojis per provider (Discord native format: <:name:id>)
               # Leave empty to use built-in emoji (🔶 epic, 🎲 steam, 🟣 twitch)
-              EPIC_EMOJI: "<:epicgames:1494084504438968410>"
-              STEAM_EMOJI: "<:steam:1494083803331956857>"
-              TWITCH_EMOJI: "<:twitchprime:1494083902506274916>"
+              EPIC_EMOJI: "<:epicgames:1494914252023267368>"
+              STEAM_EMOJI: "<:steam:1494914346281730259>"
+              TWITCH_EMOJI: "<:twitchprime:1494914397351448718>"
 
               # Base URL for desktop-app redirect service (e.g. https://redirect.example.com)
               # When set, adds "Open in App" field linking to this redirect server which
