@@ -48,12 +48,14 @@ spec:
             args:
               [
                 "dashboard",
+                "--host",
+                "0.0.0.0",
               ]
             resources:
               requests:
-                cpu: 10m
+                cpu: 500m
               limits:
-                memory: 4Gi
+                memory: 1Gi
             ports:
               - containerPort: &dashboard_port 9119
                 name: http
