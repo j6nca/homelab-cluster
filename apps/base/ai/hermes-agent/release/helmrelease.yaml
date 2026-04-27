@@ -118,7 +118,6 @@ spec:
       config:
         type: configMap
         name: "{{ .Release.Name }}"
-        defaultMode: 0400
         globalMounts:
           - path: /opt/data/config.yaml
             subPath: config.yaml
