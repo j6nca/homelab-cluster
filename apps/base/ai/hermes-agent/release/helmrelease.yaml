@@ -38,28 +38,28 @@ spec:
               - containerPort: &port 8642
                 name: http
                 protocol: TCP
-          dashboard:
-            image:
-              repository: *image_repo
-              tag: *image_tag
-            env:
-              TZ: America/Toronto
-              GATEWAY_HEALTH_URL: http://localhost:8642
-            args:
-              [
-                "dashboard",
-                "--host",
-                "0.0.0.0",
-              ]
-            resources:
-              requests:
-                cpu: 500m
-              limits:
-                memory: 1Gi
-            ports:
-              - containerPort: &dashboard_port 9119
-                name: http
-                protocol: TCP
+          # dashboard:
+          #   image:
+          #     repository: *image_repo
+          #     tag: *image_tag
+          #   env:
+          #     TZ: America/Toronto
+          #     GATEWAY_HEALTH_URL: http://localhost:8642
+          #   args:
+          #     [
+          #       "dashboard",
+          #       "--host",
+          #       "0.0.0.0",
+          #     ]
+          #   resources:
+          #     requests:
+          #       cpu: 500m
+          #     limits:
+          #       memory: 1Gi
+          #   ports:
+          #     - containerPort: &dashboard_port 9119
+          #       name: http
+          #       protocol: TCP
           codeserver:
             image:
               repository: ghcr.io/coder/code-server
