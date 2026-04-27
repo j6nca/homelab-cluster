@@ -1,0 +1,115 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app hermes-agent
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      hermes-agent:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: &image_repo nousresearch/hermes-agent
+              tag: &image_tag v2026.4.16
+            env:
+              TZ: &tz America/Toronto
+              OPENCLAW_GATEWAY_PORT: &port 8642
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            args:
+              [
+                "gateway",
+                "run",
+              ]
+            resources:
+              requests:
+                cpu: 500m
+              limits:
+                memory: 2Gi
+            ports:
+              - containerPort: *port
+                name: http
+                protocol: TCP
+          dashboard:
+            image:
+              repository: *image_repo
+              tag: *image_tag
+            env:
+              TZ: America/Toronto
+            args:
+              [
+                "dashboard",
+              ]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+            ports:
+              - containerPort: &dashboard_port 9119
+                name: http
+                protocol: TCP
+          codeserver:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.115.0@sha256:cbd5e05849367e521f774b760602cb9e0a8da1f159eaf89600490eec34129fe5
+            env:
+              TZ: America/Toronto
+            args:
+              [
+                "--auth",
+                "none",
+                "--user-data-dir",
+                "/home/node/.vscode",
+                "--extensions-dir",
+                "/home/node/.vscode",
+                "--port",
+                "12321",
+                "/config",
+              ]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+            ports:
+              - containerPort: &codeserver_port 12321
+                name: http
+                protocol: TCP
+    defaultPodOptions:
+      shareProcessNamespace: true
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+      dashboard:
+        ports:
+          http:
+            port: *dashboard_port
+      codeserver:
+        ports:
+          http:
+            port: *codeserver_port
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 100M
+        accessMode: ReadWriteOnce
+        globalMounts:
+          - path: /opt/data
