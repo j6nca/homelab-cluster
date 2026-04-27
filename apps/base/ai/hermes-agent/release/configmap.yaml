@@ -9,8 +9,6 @@ data:
       minimax:
         api_key: ${MINIMAX_API_KEY}
         base_url: https://api.minimax.chat/v1
-      local:
-        base_url: ${OLLAMA_URL}
     terminal:
       backend: local
       timeout: 180
