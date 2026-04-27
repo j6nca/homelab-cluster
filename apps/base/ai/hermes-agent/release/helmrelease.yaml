@@ -21,7 +21,6 @@ spec:
               tag: &image_tag v2026.4.16
             env:
               TZ: &tz America/Toronto
-              OPENCLAW_GATEWAY_PORT: &port 8642
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
@@ -36,7 +35,7 @@ spec:
               limits:
                 memory: 2Gi
             ports:
-              - containerPort: *port
+              - containerPort: &port 8642
                 name: http
                 protocol: TCP
           dashboard:
@@ -45,6 +44,7 @@ spec:
               tag: *image_tag
             env:
               TZ: America/Toronto
+              GATEWAY_HEALTH_URL: http://localhost:8642
             args:
               [
                 "dashboard",
