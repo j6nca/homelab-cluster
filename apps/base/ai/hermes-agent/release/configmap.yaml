@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: &app hermes-agent
+data:
+  config.yaml: |
+    model: openai/minimax
+    providers:
+      minimax:
+        api_key: ${MINIMAX_API_KEY}
+        base_url: https://api.minimax.chat/v1
+      local:
+        base_url: ${OLLAMA_URL}
+      
+    terminal:
+      backend: local
+      timeout: 180
+    tools:
+      enabled:
+        - bash
+        - read
+        - edit
+        - glob
+        - web_search
+        - browser
+    memory:
+      auto_migrate: true
+      auto_summarize:
+        threshold: 50
+    compression:
+      enabled: true
+    gateway:
+      port: 8642
