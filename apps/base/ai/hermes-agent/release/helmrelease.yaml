@@ -99,10 +99,10 @@ spec:
         ports:
           http:
             port: *port
-      dashboard:
-        ports:
-          http:
-            port: *dashboard_port
+      # dashboard:
+      #   ports:
+      #     http:
+      #       port: *dashboard_port
       codeserver:
         ports:
           http:
