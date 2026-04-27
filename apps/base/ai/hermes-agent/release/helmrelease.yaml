@@ -115,9 +115,9 @@ spec:
         accessMode: ReadWriteOnce
         globalMounts:
           - path: /opt/data
-      # config:
-      #   type: configMap
-      #   name: "{{ .Release.Name }}"
-      #   globalMounts:
-      #     - path: /opt/data/config.yaml
-      #       subPath: config.yaml
+      config:
+        type: configMap
+        name: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /opt/data/config.yaml
+            subPath: config.yaml
