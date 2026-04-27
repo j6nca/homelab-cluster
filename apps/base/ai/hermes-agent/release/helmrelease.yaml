@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: &image_repo nousresearch/hermes-agent
-              tag: &image_tag v2026.4.16
+              tag: &image_tag v2026.4.23
             env:
               TZ: &tz America/Toronto
             envFrom:
