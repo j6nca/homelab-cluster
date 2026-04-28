@@ -130,5 +130,6 @@ spec:
         globalMounts:
           - path: /opt/data/config.yaml
             subPath: config.yaml
+            readOnly: false
       tmp:
         type: emptyDir 
