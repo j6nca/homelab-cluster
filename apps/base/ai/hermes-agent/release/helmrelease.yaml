@@ -35,7 +35,8 @@ spec:
                   name: "{{ .Release.Name }}"
             args:
               [
-                "setup",
+                "gateway",
+                "run",
               ]
             resources:
               requests:
