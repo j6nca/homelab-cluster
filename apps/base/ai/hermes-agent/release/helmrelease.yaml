@@ -23,6 +23,7 @@ spec:
               - sh
               - -c
               - cp /tmp/config.yaml /opt/data/config.yaml
+              - chown 10000:10000 /opt/data/config.yaml
         containers:
           app:
             image:
