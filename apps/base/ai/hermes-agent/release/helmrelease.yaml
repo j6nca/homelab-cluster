@@ -19,7 +19,7 @@ spec:
             image:
               repository: busybox
               tag: latest
-             command:
+            command:
               - sh
               - -c
               - cp /tmp/config.yaml /opt/data/config.yaml
