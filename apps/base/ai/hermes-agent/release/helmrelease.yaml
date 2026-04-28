@@ -127,10 +127,8 @@ spec:
         type: configMap
         name: "{{ .Release.Name }}"
         defaultMode: 0755
-        readOnly: false
         globalMounts:
           - path: /tmp/config.yaml
             subPath: config.yaml
-            readOnly: false
       tmp:
         type: emptyDir 
