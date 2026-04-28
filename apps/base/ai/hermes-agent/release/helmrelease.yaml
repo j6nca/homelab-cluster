@@ -127,6 +127,7 @@ spec:
         type: configMap
         name: "{{ .Release.Name }}"
         defaultMode: 0755
+        readOnly: false
         globalMounts:
           - path: /opt/data/config.yaml
             subPath: config.yaml
