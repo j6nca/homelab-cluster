@@ -14,15 +14,15 @@ spec:
       hermes-agent:
         annotations:
           reloader.stakater.com/auto: "true"
-        # initContainers:
-        #   config:
-        #     image:
-        #       repository: busybox
-        #       tag: latest
-        #      command:
-        #       - sh
-        #       - -c
-        #       - chown 1000:1000 /config/config.yaml
+        initContainers:
+          config:
+            image:
+              repository: busybox
+              tag: latest
+             command:
+              - sh
+              - -c
+              - cp /tmp/config.yaml /opt/data/config.yaml
         containers:
           app:
             image:
@@ -129,7 +129,7 @@ spec:
         defaultMode: 0755
         readOnly: false
         globalMounts:
-          - path: /opt/data/config.yaml
+          - path: /tmp/config.yaml
             subPath: config.yaml
             readOnly: false
       tmp:
