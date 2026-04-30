@@ -22,8 +22,8 @@ spec:
             command:
               - sh
               - -c
-              - cp /tmp/config.yaml /opt/data/config.yaml
-              - chown 10000:10000 /opt/data/config.yaml
+              - cp /tmp/profiles/jade/config.yaml /opt/data/profiles/jade/config.yaml
+              - chown 10000:10000 /opt/data/profiles/jade/config.yaml
         containers:
           app:
             image:
@@ -38,6 +38,94 @@ spec:
               [
                 "gateway",
                 "run",
+                "--profile",
+                "jade",
+              ]
+            resources:
+              requests:
+                cpu: 500m
+              limits:
+                memory: 2Gi
+            ports:
+              - containerPort: &port 8642
+                name: http
+                protocol: TCP
+          dashboard:
+            image:
+              repository: *image_repo
+              tag: *image_tag
+            env:
+              TZ: America/Toronto
+              GATEWAY_HEALTH_URL: http://localhost:8642
+            args:
+              [
+                "dashboard",
+              ]
+            resources:
+              requests:
+                cpu: 500m
+              limits:
+                memory: 1Gi
+            ports:
+              - containerPort: &dashboard_port 9119
+                name: http
+                protocol: TCP
+          codeserver:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.115.0@sha256:cbd5e05849367e521f774b760602cb9e0a8da1f159eaf89600490eec34129fe5
+            env:
+              TZ: America/Toronto
+            args:
+              [
+                "--auth",
+                "none",
+                "--user-data-dir",
+                "/home/node/.vscode",
+                "--extensions-dir",
+                "/home/node/.vscode",
+                "--port",
+                "12321",
+                "/config",
+              ]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+            ports:
+              - containerPort: &codeserver_port 12321
+                name: http
+                protocol: TCP
+      hermes-agent-echo:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          config:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - cp /tmp/profiles/echo/config.yaml /opt/data/profiles/echo/config.yaml
+              - chown 10000:10000 /opt/data/profiles/echo/config.yaml
+        containers:
+          app:
+            image:
+              repository: &image_repo nousresearch/hermes-agent
+              tag: &image_tag v2026.4.23
+            env:
+              TZ: &tz America/Toronto
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-echo"
+            args:
+              [
+                "gateway",
+                "run",
+                "--profile",
+                "echo"
               ]
             resources:
               requests:
@@ -115,6 +203,18 @@ spec:
         ports:
           http:
             port: *codeserver_port
+      echo-app:
+        ports:
+          http:
+            port: *port
+      echo-dashboard:
+        ports:
+          http:
+            port: *dashboard_port
+      echo-codeserver:
+        ports:
+          http:
+            port: *codeserver_port
     persistence:
       data:
         type: persistentVolumeClaim
@@ -123,12 +223,26 @@ spec:
         accessMode: ReadWriteOnce
         globalMounts:
           - path: /opt/data
-      config:
+      config-default:
         type: configMap
         name: "{{ .Release.Name }}"
         defaultMode: 0755
         globalMounts:
           - path: /tmp/config.yaml
+            subPath: config.yaml
+      config-jade:
+        type: configMap
+        name: "{{ .Release.Name }}"
+        defaultMode: 0755
+        globalMounts:
+          - path: /tmp/profiles/jade/config.yaml
+            subPath: config.yaml
+      config-echo:
+        type: configMap
+        name: "{{ .Release.Name }}-echo"
+        defaultMode: 0755
+        globalMounts:
+          - path: /tmp/profiles/echo/config.yaml
             subPath: config.yaml
       tmp:
         type: emptyDir 
