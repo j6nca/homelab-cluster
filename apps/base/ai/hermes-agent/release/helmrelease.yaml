@@ -23,7 +23,11 @@ spec:
               - sh
               - -c
               - cp /tmp/profiles/jade/config.yaml /opt/data/profiles/jade/config.yaml
+              - cp /tmp/profiles/echo/config.yaml /opt/data/profiles/echo/config.yaml
+              - cp /tmp/config.yaml /opt/data/config.yaml
               - chown 10000:10000 /opt/data/profiles/jade/config.yaml
+              - chown 10000:10000 /opt/data/profiles/echo/config.yaml
+              - chown 10000:10000 /opt/data/config.yaml
         containers:
           app:
             image:
@@ -97,20 +101,6 @@ spec:
               - containerPort: &codeserver_port 12321
                 name: http
                 protocol: TCP
-      hermes-agent-echo:
-        annotations:
-          reloader.stakater.com/auto: "true"
-        initContainers:
-          echo-config:
-            image:
-              repository: busybox
-              tag: latest
-            command:
-              - sh
-              - -c
-              - cp /tmp/profiles/echo/config.yaml /opt/data/profiles/echo/config.yaml
-              - chown 10000:10000 /opt/data/profiles/echo/config.yaml
-        containers:
           echo-app:
             image:
               repository: &image_repo nousresearch/hermes-agent
@@ -192,32 +182,26 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        controller: hermes-agent
         ports:
           http:
             port: *port
       dashboard:
-        controller: hermes-agent
         ports:
           http:
             port: *dashboard_port
       codeserver:
-        controller: hermes-agent
         ports:
           http:
             port: *codeserver_port
       echo-app:
-        controller: hermes-agent-echo
         ports:
           http:
             port: *port
       echo-dashboard:
-        controller: hermes-agent-echo
         ports:
           http:
             port: *dashboard_port
       echo-codeserver:
-        controller: hermes-agent-echo
         ports:
           http:
             port: *codeserver_port
