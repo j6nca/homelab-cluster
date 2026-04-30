@@ -54,26 +54,26 @@ spec:
               - containerPort: &port 8642
                 name: http
                 protocol: TCP
-          dashboard:
-            image:
-              repository: *image_repo
-              tag: *image_tag
-            env:
-              TZ: America/Toronto
-              GATEWAY_HEALTH_URL: http://localhost:8642
-            args:
-              [
-                "dashboard",
-              ]
-            resources:
-              requests:
-                cpu: 500m
-              limits:
-                memory: 1Gi
-            ports:
-              - containerPort: &dashboard_port 9119
-                name: http
-                protocol: TCP
+          # dashboard:
+          #   image:
+          #     repository: *image_repo
+          #     tag: *image_tag
+          #   env:
+          #     TZ: America/Toronto
+          #     GATEWAY_HEALTH_URL: http://localhost:8642
+          #   args:
+          #     [
+          #       "dashboard",
+          #     ]
+          #   resources:
+          #     requests:
+          #       cpu: 500m
+          #     limits:
+          #       memory: 1Gi
+          #   ports:
+          #     - containerPort: &dashboard_port 9119
+          #       name: http
+          #       protocol: TCP
           codeserver:
             image:
               repository: ghcr.io/coder/code-server
@@ -126,26 +126,26 @@ spec:
               - containerPort: &port 8642
                 name: http
                 protocol: TCP
-          echo-dashboard:
-            image:
-              repository: *image_repo
-              tag: *image_tag
-            env:
-              TZ: America/Toronto
-              GATEWAY_HEALTH_URL: http://localhost:8642
-            args:
-              [
-                "dashboard",
-              ]
-            resources:
-              requests:
-                cpu: 500m
-              limits:
-                memory: 1Gi
-            ports:
-              - containerPort: &dashboard_port 9119
-                name: http
-                protocol: TCP
+          # echo-dashboard:
+          #   image:
+          #     repository: *image_repo
+          #     tag: *image_tag
+          #   env:
+          #     TZ: America/Toronto
+          #     GATEWAY_HEALTH_URL: http://localhost:8642
+          #   args:
+          #     [
+          #       "dashboard",
+          #     ]
+          #   resources:
+          #     requests:
+          #       cpu: 500m
+          #     limits:
+          #       memory: 1Gi
+          #   ports:
+          #     - containerPort: &dashboard_port 9119
+          #       name: http
+          #       protocol: TCP
     defaultPodOptions:
       shareProcessNamespace: true
       securityContext:
@@ -158,10 +158,10 @@ spec:
         ports:
           http:
             port: *port
-      dashboard:
-        ports:
-          http:
-            port: *dashboard_port
+      # dashboard:
+      #   ports:
+      #     http:
+      #       port: *dashboard_port
       codeserver:
         ports:
           http:
@@ -170,10 +170,10 @@ spec:
         ports:
           http:
             port: *port
-      echo-dashboard:
-        ports:
-          http:
-            port: *dashboard_port
+      # echo-dashboard:
+      #   ports:
+      #     http:
+      #       port: *dashboard_port
     persistence:
       data:
         type: persistentVolumeClaim
