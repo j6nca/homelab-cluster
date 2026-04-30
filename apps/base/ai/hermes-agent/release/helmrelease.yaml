@@ -192,26 +192,32 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
+        controller: hermes-agent
         ports:
           http:
             port: *port
       dashboard:
+        controller: hermes-agent
         ports:
           http:
             port: *dashboard_port
       codeserver:
+        controller: hermes-agent
         ports:
           http:
             port: *codeserver_port
       echo-app:
+        controller: hermes-agent-echo
         ports:
           http:
             port: *port
       echo-dashboard:
+        controller: hermes-agent-echo
         ports:
           http:
             port: *dashboard_port
       echo-codeserver:
+        controller: hermes-agent-echo
         ports:
           http:
             port: *codeserver_port
