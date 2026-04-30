@@ -101,7 +101,7 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          config:
+          echo-config:
             image:
               repository: busybox
               tag: latest
