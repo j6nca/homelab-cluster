@@ -111,7 +111,7 @@ spec:
               - cp /tmp/profiles/echo/config.yaml /opt/data/profiles/echo/config.yaml
               - chown 10000:10000 /opt/data/profiles/echo/config.yaml
         containers:
-          app:
+          echo-app:
             image:
               repository: &image_repo nousresearch/hermes-agent
               tag: &image_tag v2026.4.23
@@ -136,7 +136,7 @@ spec:
               - containerPort: &port 8642
                 name: http
                 protocol: TCP
-          dashboard:
+          echo-dashboard:
             image:
               repository: *image_repo
               tag: *image_tag
@@ -156,7 +156,7 @@ spec:
               - containerPort: &dashboard_port 9119
                 name: http
                 protocol: TCP
-          codeserver:
+          echo-codeserver:
             image:
               repository: ghcr.io/coder/code-server
               tag: 4.115.0@sha256:cbd5e05849367e521f774b760602cb9e0a8da1f159eaf89600490eec34129fe5
