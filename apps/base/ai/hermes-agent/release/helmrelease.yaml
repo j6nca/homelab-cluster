@@ -22,8 +22,8 @@ spec:
             command:
               - sh
               - -c
-              - cp /tmp/profiles/jade/config.yaml /opt/data/profiles/jade/config.yaml
-              - cp /tmp/profiles/echo/config.yaml /opt/data/profiles/echo/config.yaml
+              - cp /tmp/jade.yaml /opt/data/profiles/jade/config.yaml
+              - cp /tmp/echo.yaml /opt/data/profiles/echo/config.yaml
               - cp /tmp/config.yaml /opt/data/config.yaml
               - chown 10000:10000 /opt/data/profiles/jade/config.yaml
               - chown 10000:10000 /opt/data/profiles/echo/config.yaml
@@ -194,14 +194,14 @@ spec:
         name: "{{ .Release.Name }}"
         defaultMode: 0755
         globalMounts:
-          - path: /tmp/profiles/jade/config.yaml
+          - path: /tmp/jade.yaml
             subPath: config.yaml
       config-echo:
         type: configMap
         name: "{{ .Release.Name }}-echo"
         defaultMode: 0755
         globalMounts:
-          - path: /tmp/profiles/echo/config.yaml
+          - path: /tmp/echo.yaml
             subPath: config.yaml
       tmp:
         type: emptyDir 
