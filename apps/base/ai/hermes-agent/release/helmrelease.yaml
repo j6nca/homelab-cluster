@@ -121,7 +121,7 @@ spec:
       data:
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 1G
+        size: 1Gi
         accessMode: ReadWriteOnce
         globalMounts:
           - path: /opt/data
