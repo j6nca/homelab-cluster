@@ -24,28 +24,11 @@ spec:
   targetNamespace: observability
   commonMetadata:
     labels:
-      service: *app 
+      service: *app
   dependsOn:
     - name: grafana-operator
   interval: 5m
   path: ./apps/base/grafana-operator/grafana
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &app grafana-mcp
-  namespace: flux-system
-spec:
-  targetNamespace: observability
-  commonMetadata:
-    labels:
-      service: *app
-  interval: 5m
-  path: ./apps/base/grafana-operator/mcp
   prune: true
   sourceRef:
     kind: GitRepository
