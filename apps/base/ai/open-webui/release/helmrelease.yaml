@@ -32,7 +32,7 @@ spec:
               # COMFYUI_BASE_URL: 
               # Open-webui settings
               # Multiple OpenAI-compatible endpoints; keys come from the secret as OPENAI_API_KEYS
-              OPENAI_API_BASE_URLS: http://jarvis.home:13305/api/v1;http://hermes-agent.hermes-agent.svc.cluster.local:8642/v1;https://api.minimax.chat/v1
+              OPENAI_API_BASE_URLS: http://jarvis.home:13305/api/v1;http://hermes-agent-app.hermes-agent:8642/v1;https://api.minimax.chat/v1
               # Enable once searxng is ready
               ENABLE_RAG_WEB_SEARCH: false
               ENABLE_SEARCH_QUERY: false
