@@ -28,8 +28,8 @@ spec:
       providers:
         minimax:
           keys:
-            - name: "minimax-key"         # Key name (required, must be unique)
-              value: "env.MINIMAX_API_KEY",
+            - name: "minimax-key"
+              value: "env.MINIMAX_API_KEY"
               models: ["MiniMax-2.7"]
               weight: 1
           network_config:
@@ -39,8 +39,8 @@ spec:
             base_url: http://jarvis.home:13305/v1
         hermes-agent:
           keys:
-            - name: "hermes-agent-key"         # Key name (required, must be unique)
-              value: "env.HERMES_AGENT_API_KEY",
+            - name: "hermes-agent-key"
+              value: "env.HERMES_AGENT_API_KEY"
               weight: 1
           network_config:
             base_url: http://hermes-agent-app.hermes-agent:8642/v1
