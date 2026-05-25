@@ -48,4 +48,10 @@ spec:
               weight: 1
           network_config:
             base_url: http://hermes-agent-app.hermes-agent:8642/v1
+      mcp:
+        enabled: true
+        clientConfigs:
+          - name: grafana-mcp
+            transport: streamable-http
+            url: "http://grafana-mcp-app.observability:8000"
         
