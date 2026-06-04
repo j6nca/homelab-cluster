@@ -20,12 +20,12 @@ spec:
               repository: mcp/context7
               tag: latest
               pullPolicy: Always
+            command: ["node", "dist/index.js"]
             args:
               - "--transport"
               - "http"
               - "--port"
               - "3000"
-            command: ["context7-mcp"]
             probes:
               liveness:
                 enabled: false
