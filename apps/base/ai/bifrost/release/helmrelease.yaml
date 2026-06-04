@@ -68,11 +68,11 @@ spec:
         enabled: true
         clientConfigs:
           - name: grafana-mcp
-            transport: streamable-http
-            url: "http://grafana-mcp.mcp:8000"
+            connectionType: http
+            connectionString: "http://grafana-mcp.mcp:8000"
           - name: github-mcp
-            transport: streamable-http
-            url: "http://github-mcp.mcp:8082"
+            connectionType: http
+            connectionString: "http://github-mcp.mcp:8082"
           - name: context7-mcp
-            transport: streamable-http
-            url: "http://context7-mcp.mcp:3000"
+            connectionType: http
+            connectionString: "http://context7-mcp.mcp:3000"
