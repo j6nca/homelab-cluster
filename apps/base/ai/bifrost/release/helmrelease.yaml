@@ -67,12 +67,12 @@ spec:
       mcp:
         enabled: true
         clientConfigs:
-          - name: grafana-mcp
+          - name: grafana_mcp
             connectionType: http
             connectionString: "http://grafana-mcp.mcp:8000"
-          - name: github-mcp
+          - name: github_mcp
             connectionType: http
             connectionString: "http://github-mcp.mcp:8082"
-          - name: context7-mcp
+          - name: context7_mcp
             connectionType: http
             connectionString: "http://context7-mcp.mcp:3000"
