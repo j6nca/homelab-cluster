@@ -70,12 +70,12 @@ spec:
           - name: grafana_mcp
             connectionType: http
             httpConfig:
-              url: "http://grafana-mcp.mcp:8000"
+              url: "http://grafana-mcp.mcp:8000/mcp"
           - name: github_mcp
             connectionType: http
             httpConfig:
-              url: "http://github-mcp.mcp:8082"
+              url: "http://github-mcp.mcp:8082/mcp"
           - name: context7_mcp
             connectionType: http
             httpConfig:
-              url: "http://context7-mcp.mcp:3000"
+              url: "http://context7-mcp.mcp:3000/mcp"
