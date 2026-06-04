@@ -69,10 +69,10 @@ spec:
         clientConfigs:
           - name: grafana-mcp
             transport: streamable-http
-            url: "http://grafana-mcp-app.observability:8000"
+            url: "http://grafana-mcp.mcp:8000"
           - name: github-mcp
             transport: streamable-http
-            url: "http://github-mcp-app.observability:8082"
+            url: "http://github-mcp.mcp:8082"
           - name: context7-mcp
             transport: streamable-http
-            url: "http://context7-mcp-app.observability:3000"
+            url: "http://context7-mcp.mcp:3000"

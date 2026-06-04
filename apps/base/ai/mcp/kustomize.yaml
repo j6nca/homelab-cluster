@@ -5,7 +5,7 @@ metadata:
   name: &app grafana-mcp
   namespace: flux-system
 spec:
-  targetNamespace: observability
+  targetNamespace: mcp
   commonMetadata:
     labels:
       service: *app
@@ -22,7 +22,7 @@ metadata:
   name: &app context7-mcp
   namespace: flux-system
 spec:
-  targetNamespace: observability
+  targetNamespace: mcp
   commonMetadata:
     labels:
       service: *app
@@ -39,7 +39,7 @@ metadata:
   name: &app github-mcp
   namespace: flux-system
 spec:
-  targetNamespace: observability
+  targetNamespace: mcp
   commonMetadata:
     labels:
       service: *app
