@@ -25,6 +25,7 @@ spec:
               - "http"
               - "--port"
               - "3000"
+            command: ["context7-mcp"]
             probes:
               liveness:
                 enabled: false
