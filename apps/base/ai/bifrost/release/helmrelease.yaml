@@ -48,6 +48,22 @@ spec:
               weight: 1
           network_config:
             base_url: http://hermes-agent-app.hermes-agent:8642/v1
+        opencode-go:
+          keys:
+            - name: "opencode-go-key"
+              value: "env.OPENCODE_GO_API_KEY"
+              models:
+                - glm-5.1
+                - glm-5
+                - kimi-k2.5
+                - kimi-k2.6
+                - deepseek-v4-pro
+                - deepseek-v4-flash
+                - mimo-v2.5
+                - mimo-v2.5-pro
+              weight: 1
+          network_config:
+            base_url: https://opencode.ai/zen/go/v1
       mcp:
         enabled: true
         clientConfigs:
