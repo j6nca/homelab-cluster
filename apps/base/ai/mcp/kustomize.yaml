@@ -15,3 +15,37 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app context7-mcp
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/ai/mcp/context7
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app github-mcp
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/ai/mcp/github
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

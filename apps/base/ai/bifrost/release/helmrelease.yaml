@@ -70,4 +70,9 @@ spec:
           - name: grafana-mcp
             transport: streamable-http
             url: "http://grafana-mcp-app.observability:8000"
-        
+          - name: github-mcp
+            transport: streamable-http
+            url: "http://github-mcp-app.observability:8082"
+          - name: context7-mcp
+            transport: streamable-http
+            url: "http://context7-mcp-app.observability:3000"
