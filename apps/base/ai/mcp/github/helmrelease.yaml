@@ -34,6 +34,10 @@ spec:
                 enabled: false
               startup:
                 enabled: false
+            ports:
+              - containerPort: &port 8082
+                name: http
+                protocol: TCP
             resources:
               requests:
                 cpu: 50m
@@ -54,4 +58,4 @@ spec:
       app:
         ports:
           http:
-            port: 8082
+            port: *port

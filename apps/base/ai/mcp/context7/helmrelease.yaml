@@ -32,6 +32,10 @@ spec:
                 enabled: false
               startup:
                 enabled: false
+            ports:
+              - containerPort: &port 3000
+                name: http
+                protocol: TCP
             resources:
               requests:
                 cpu: 50m
@@ -52,4 +56,4 @@ spec:
       app:
         ports:
           http:
-            port: 3000
+            port: *port
