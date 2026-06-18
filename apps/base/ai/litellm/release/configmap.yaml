@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: &app litellm
+data:
+  config.yaml: |
+    model_list:
+      # --- standalone providers (parity with Bifrost) ---
+      - model_name: MiniMax-M3
+        litellm_params:
+          model: openai/MiniMax-M3
+          api_base: https://api.minimax.chat/v1
+          api_key: os.environ/MINIMAX_API_KEY
+
+      - model_name: hermes-agent
+        litellm_params:
+          model: openai/hermes-agent
+          api_base: http://hermes-agent-app.hermes-agent:8642/v1
+          api_key: os.environ/HERMES_AGENT_API_KEY
+
+      # local ollama/openai-compatible passthrough (jarvis.home)
+      - model_name: jarvis/*
+        litellm_params:
+          model: openai/*
+          api_base: http://jarvis.home:13305/v1
+          api_key: "none"
+
+      # --- opencode-go models (https://opencode.ai/zen/go/v1) ---
+      - model_name: glm-5.1
+        litellm_params:
+          model: openai/glm-5.1
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: glm-5
+        litellm_params:
+          model: openai/glm-5
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: kimi-k2.5
+        litellm_params:
+          model: openai/kimi-k2.5
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: kimi-k2.6
+        litellm_params:
+          model: openai/kimi-k2.6
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: deepseek-v4-pro
+        litellm_params:
+          model: openai/deepseek-v4-pro
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: deepseek-v4-flash
+        litellm_params:
+          model: openai/deepseek-v4-flash
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: mimo-v2.5
+        litellm_params:
+          model: openai/mimo-v2.5
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+      - model_name: mimo-v2.5-pro
+        litellm_params:
+          model: openai/mimo-v2.5-pro
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+
+      # --- load-balanced pool (least-busy across MiniMax-M3 + deepseek-v4-flash) ---
+      - model_name: fast-pool
+        litellm_params:
+          model: openai/MiniMax-M3
+          api_base: https://api.minimax.chat/v1
+          api_key: os.environ/MINIMAX_API_KEY
+      - model_name: fast-pool
+        litellm_params:
+          model: openai/deepseek-v4-flash
+          api_base: https://opencode.ai/zen/go/v1
+          api_key: os.environ/OPENCODE_GO_API_KEY
+
+    router_settings:
+      routing_strategy: least-busy
+
+    mcp_servers:
+      grafana_mcp:
+        url: "http://grafana-mcp.mcp:8000/mcp"
+      github_mcp:
+        url: "http://github-mcp.mcp:8082/mcp"
+      context7_mcp:
+        url: "http://context7-mcp.mcp:3000/mcp"
+      kubernetes_mcp:
+        url: "http://kubernetes-mcp.mcp:8080/mcp"
+
+    general_settings:
+      master_key: os.environ/LITELLM_MASTER_KEY
+
+    litellm_settings:
+      drop_params: true
