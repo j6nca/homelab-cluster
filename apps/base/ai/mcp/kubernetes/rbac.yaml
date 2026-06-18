@@ -1,0 +1,115 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubernetes-mcp
+automountServiceAccountToken: true
+---
+# Read-only access to the standard namespaced resources. The built-in `view`
+# ClusterRole intentionally excludes Secrets (reading a Secret exposes
+# ServiceAccount tokens, a privilege-escalation vector), which satisfies the
+# "no decoding secrets" requirement.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-mcp-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-mcp
+    namespace: mcp
+---
+# Supplemental read-only access for cluster-scoped infra not covered by `view`
+# and for the CRD API groups in this cluster. RBAC has no deny rule, so Secrets
+# are excluded simply by never granting them here (and they only exist in the
+# core "" group, which is omitted below). Add new operator API groups as the
+# cluster grows.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubernetes-mcp-extra-read
+rules:
+  # Cluster-scoped core resources absent from the `view` role.
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - persistentvolumes
+      - componentstatuses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apiregistration.k8s.io"]
+    resources: ["apiservices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["scheduling.k8s.io", "node.k8s.io", "admissionregistration.k8s.io"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+  # CRD API groups in use across this cluster (see AGENTS.md tech stack).
+  - apiGroups:
+      # Flux
+      - "fluxcd.controlplane.io"
+      - "source.toolkit.fluxcd.io"
+      - "kustomize.toolkit.fluxcd.io"
+      - "helm.toolkit.fluxcd.io"
+      - "notification.toolkit.fluxcd.io"
+      - "image.toolkit.fluxcd.io"
+      # Networking / ingress
+      - "gateway.networking.k8s.io"
+      - "gateway.envoyproxy.io"
+      - "networking.istio.io"
+      - "security.istio.io"
+      - "telemetry.istio.io"
+      - "install.istio.io"
+      # cert-manager
+      - "cert-manager.io"
+      - "acme.cert-manager.io"
+      # External Secrets
+      - "external-secrets.io"
+      - "generators.external-secrets.io"
+      # Storage / backup
+      - "longhorn.io"
+      - "volsync.backube"
+      - "snapshot.storage.k8s.io"
+      # Databases
+      - "postgresql.cnpg.io"
+      - "dragonflydb.io"
+      # Observability
+      - "operator.victoriametrics.com"
+      - "monitoring.coreos.com"
+      - "grafana.integreatly.org"
+      # Policy
+      - "config.gatekeeper.sh"
+      - "status.gatekeeper.sh"
+      - "templates.gatekeeper.sh"
+      - "constraints.gatekeeper.sh"
+      - "mutations.gatekeeper.sh"
+      # MCP runtime
+      - "toolhive.stacklok.dev"
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-mcp-extra-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-mcp-extra-read
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-mcp
+    namespace: mcp

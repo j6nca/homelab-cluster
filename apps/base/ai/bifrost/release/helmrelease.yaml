@@ -79,3 +79,7 @@ spec:
             connectionType: http
             httpConfig:
               url: "http://context7-mcp.mcp:3000/mcp"
+          - name: kubernetes_mcp
+            connectionType: http
+            httpConfig:
+              url: "http://kubernetes-mcp.mcp:8080/mcp"
