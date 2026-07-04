@@ -48,4 +48,4 @@ spec:
       app:
         ports:
           http:
-            port: *port          
+            port: *port

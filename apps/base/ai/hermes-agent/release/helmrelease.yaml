@@ -136,4 +136,4 @@ spec:
           - path: /tmp/config.yaml
             subPath: config.yaml
       tmp:
-        type: emptyDir 
+        type: emptyDir

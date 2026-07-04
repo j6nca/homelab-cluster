@@ -27,4 +27,3 @@ spec:
         - hostname: grafana.j6n.dev
           service: http://grafana-service.observability.svc.cluster.local:80
     replicaCount: 1
-        

@@ -38,9 +38,9 @@ spec:
         type: persistentVolumeClaim
         storageClass: longhorn
         size: 15Gi
-        accessModes: 
+        accessModes:
           - ReadWriteOnce
-        
+
     minecraftServer:
       serviceType: NodePort
       ## Set the port used if the serviceType is NodePort

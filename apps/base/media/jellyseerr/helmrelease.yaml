@@ -61,4 +61,4 @@ spec:
         size: 1Gi
         accessMode: ReadWriteOnce
       tmp:
-        type: emptyDir            
+        type: emptyDir

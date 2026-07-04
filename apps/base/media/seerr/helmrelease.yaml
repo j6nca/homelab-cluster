@@ -51,7 +51,7 @@ spec:
         ports:
           http:
             port: *port
-      
+
     persistence:
       config:
         globalMounts:

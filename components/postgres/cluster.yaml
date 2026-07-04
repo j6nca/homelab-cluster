@@ -19,7 +19,7 @@ kind: Database
 metadata:
   name: ${APP}-postgres
 spec:
-  cluster: 
+  cluster:
     name: ${APP}-postgres
   name: &app ${APP}
   owner: *app

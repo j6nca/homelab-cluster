@@ -1,0 +1,97 @@
+name: validate
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/**"
+      - "clusters/**"
+      - "components/**"
+      - "dashboards/**"
+      - "scripts/**"
+      - ".github/workflows/validate.yaml"
+      - ".yamllint.yaml"
+
+permissions:
+  contents: read
+
+env:
+  KUBECONFORM_VERSION: v0.7.0
+
+jobs:
+  lint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yamllint
+        run: pip install --quiet yamllint
+      - name: Lint
+        run: yamllint .
+
+  validate:
+    name: render + kubeconform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubeconform
+        run: |
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar xz -C /usr/local/bin kubeconform
+      - name: Render all manifests (kustomize + helm)
+        run: |
+          python3 -c "import yaml" 2>/dev/null || pip install --quiet pyyaml
+          python3 scripts/render-manifests.py --helm --output-dir rendered
+      - name: Validate schemas
+        run: |
+          kubeconform -strict -summary \
+            -ignore-missing-schemas \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            rendered/
+
+  diff:
+    name: rendered diff
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          path: pr
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - name: Render both branches
+        run: |
+          python3 -c "import yaml" 2>/dev/null || pip install --quiet pyyaml
+          # use the PR's renderer for both trees so script changes don't show as manifest noise
+          python3 pr/scripts/render-manifests.py --helm --output-dir rendered-main main || true
+          python3 pr/scripts/render-manifests.py --helm --output-dir rendered-pr pr || true
+      - name: Diff
+        id: diff
+        run: |
+          diff -ruN rendered-main rendered-pr > raw.diff || true
+          {
+            echo "### Rendered resource diff vs \`main\`"
+            if [ -s raw.diff ]; then
+              echo '<details><summary>'"$(grep -c '^diff ' raw.diff) render root(s) changed"'</summary>'
+              echo
+              echo '```diff'
+              head -c 60000 raw.diff
+              [ "$(wc -c < raw.diff)" -gt 60000 ] && echo '... (truncated)'
+              echo '```'
+              echo '</details>'
+            else
+              echo "No rendered resource changes."
+            fi
+          } > comment.md
+      - name: Comment on PR
+        uses: mshick/add-pr-comment@v2
+        with:
+          message-id: rendered-diff
+          message-path: comment.md

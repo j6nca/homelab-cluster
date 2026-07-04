@@ -35,7 +35,7 @@ kind: Database
 metadata:
   name: seerr-postgres
 spec:
-  cluster: 
+  cluster:
     name: media-postgres
   name: &app seerr
   owner: *app
@@ -45,7 +45,7 @@ kind: Database
 metadata:
   name: jellystat-postgres
 spec:
-  cluster: 
+  cluster:
     name: media-postgres
   name: &app jellystat
   owner: *app
@@ -55,7 +55,7 @@ kind: Database
 metadata:
   name: sonarr-postgres
 spec:
-  cluster: 
+  cluster:
     name: media-postgres
   name: &app sonarr
   owner: *app
@@ -65,7 +65,7 @@ kind: Database
 metadata:
   name: radarr-postgres
 spec:
-  cluster: 
+  cluster:
     name: media-postgres
   name: &app radarr
   owner: *app
@@ -75,7 +75,7 @@ kind: Database
 metadata:
   name: prowlarr-postgres
 spec:
-  cluster: 
+  cluster:
     name: media-postgres
   name: &app prowlarr
   owner: *app
