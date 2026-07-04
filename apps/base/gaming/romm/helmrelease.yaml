@@ -62,7 +62,7 @@ spec:
       securityContext:
         runAsNonRoot: true
         # NAS k8s user
-        runAsUser: 1031 
+        runAsUser: 1031
         runAsGroup: 100
         fsGroup: 100
         fsGroupChangePolicy: OnRootMismatch
@@ -98,6 +98,6 @@ spec:
         path: /volume2/kubernetes/gaming/romm/library
         globalMounts:
           - path: /romm/library
-      
+
       tmp:
         type: emptyDir

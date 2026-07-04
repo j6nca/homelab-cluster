@@ -15,7 +15,7 @@ spec:
         containers:
           app:
             image:
-              repository:	ghcr.io/recyclarr/recyclarr
+              repository: ghcr.io/recyclarr/recyclarr
               tag: 7.5.2
             env:
               CRON_SCHEDULE: "@daily"
@@ -24,7 +24,7 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
             ports:
-              - containerPort: *port
+              - containerPort: &port 8080
                 name: http
                 protocol: TCP
 
@@ -41,7 +41,7 @@ spec:
         ports:
           http:
             port: *port
-      
+
     persistence:
       config:
         globalMounts:

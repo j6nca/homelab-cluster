@@ -14,6 +14,8 @@ spec:
       kubernetes-mcp:
         annotations:
           reloader.stakater.com/auto: "true"
+        serviceAccount:
+          name: kubernetes-mcp
         containers:
           app:
             image:
@@ -51,7 +53,6 @@ spec:
                 drop:
                   - ALL
     defaultPodOptions:
-      serviceAccountName: kubernetes-mcp
       securityContext:
         runAsNonRoot: false
         runAsUser: 0

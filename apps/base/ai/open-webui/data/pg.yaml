@@ -19,7 +19,7 @@ kind: Database
 metadata:
   name: open-webui-postgres
 spec:
-  cluster: 
+  cluster:
     name: open-webui-postgres
   name: &app open-webui
   owner: *app

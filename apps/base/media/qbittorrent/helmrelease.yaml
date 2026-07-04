@@ -22,9 +22,9 @@ spec:
               WEBUI_PORT: &port 8080
               TORRENTING_PORT:
                 valueFrom:
-                    secretKeyRef:
-                      name: "gluetun-secret"
-                      key: FIREWALL_VPN_INPUT_PORTS
+                  secretKeyRef:
+                    name: "gluetun-secret"
+                    key: FIREWALL_VPN_INPUT_PORTS
             ports:
               - containerPort: *port
                 name: http
@@ -70,7 +70,7 @@ spec:
         ports:
           http:
             port: *port
-      
+
     persistence:
       config:
         globalMounts:
