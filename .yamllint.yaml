@@ -1,0 +1,17 @@
+extends: relaxed
+
+ignore:
+  - .git/
+
+rules:
+  line-length: disable
+  # helm values blocks and k8s annotations commonly nest comments oddly;
+  # keep the signal rules (syntax, duplicate keys, indentation) strict
+  comments: disable
+  comments-indentation: disable
+  key-duplicates: enable
+  trailing-spaces: enable
+  new-line-at-end-of-file: enable
+  indentation:
+    spaces: 2
+    indent-sequences: consistent

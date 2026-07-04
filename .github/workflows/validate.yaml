@@ -8,34 +8,54 @@ on:
       - "clusters/**"
       - "components/**"
       - "dashboards/**"
+      - "scripts/**"
       - ".github/workflows/validate.yaml"
+      - ".yamllint.yaml"
 
 permissions:
   contents: read
 
+env:
+  KUBECONFORM_VERSION: v0.7.0
+
 jobs:
-  test:
-    name: flux-local test
+  lint:
+    name: yamllint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Run flux-local test
-        uses: allenporter/flux-local/action/test@8.4.0
-        with:
-          path: clusters/homelab
-          enable-helm: true
+      - uses: actions/checkout@v4
+      - name: Install yamllint
+        run: pip install --quiet yamllint
+      - name: Lint
+        run: yamllint .
+
+  validate:
+    name: render + kubeconform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubeconform
+        run: |
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar xz -C /usr/local/bin kubeconform
+      - name: Render all manifests (kustomize + helm)
+        run: |
+          python3 -c "import yaml" 2>/dev/null || pip install --quiet pyyaml
+          python3 scripts/render-manifests.py --helm --output-dir rendered
+      - name: Validate schemas
+        run: |
+          kubeconform -strict -summary \
+            -ignore-missing-schemas \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            rendered/
 
   diff:
-    name: flux-local diff (${{ matrix.resource }})
+    name: rendered diff
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-    strategy:
-      fail-fast: false
-      matrix:
-        resource: [kustomization, helmrelease]
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -46,24 +66,32 @@ jobs:
         with:
           ref: main
           path: main
-      - name: Diff rendered resources vs main
-        uses: allenporter/flux-local/action/diff@8.4.0
+      - name: Render both branches
+        run: |
+          python3 -c "import yaml" 2>/dev/null || pip install --quiet pyyaml
+          # use the PR's renderer for both trees so script changes don't show as manifest noise
+          python3 pr/scripts/render-manifests.py --helm --output-dir rendered-main main || true
+          python3 pr/scripts/render-manifests.py --helm --output-dir rendered-pr pr || true
+      - name: Diff
         id: diff
-        with:
-          path: pr/clusters/homelab
-          path-orig: main/clusters/homelab
-          resource: ${{ matrix.resource }}
-      - name: Comment diff on PR
+        run: |
+          diff -ruN rendered-main rendered-pr > raw.diff || true
+          {
+            echo "### Rendered resource diff vs \`main\`"
+            if [ -s raw.diff ]; then
+              echo '<details><summary>'"$(grep -c '^diff ' raw.diff) render root(s) changed"'</summary>'
+              echo
+              echo '```diff'
+              head -c 60000 raw.diff
+              [ "$(wc -c < raw.diff)" -gt 60000 ] && echo '... (truncated)'
+              echo '```'
+              echo '</details>'
+            else
+              echo "No rendered resource changes."
+            fi
+          } > comment.md
+      - name: Comment on PR
         uses: mshick/add-pr-comment@v2
-        if: ${{ steps.diff.outputs.diff != '' }}
         with:
-          message-id: diff-${{ matrix.resource }}
-          message: |
-            <details>
-            <summary>flux-local ${{ matrix.resource }} diff</summary>
-
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
-
-            </details>
+          message-id: rendered-diff
+          message-path: comment.md
