@@ -1,0 +1,69 @@
+name: validate
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/**"
+      - "clusters/**"
+      - "components/**"
+      - "dashboards/**"
+      - ".github/workflows/validate.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: flux-local test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run flux-local test
+        uses: allenporter/flux-local/action/test@8.4.0
+        with:
+          path: clusters/homelab
+          enable-helm: true
+
+  diff:
+    name: flux-local diff (${{ matrix.resource }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        resource: [kustomization, helmrelease]
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          path: pr
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - name: Diff rendered resources vs main
+        uses: allenporter/flux-local/action/diff@8.4.0
+        id: diff
+        with:
+          path: pr/clusters/homelab
+          path-orig: main/clusters/homelab
+          resource: ${{ matrix.resource }}
+      - name: Comment diff on PR
+        uses: mshick/add-pr-comment@v2
+        if: ${{ steps.diff.outputs.diff != '' }}
+        with:
+          message-id: diff-${{ matrix.resource }}
+          message: |
+            <details>
+            <summary>flux-local ${{ matrix.resource }} diff</summary>
+
+            ```diff
+            ${{ steps.diff.outputs.diff }}
+            ```
+
+            </details>
