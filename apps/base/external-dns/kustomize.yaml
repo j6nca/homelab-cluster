@@ -9,6 +9,8 @@ spec:
   commonMetadata:
     labels:
       service: *app
+  dependsOn:
+    - name: external-secrets-resources
   interval: 5m
   path: ./apps/base/external-dns/release
   prune: true

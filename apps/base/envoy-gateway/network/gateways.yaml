@@ -3,15 +3,28 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: envoy-external
+  labels:
+    # watched by the cloudflare external-dns instance: HTTPRoutes attached
+    # here get public DNS records pointing at the tunnel
+    external-dns/public: "true"
+  annotations:
+    # TODO(user): replace with the k8s-lab tunnel ID (Cloudflare dashboard or
+    # `kubectl -n network get secret cloudflare-tunnel-credentials -o jsonpath='{.data.credentials\.json}' | base64 -d`)
+    external-dns.alpha.kubernetes.io/target: TUNNEL_ID.cfargotunnel.com
 spec:
   gatewayClassName: envoy
+  infrastructure:
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: envoy-external
   listeners:
     - name: http
       protocol: HTTP
       port: 80
       allowedRoutes:
         namespaces:
-          from: Same
+          from: All
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
@@ -19,6 +32,11 @@ metadata:
   name: envoy-internal
 spec:
   gatewayClassName: envoy
+  infrastructure:
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: envoy-internal
   listeners:
     - name: http
       protocol: HTTP

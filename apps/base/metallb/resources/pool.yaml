@@ -1,0 +1,17 @@
+# TODO(user): confirm this range is inside the LAN subnet and OUTSIDE the
+# UDM Pro's DHCP scope before merging.
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: lan
+spec:
+  addresses:
+    - 192.168.1.240-192.168.1.250
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: lan
+spec:
+  ipAddressPools:
+    - lan
