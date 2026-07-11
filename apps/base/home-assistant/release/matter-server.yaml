@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app home-assistant
+  name: &app matter-server
 spec:
   chartRef:
     kind: OCIRepository
@@ -12,36 +12,38 @@ spec:
   interval: 15m
   values:
     controllers:
-      home-assistant:
+      matter-server:
         containers:
           app:
             image:
-              repository: ghcr.io/home-assistant/home-assistant
-              tag: 2026.7.0
+              repository: ghcr.io/home-assistant-libs/python-matter-server
+              tag: 6.2.2
             env:
               TZ: America/Toronto
             ports:
-              - containerPort: &port 8123
-                name: http
+              - containerPort: &port 5580
+                name: api
                 protocol: TCP
-    # No non-root securityContext: the official image's s6-overlay init
-    # requires root at startup (it drops privileges itself); forcing
-    # runAsNonRoot crashloops the pod before HA starts.
+
+    defaultPodOptions:
+      # Matter commissioning and device communication rely on mDNS and
+      # (for Thread devices) IPv6 on the LAN, so the server must sit on
+      # the host network rather than the pod overlay.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
 
     service:
       app:
         ports:
-          http:
+          api:
             port: *port
 
     persistence:
-      config:
+      data:
         globalMounts:
-          - path: /config
+          - path: /data
             readOnly: false
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 5Gi
+        size: 1Gi
         accessMode: ReadWriteOnce
-      tmp:
-        type: emptyDir
