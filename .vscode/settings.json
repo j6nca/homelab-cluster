@@ -4,25 +4,25 @@
   // filename conventions. Files not covered here can opt in per-file with a
   // "# yaml-language-server: $schema=<url>" modeline.
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/kustomize.toolkit.fluxcd.io/kustomization_v1.json": [
+    "https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json": [
       "apps/base/**/kustomize.yaml"
     ],
-    "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/helm.toolkit.fluxcd.io/helmrelease_v2.json": [
+    "https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json": [
       "**/helmrelease.yaml"
     ],
-    "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/external-secrets.io/externalsecret_v1.json": [
+    "https://ctrl-research.github.io/k8s-schemas/external-secrets.io/externalsecret_v1.json": [
       "**/externalsecrets.yaml"
     ],
-    "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/source.toolkit.fluxcd.io/helmrepository_v1.json": [
+    "https://ctrl-research.github.io/k8s-schemas/source.toolkit.fluxcd.io/helmrepository_v1.json": [
       "clusters/homelab/repos/helm/*.yaml"
     ],
     "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/source.toolkit.fluxcd.io/ocirepository_v1beta2.json": [
       "clusters/homelab/repos/oci/*.yaml"
     ],
-    "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/gateway.networking.k8s.io/httproute_v1.json": [
+    "https://ctrl-research.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json": [
       "**/httproute.yaml"
     ],
-    "https://json.schemastore.org/kustomization.json": [
+    "https://ctrl-research.github.io/k8s-schemas/kustomize.config.k8s.io/kustomization_v1beta1.json": [
       "**/kustomization.yaml"
     ]
   },

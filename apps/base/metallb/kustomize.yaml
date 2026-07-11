@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app metallb
+  namespace: flux-system
+spec:
+  targetNamespace: metallb-system
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/metallb/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metallb-resources
+  namespace: flux-system
+spec:
+  targetNamespace: metallb-system
+  commonMetadata:
+    labels:
+      service: metallb
+  dependsOn:
+    - name: metallb
+  interval: 5m
+  path: ./apps/base/metallb/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

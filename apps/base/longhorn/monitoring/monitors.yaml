@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmservicescrape_v1beta1.json
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMServiceScrape

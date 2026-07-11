@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/namespace_v1.json
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-system
+  labels:
+    # speaker pods need hostNetwork + NET_RAW for L2 announcements
+    pod-security.kubernetes.io/enforce: privileged
