@@ -20,3 +20,28 @@ spec:
   interval: 15m
   # values.yaml
   values:
+    fullnameOverride: external-dns-cloudflare
+    provider:
+      name: cloudflare
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: token
+    # exposure declaration: an HTTPRoute attached to a gateway labelled
+    # external-dns/public=true gets a public record -> tunnel
+    sources:
+      - gateway-httproute
+    domainFilters:
+      - j6n.dev
+    # upsert-only until all existing dashboard-managed records are migrated
+    # to HTTPRoutes, then flip to sync so deleted routes clean up records
+    policy: upsert-only
+    txtOwnerId: homelab
+    txtPrefix: k8s.
+    extraArgs:
+      - --gateway-namespace=network
+      - --gateway-label-filter=external-dns/public=true
+      # records targeting <tunnel>.cfargotunnel.com must be proxied
+      - --cloudflare-proxied
