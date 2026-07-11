@@ -47,6 +47,7 @@ jobs:
           kubeconform -strict -summary \
             -ignore-missing-schemas \
             -schema-location default \
+            -schema-location 'https://ctrl-research.github.io/k8s-schemas/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             rendered/
 
