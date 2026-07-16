@@ -1,0 +1,7 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.config.k8s.io/kustomization_v1beta1.json
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecrets.yaml
+  - ./helmrelease.yaml
