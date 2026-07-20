@@ -31,9 +31,6 @@ spec:
             env:
               TZ: America/Toronto
               WAYPOINT_ADDR: ":8080"
-              # TODO(user): no database yet — provision one (e.g. the
-              # components/postgres CNPG component) and set
-              # WAYPOINT_DATABASE_URL; the pod crashloops until then.
               WAYPOINT_BASE_URL: http://waypoint.j6n.dev
               WAYPOINT_DATA_DIR: /data
               WAYPOINT_LOCAL_AUTH: "true"

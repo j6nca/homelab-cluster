@@ -6,6 +6,13 @@ metadata:
   name: &app waypoint
   namespace: flux-system
 spec:
+  components:
+    - ../../../../../components/postgres
+  postBuild:
+    substitute:
+      APP: *app
+      POSTGRES_REPLICAS: "1"
+      POSTGRES_SIZE: 1Gi
   targetNamespace: *app
   commonMetadata:
     labels:
