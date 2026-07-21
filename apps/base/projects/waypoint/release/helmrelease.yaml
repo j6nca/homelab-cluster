@@ -31,7 +31,7 @@ spec:
             env:
               TZ: America/Toronto
               WAYPOINT_ADDR: ":8080"
-              WAYPOINT_BASE_URL: http://waypoint.j6n.dev
+              WAYPOINT_BASE_URL: https://travel.j6n.dev
               WAYPOINT_DATA_DIR: /data
               WAYPOINT_LOCAL_AUTH: "true"
             envFrom:
@@ -72,7 +72,7 @@ spec:
     route:
       app:
         hostnames:
-          - waypoint.j6n.dev
+          - travel.j6n.dev
         parentRefs:
           - name: envoy-internal
             namespace: network
