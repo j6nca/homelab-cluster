@@ -16,71 +16,73 @@ spec:
   dependsOn: []
   interval: 15m
   values:
-    image:
-      registry: ghcr.io
-      repository: ctrl-research/getbud
-      tag: 0.0.1
-      pullPolicy: IfNotPresent
+    deployments:
+      *app:
+        image:
+          registry: ghcr.io
+          repository: ctrl-research/getbud
+          tag: 0.0.1
+          pullPolicy: IfNotPresent
 
-    containerName: *app
+        containerName: *app
 
-    env:
-      - name: TZ
-        value: America/Toronto
-      - name: GETBUD_ADDR
-        value: ":8080"
-      - name: GETBUD_BASE_URL
-        value: https://budget.j6n.dev
-      - name: GETBUD_LOCAL_AUTH
-        value: "false"
+        env:
+          - name: TZ
+            value: America/Toronto
+          - name: GETBUD_ADDR
+            value: ":8080"
+          - name: GETBUD_BASE_URL
+            value: https://budget.j6n.dev
+          - name: GETBUD_LOCAL_AUTH
+            value: "false"
 
-    envFrom:
-      - secretRef:
-          name: *app
+        envFrom:
+          - secretRef:
+              name: *app
 
-    ports:
-      - containerPort: 8080
-        name: http
-        protocol: TCP
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
 
-    livenessProbe:
-      httpGet:
-        path: /healthz
-        port: http
-    readinessProbe:
-      httpGet:
-        path: /healthz
-        port: http
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
 
-    resources:
-      requests:
-        cpu: 10m
+        resources:
+          requests:
+            cpu: 10m
 
-    securityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      readOnlyRootFilesystem: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
 
-    podSecurityContext:
-      runAsGroup: 1000
-      runAsNonRoot: true
-      runAsUser: 1000
+        podSecurityContext:
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
 
-    volumes:
-      - name: tmp
-        emptyDir: {}
+        volumes:
+          - name: tmp
+            emptyDir: {}
 
-    volumeMounts:
-      - name: tmp
-        mountPath: /tmp
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
 
-    service:
-      enabled: true
-      type: ClusterIP
-      ports:
-        - port: 8080
-          targetPort: http
-          protocol: TCP
-          name: http
+    services:
+      *app:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: http
+            protocol: TCP
+            name: http
