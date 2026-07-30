@@ -12,5 +12,5 @@ spec:
       namespace: network
   rules:
     - backendRefs:
-        - name: getbud
+        - name: getbud-app
           port: 8080

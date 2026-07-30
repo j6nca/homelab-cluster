@@ -12,12 +12,12 @@ spec:
         kind: HelmRepository
         name: ctrl-research
         namespace: flux-system
-      version: 0.2.1
+      version: 0.2.2
   dependsOn: []
   interval: 15m
   values:
     deployments:
-      *app:
+      app:
         image:
           registry: ghcr.io
           repository: ctrl-research/getbud
@@ -79,7 +79,7 @@ spec:
             mountPath: /tmp
 
     services:
-      *app:
+      app:
         type: ClusterIP
         ports:
           - port: 8080
