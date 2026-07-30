@@ -10,9 +10,9 @@ spec:
       chart: generic
       sourceRef:
         kind: HelmRepository
-        name: j6nca
+        name: ctrl-research
         namespace: flux-system
-      version: 0.3.0
+      version: 0.2.0
   dependsOn: []
   interval: 15m
   values:
