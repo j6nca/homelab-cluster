@@ -29,9 +29,11 @@ spec:
           repository: ghcr.io/home-operations/external-dns-unifi-webhook
           tag: 0.10.9
         env:
-          # local record for the UDM Pro
+          # local record for the UDM Pro; must be https — the integration API
+          # only listens on 443 (self-signed cert is fine, the webhook skips
+          # TLS verification by default)
           - name: UNIFI_HOST
-            value: http://unifi.internal
+            value: https://unifi.j6n.internal
           - name: UNIFI_API_KEY
             valueFrom:
               secretKeyRef:
