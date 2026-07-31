@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app external-dns
+  name: external-dns-cloudflare
 spec:
   chart:
     spec:
-      chart: *app
+      chart: &chart external-dns
       sourceRef:
         kind: HelmRepository
-        name: *app
+        name: *chart
         namespace: flux-system
       version: 1.19.0
   install:

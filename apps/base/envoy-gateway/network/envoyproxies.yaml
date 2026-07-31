@@ -26,5 +26,6 @@ spec:
         name: envoy-internal
         type: LoadBalancer
         annotations:
-          # TODO(user): confirm pinned LAN IP (must be inside the MetalLB pool)
-          metallb.io/loadBalancerIPs: 192.168.1.240
+          # first address of the MetalLB lan pool; internal DNS records
+          # created by external-dns-unifi resolve to this IP
+          metallb.io/loadBalancerIPs: 10.1.8.240

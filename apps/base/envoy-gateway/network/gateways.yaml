@@ -30,6 +30,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: envoy-internal
+  labels:
+    # watched by the unifi external-dns instance: HTTPRoutes attached here
+    # get LAN DNS records on the UDM Pro pointing at the LoadBalancer IP
+    external-dns/internal: "true"
 spec:
   gatewayClassName: envoy
   infrastructure:

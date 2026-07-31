@@ -1,12 +1,12 @@
-# TODO(user): confirm this range is inside the LAN subnet and OUTSIDE the
-# UDM Pro's DHCP scope before merging.
+# top of the 10.1.8.0/24 homelab subnet; the UDM Pro's DHCP scope for this
+# network must stop at 10.1.8.239 so leases never collide with the pool
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: lan
 spec:
   addresses:
-    - 192.168.1.240-192.168.1.250
+    - 10.1.8.240-10.1.8.250
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
