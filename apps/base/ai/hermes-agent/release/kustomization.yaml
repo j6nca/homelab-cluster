@@ -5,3 +5,4 @@ resources:
   - ./helmrelease.yaml
   - ./externalsecrets.yaml
   - ./configmap.yaml
+  - ./httproute.yaml
