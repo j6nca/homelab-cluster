@@ -28,22 +28,37 @@ spec:
     serviceMonitor:
       enabled: false
     env:
-      GATUS_CONFIG_PATH: /dynamic-config/gatus-sidecar.yaml
+      # a directory: gatus merges every yaml inside — the static config
+      # below (overlaid as config.yaml) plus the sidecar's generated file
+      GATUS_CONFIG_PATH: /dynamic-config
     sidecarContainers:
       gatus-sidecar:
-        image: ghcr.io/home-operations/gatus-sidecar:0.0.9
+        image: ghcr.io/home-operations/gatus-sidecar:0.4.0
         args:
+          # annotation-gated: only Services/HTTPRoutes carrying
+          # gatus.home-operations.com/enabled: "true" get endpoints;
+          # gatus.home-operations.com/endpoint can override the defaults
           - --enable-service
-          - --auto-service
+          - --enable-httproute
           - --output=/dynamic-config/gatus-sidecar.yaml
         volumeMounts:
           - name: gatus-dynamic-config
             mountPath: /dynamic-config
     serviceAccount:
+      # the sidecar's ClusterRoleBinding targets the "gatus" SA — without
+      # create, the pod runs as "default" and the sidecar has no RBAC
+      create: true
       autoMount: true
     extraVolumeMounts:
       - name: gatus-dynamic-config
         mountPath: /dynamic-config
+        readOnly: false
+      # the chart's own configmap, overlaid into the merged config dir
+      - name: gatus-static-config
+        existingConfigMap: gatus
+        mountPath: /dynamic-config/config.yaml
+        subPath: config.yaml
+        readOnly: true
     config:
       storage:
         type: memory
