@@ -3,6 +3,12 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: gatus-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: observability
+      url: http://gatus.j6n.internal
 spec:
   parentRefs:
   - name: envoy-internal
@@ -18,6 +24,9 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: gatus-external
+  annotations:
+    # group: external inherited from the envoy-external gateway
+    gatus.home-operations.com/enabled: "true"
 spec:
   parentRefs:
   - name: envoy-external

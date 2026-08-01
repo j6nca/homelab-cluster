@@ -11,6 +11,10 @@ metadata:
     # the k8s-lab tunnel; records created for routes on this gateway CNAME
     # here (proxied). The tunnel ID is routing info, not a credential.
     external-dns.alpha.kubernetes.io/target: 0ed32255-fc2f-4bb0-9f90-829201d6e653.cfargotunnel.com
+    # inherited by every gatus-sidecar endpoint generated from routes on
+    # this gateway (routes can override)
+    gatus.home-operations.com/endpoint: |
+      group: external
 spec:
   gatewayClassName: envoy
   infrastructure:
@@ -34,6 +38,11 @@ metadata:
     # watched by the unifi external-dns instance: HTTPRoutes attached here
     # get LAN DNS records on the UDM Pro pointing at the LoadBalancer IP
     external-dns/internal: "true"
+  annotations:
+    # fallback group for gatus-sidecar endpoints; routes set their own
+    # category group (media, tools, ...) which wins over this
+    gatus.home-operations.com/endpoint: |
+      group: internal
 spec:
   gatewayClassName: envoy
   infrastructure:
