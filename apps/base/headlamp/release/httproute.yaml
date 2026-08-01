@@ -3,6 +3,12 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: headlamp-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Tools
+      url: http://headlamp.j6n.internal
 spec:
   parentRefs:
   - name: envoy-internal
