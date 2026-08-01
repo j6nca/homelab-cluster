@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: ctrl-research
         namespace: flux-system
-      version: 0.2.2
+      version: 0.3.0
   dependsOn: []
   interval: 15m
   values:
@@ -23,6 +23,11 @@ spec:
           repository: ctrl-research/getbud
           tag: 0.0.1
           pullPolicy: IfNotPresent
+
+        # 0.3.0 dropped the built-in reloader annotation; the app reads its
+        # secret via envFrom, so restart on rotation
+        annotations:
+          reloader.stakater.com/auto: "true"
 
         containerName: *app
 
