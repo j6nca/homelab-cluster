@@ -11,6 +11,9 @@ spec:
   - name: envoy-external
     namespace: network
   hostnames:
+  - lobby.j6n.dev
+  # Transitional: the currently-deployed Pages build still points at
+  # dive-control; drop this hostname once the next game deploy is live.
   - dive-control.j6n.dev
   rules:
   - backendRefs:
