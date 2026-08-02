@@ -4,7 +4,7 @@ kind: HTTPRoute
 metadata:
   name: waypoint-external
   annotations:
-    # group: external inherited from the envoy-external gateway
+    # group: External inherited from the envoy-external gateway
     gatus.home-operations.com/enabled: "true"
 spec:
   parentRefs:
@@ -12,6 +12,27 @@ spec:
     namespace: network
   hostnames:
   - travel.j6n.dev
+  rules:
+  - backendRefs:
+    - name: waypoint
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: waypoint-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Self-Hosted
+      url: http://waypoint.j6n.internal
+spec:
+  parentRefs:
+  - name: envoy-internal
+    namespace: network
+  hostnames:
+  - waypoint.j6n.internal
   rules:
   - backendRefs:
     - name: waypoint
