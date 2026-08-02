@@ -14,7 +14,7 @@ metadata:
     # inherited by every gatus-sidecar endpoint generated from routes on
     # this gateway (routes can override)
     gatus.home-operations.com/endpoint: |
-      group: external
+      group: External
 spec:
   gatewayClassName: envoy
   infrastructure:
@@ -42,7 +42,7 @@ metadata:
     # fallback group for gatus-sidecar endpoints; routes set their own
     # category group (media, tools, ...) which wins over this
     gatus.home-operations.com/endpoint: |
-      group: internal
+      group: Internal
 spec:
   gatewayClassName: envoy
   infrastructure:

@@ -7,7 +7,7 @@ metadata:
     gatus.home-operations.com/enabled: "true"
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
-      group: media
+      group: Media
       url: http://sonarr.j6n.internal
 spec:
   parentRefs:

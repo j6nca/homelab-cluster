@@ -7,7 +7,7 @@ metadata:
     gatus.home-operations.com/enabled: "true"
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
-      group: media
+      group: Media
       url: http://jellyfin.j6n.internal
 spec:
   parentRefs:
@@ -25,7 +25,7 @@ kind: HTTPRoute
 metadata:
   name: jellyfin-external
   annotations:
-    # group: external inherited from the envoy-external gateway
+    # group: External inherited from the envoy-external gateway
     gatus.home-operations.com/enabled: "true"
 spec:
   parentRefs:

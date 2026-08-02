@@ -4,7 +4,7 @@ kind: HTTPRoute
 metadata:
   name: it-tools-external
   annotations:
-    # group: external inherited from the envoy-external gateway
+    # group: External inherited from the envoy-external gateway
     gatus.home-operations.com/enabled: "true"
 spec:
   parentRefs:
