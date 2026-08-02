@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rogue-like-signaling
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    # WebRTC signaling broker for Abyssal Salvage (ctrl-research/rogue-like).
+    # Brokers the offer/answer/ICE handshake only; game traffic is P2P, so
+    # this idles at near-zero. Stateless: no persistence, no secrets.
+    controllers:
+      rogue-like-signaling:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ctrl-research/rogue-like/signaling
+              tag: sha-6abb207
+            env:
+              PORT: &port 9080
+              # CSWSH guard: browser clients must come from the Pages site.
+              # Native (desktop) game clients send no Origin and are allowed.
+              ALLOWED_ORIGINS: "https://ctrl-research.github.io"
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 64Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+    service:
+      app:
+        ports:
+          http:
+            port: *port
