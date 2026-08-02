@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: ghcr.io/ctrl-research/rogue-like/signaling
-              tag: sha-53249e8
+              tag: sha-a0ae8e7
             env:
               PORT: &port 9080
               # CSWSH guard: browser clients must come from the Pages site.
