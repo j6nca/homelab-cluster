@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app buzz
+  namespace: flux-system
+spec:
+  # suspended until: (1) an S3 backend exists (garage/rustfs evaluation
+  # pending — buzz stores media and git state in object storage and its
+  # startup probe exits if the bucket is unreachable), (2) ownerPubkey is
+  # set in the HelmRelease, (3) 1Password items `buzz-postgres`
+  # (username/password) and `buzz` (relay_private_key) exist
+  suspend: true
+  components:
+    - ../../../../components/postgres
+    - ../../../../components/dragonfly
+  postBuild:
+    substitute:
+      APP: *app
+      POSTGRES_REPLICAS: "1"
+      POSTGRES_SIZE: 3Gi
+      DRAGONFLY_REPLICAS: "1"
+      DRAGONFLY_MAX_MEMORY: 512Mi
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/buzz/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

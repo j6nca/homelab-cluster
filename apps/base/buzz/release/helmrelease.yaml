@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: buzz
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: buzz
+    namespace: flux-system
+  interval: 15m
+  # populated by the postgres/dragonfly component patches (cnpg,
+  # dragonfly-operator)
+  dependsOn: []
+  values:
+    relayUrl: wss://buzz.j6n.dev
+
+    # TODO: set to jonathan's 64-char lowercase hex Nostr pubkey (it's a
+    # public key — safe to commit). The chart hard-fails rendering while
+    # this is empty, which is a deliberate guard until it's filled in.
+    ownerPubkey: ""
+
+    # keys: DATABASE_URL, REDIS_URL, BUZZ_RELAY_PRIVATE_KEY (+ S3 creds
+    # later) — composed by the buzz-secrets ExternalSecret
+    secrets:
+      existingSecret: buzz-secrets
+
+    replicaCount: 1
+
+    # ephemeral git working space; sources of truth are S3 + postgres
+    persistence:
+      git:
+        enabled: true
+        storageClass: longhorn
+        size: 5Gi
+
+    relay:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 1Gi
+
+    # TODO(s3): buzz requires S3-compatible object storage for media and
+    # git state; the relay's startup conformance probe exits if the bucket
+    # is unreachable. Fill in once the garage/rustfs evaluation lands.
+    s3:
+      endpoint: ""
+      bucket: buzz-media
+      addressingStyle: path
+
+    # exposure is handled by the HTTPRoutes in this directory, not the chart
+    ingress:
+      enabled: false
+    httproute:
+      enabled: false
