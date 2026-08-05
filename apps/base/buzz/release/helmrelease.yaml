@@ -35,12 +35,31 @@ spec:
 
     replicaCount: 1
 
-    # ephemeral git working space; sources of truth are S3 + postgres
+    # Pure scratch: refs and objects rehydrate from object storage per
+    # request and repo names live in postgres, so this holds no source of
+    # truth. Kept off longhorn deliberately — a 5Gi PVC cost ~15Gi of pool
+    # (the longhorn storageclass provisions 3 replicas), which is a poor
+    # trade for a volume whose only loss is a cold rehydrate after a
+    # restart. size is now an emptyDir sizeLimit on node ephemeral storage,
+    # a cap rather than a reservation; raise it if pack operations get
+    # evicted for exceeding it.
     persistence:
       git:
-        enabled: true
-        storageClass: longhorn
-        size: 5Gi
+        enabled: false
+        size: 2Gi
+
+    # The pack cache is a second per-pod emptyDir on the same node disk that
+    # longhorn draws from, and the chart's 7Gi/5GiB defaults would let this
+    # pod grow to ~9Gi of node storage once warm. Trimmed to fit a small
+    # disk, keeping the cap above worst-case use: 1GiB of cache plus one
+    # cold population staging a maxPackBytes (500MiB) pack = 1.5GiB against
+    # a 2Gi ceiling. Concurrency is 1 so staging can't double that —
+    # serialising cold populations costs first-access latency, not
+    # correctness.
+    git:
+      packCacheVolumeSize: 2Gi
+      packCacheMaxBytes: 1073741824
+      packCacheMaxConcurrentPopulations: 1
 
     relay:
       resources:
