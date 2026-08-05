@@ -13,7 +13,20 @@ spec:
   hostnames:
   - auth.j6n.dev
   rules:
-  - backendRefs:
+  # TLS terminates at cloudflare and the tunnel reaches this gateway over
+  # plain http, so envoy stamps x-forwarded-proto: http from the downstream
+  # connection. authentik builds absolute URLs from that header and was
+  # serving the flow page an api base of http://auth.j6n.dev/ — mixed
+  # content the browser refuses to fetch, which surfaces as "The request
+  # failed and the interceptors did not return an alternative response".
+  # Only correct on the external route; authentik-internal really is http.
+  - filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        set:
+        - name: X-Forwarded-Proto
+          value: https
+    backendRefs:
     - name: authentik-server
       port: 80
 ---
