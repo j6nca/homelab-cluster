@@ -39,8 +39,9 @@ spec:
           - name: buzz-media
             anonymousRead: false
       data:
+        # longhorn supports online expansion if media outgrows this
         type: persistentVolumeClaim
-        size: 50Gi
+        size: 5Gi
         storageClass: longhorn
       resources:
         requests:
