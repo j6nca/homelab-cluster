@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmpodscrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: buzz
+spec:
+  # this CR lives in observability, the pods live in buzz — without an
+  # explicit selector the operator would only look in its own namespace
+  namespaceSelector:
+    matchNames:
+      - buzz
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: buzz
+      app.kubernetes.io/instance: buzz
+      app.kubernetes.io/component: relay
+  podMetricsEndpoints:
+    # BUZZ_METRICS_PORT=9102, default /metrics path
+    - port: metrics
+      interval: 1m

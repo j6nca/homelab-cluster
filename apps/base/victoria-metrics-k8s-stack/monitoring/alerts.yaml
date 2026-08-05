@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: storage
+spec:
+  groups:
+    - name: storage
+      rules:
+        # cluster-wide early warning. The stack's own
+        # KubePersistentVolumeFillingUp only fires at 3% free, which leaves no
+        # time to expand; this is the actionable one.
+        #
+        # NOTE: percentage-based warnings assume the consumer degrades near
+        # full. Services needing a fixed absolute headroom can trip before
+        # this fires — e.g. seaweedfs cannot allocate a new storage volume
+        # once free space drops under master.volumeSizeLimitMB, so keep that
+        # value well under 20% of the PVC's capacity.
+        - alert: PersistentVolumeAlmostFull
+          expr: |
+            (
+              1 - (
+                kubelet_volume_stats_available_bytes
+                  / kubelet_volume_stats_capacity_bytes
+              )
+            ) > 0.80
+          for: 15m
+          labels:
+            severity: medium
+          annotations:
+            summary: >-
+              PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}
+              is over 80% full
+            description: >-
+              Less than 15% of the volume remains. Longhorn supports online
+              expansion — raise the size in the owning HelmRelease or PVC.

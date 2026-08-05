@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: buzz
+spec:
+  groups:
+    # volume capacity is covered cluster-wide by PersistentVolumeAlmostFull
+    - name: buzz-relay
+      rules:
+        # the relay exits on a failed S3 conformance probe and on database
+        # errors, so a crash loop is the signal that its dependencies broke
+        - alert: BuzzRelayNotReady
+          expr: |
+            kube_deployment_status_replicas_available{namespace="buzz", deployment="buzz"} < 1
+          for: 10m
+          labels:
+            severity: high
+            service: buzz
+          annotations:
+            summary: Buzz relay has no available replicas
+            description: >-
+              No ready buzz pod for 10m. Common causes are the startup S3
+              conformance probe failing against seaweedfs, or postgres being
+              unreachable — check `kubectl -n buzz logs deploy/buzz`.

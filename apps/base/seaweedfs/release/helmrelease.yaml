@@ -23,13 +23,14 @@ spec:
     master:
       enabled: false
       # per-volume file size cap, also the divisor for the volume server's
-      # auto max-volume count (-volume.max=0): free space / this. The chart
-      # default of 1000 leaves only ~4 possible volumes on a 5Gi PVC, and
-      # allocation fails outright once free space drops under one volume's
-      # worth — which surfaces as an S3 500 InternalError on write. 250
-      # gives ~18 and matches the few-GB scale we expect here.
+      # auto max-volume count (-volume.max=0): free space / this. Allocation
+      # fails outright once free space drops under one volume's worth, which
+      # surfaces as an S3 500 InternalError on write — so this value has to
+      # stay well under the 20% remaining that fires
+      # PersistentVolumeAlmostFull, or the alert arrives after the outage.
+      # At 1Gi: alert at ~205Mi free, allocation stops at 100Mi free.
       # allInOne reads these master.* values even with master.enabled=false
-      volumeSizeLimitMB: 250
+      volumeSizeLimitMB: 100
     volume:
       enabled: false
     filer:
