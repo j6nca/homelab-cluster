@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app seaweedfs
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: longhorn
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/seaweedfs/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

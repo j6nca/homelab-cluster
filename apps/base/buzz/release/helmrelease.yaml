@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: buzz
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: buzz
+    namespace: flux-system
+  interval: 15m
+  # cnpg + dragonfly-operator entries are appended by the component patches
+  dependsOn:
+    - name: seaweedfs
+      namespace: seaweedfs
+  values:
+    relayUrl: wss://buzz.j6n.dev
+
+    # jonathan's Nostr pubkey (public by design — the private half lives
+    # in 1Password as buzz-nostr). Inline rather than valuesFrom so CI can
+    # render the chart, whose schema requires this to be set.
+    ownerPubkey: 73993a820faaf8f79efe73246daf2f2b9bb2a226bc32cdc37f1864f853d4aa9b
+
+    # keys: DATABASE_URL, REDIS_URL, BUZZ_RELAY_PRIVATE_KEY (+ S3 creds
+    # later) — composed by the buzz-secrets ExternalSecret
+    secrets:
+      existingSecret: buzz-secrets
+
+    replicaCount: 1
+
+    # ephemeral git working space; sources of truth are S3 + postgres
+    persistence:
+      git:
+        enabled: true
+        storageClass: longhorn
+        size: 5Gi
+
+    relay:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 1Gi
+
+    # in-cluster SeaweedFS (allInOne); the bucket is created by the
+    # seaweedfs chart's hook, credentials come via buzz-secrets. The
+    # relay's startup conformance probe validates the gateway's
+    # conditional-write (CAS) semantics on every boot.
+    # chart 0.1.7 has no addressingStyle knob; the relay defaults to
+    # path-style, which is what SeaweedFS expects
+    s3:
+      endpoint: http://seaweedfs-all-in-one.seaweedfs.svc:8333
+      bucket: buzz-media
+
+    # exposure is handled by the HTTPRoutes in this directory, not the chart
+    ingress:
+      enabled: false
+    httproute:
+      enabled: false
