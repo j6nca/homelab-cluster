@@ -13,17 +13,13 @@ spec:
   dependsOn:
     - name: seaweedfs
       namespace: seaweedfs
-  # ownerPubkey comes from the buzz-nostr 1Password item via ExternalSecret.
-  # It must NOT also appear under spec.values — inline values take
-  # precedence over valuesFrom, so an empty inline value would win and the
-  # chart would refuse to render.
-  valuesFrom:
-    - kind: Secret
-      name: buzz-nostr
-      valuesKey: public_key
-      targetPath: ownerPubkey
   values:
     relayUrl: wss://buzz.j6n.dev
+
+    # jonathan's Nostr pubkey (public by design — the private half lives
+    # in 1Password as buzz-nostr). Inline rather than valuesFrom so CI can
+    # render the chart, whose schema requires this to be set.
+    ownerPubkey: 73993a820faaf8f79efe73246daf2f2b9bb2a226bc32cdc37f1864f853d4aa9b
 
     # keys: DATABASE_URL, REDIS_URL, BUZZ_RELAY_PRIVATE_KEY (+ S3 creds
     # later) — composed by the buzz-secrets ExternalSecret
@@ -52,10 +48,11 @@ spec:
     # seaweedfs chart's hook, credentials come via buzz-secrets. The
     # relay's startup conformance probe validates the gateway's
     # conditional-write (CAS) semantics on every boot.
+    # chart 0.1.7 has no addressingStyle knob; the relay defaults to
+    # path-style, which is what SeaweedFS expects
     s3:
       endpoint: http://seaweedfs-all-in-one.seaweedfs.svc:8333
       bucket: buzz-media
-      addressingStyle: path
 
     # exposure is handled by the HTTPRoutes in this directory, not the chart
     ingress:
