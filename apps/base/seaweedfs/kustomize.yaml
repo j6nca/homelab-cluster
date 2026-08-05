@@ -3,25 +3,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app buzz
+  name: &app seaweedfs
   namespace: flux-system
 spec:
-  components:
-    - ../../../../components/postgres
-    - ../../../../components/dragonfly
-  postBuild:
-    substitute:
-      APP: *app
-      POSTGRES_REPLICAS: "1"
-      POSTGRES_SIZE: 3Gi
-      DRAGONFLY_REPLICAS: "1"
-      DRAGONFLY_MAX_MEMORY: 512Mi
+  dependsOn:
+    - name: longhorn
   targetNamespace: *app
   commonMetadata:
     labels:
       service: *app
   interval: 5m
-  path: ./apps/base/buzz/release
+  path: ./apps/base/seaweedfs/release
   prune: true
   sourceRef:
     kind: GitRepository

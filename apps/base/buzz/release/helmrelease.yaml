@@ -9,16 +9,21 @@ spec:
     name: buzz
     namespace: flux-system
   interval: 15m
-  # populated by the postgres/dragonfly component patches (cnpg,
-  # dragonfly-operator)
-  dependsOn: []
+  # cnpg + dragonfly-operator entries are appended by the component patches
+  dependsOn:
+    - name: seaweedfs
+      namespace: seaweedfs
+  # ownerPubkey comes from the buzz-nostr 1Password item via ExternalSecret.
+  # It must NOT also appear under spec.values — inline values take
+  # precedence over valuesFrom, so an empty inline value would win and the
+  # chart would refuse to render.
+  valuesFrom:
+    - kind: Secret
+      name: buzz-nostr
+      valuesKey: public_key
+      targetPath: ownerPubkey
   values:
     relayUrl: wss://buzz.j6n.dev
-
-    # TODO: set to jonathan's 64-char lowercase hex Nostr pubkey (it's a
-    # public key — safe to commit). The chart hard-fails rendering while
-    # this is empty, which is a deliberate guard until it's filled in.
-    ownerPubkey: ""
 
     # keys: DATABASE_URL, REDIS_URL, BUZZ_RELAY_PRIVATE_KEY (+ S3 creds
     # later) — composed by the buzz-secrets ExternalSecret
@@ -43,11 +48,12 @@ spec:
           cpu: "1"
           memory: 1Gi
 
-    # TODO(s3): buzz requires S3-compatible object storage for media and
-    # git state; the relay's startup conformance probe exits if the bucket
-    # is unreachable. Fill in once the garage/rustfs evaluation lands.
+    # in-cluster SeaweedFS (allInOne); the bucket is created by the
+    # seaweedfs chart's hook, credentials come via buzz-secrets. The
+    # relay's startup conformance probe validates the gateway's
+    # conditional-write (CAS) semantics on every boot.
     s3:
-      endpoint: ""
+      endpoint: http://seaweedfs-all-in-one.seaweedfs.svc:8333
       bucket: buzz-media
       addressingStyle: path
 
