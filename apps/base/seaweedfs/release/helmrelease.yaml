@@ -22,6 +22,14 @@ spec:
     # SeaweedFS-level replication stays off (000 default).
     master:
       enabled: false
+      # per-volume file size cap, also the divisor for the volume server's
+      # auto max-volume count (-volume.max=0): free space / this. The chart
+      # default of 1000 leaves only ~4 possible volumes on a 5Gi PVC, and
+      # allocation fails outright once free space drops under one volume's
+      # worth — which surfaces as an S3 500 InternalError on write. 250
+      # gives ~18 and matches the few-GB scale we expect here.
+      # allInOne reads these master.* values even with master.enabled=false
+      volumeSizeLimitMB: 250
     volume:
       enabled: false
     filer:
@@ -39,9 +47,11 @@ spec:
           - name: buzz-media
             anonymousRead: false
       data:
-        # longhorn supports online expansion if media outgrows this
+        # 1Gi holds ~3 volumes at volumeSizeLimitMB=250. Longhorn supports
+        # online expansion if media outgrows it — shrinking needs the PVC
+        # recreated, since storage requests are immutable downward.
         type: persistentVolumeClaim
-        size: 5Gi
+        size: 1Gi
         storageClass: longhorn
       resources:
         requests:
