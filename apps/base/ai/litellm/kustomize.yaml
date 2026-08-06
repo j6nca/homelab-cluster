@@ -6,6 +6,16 @@ metadata:
   name: &app litellm
   namespace: flux-system
 spec:
+  components:
+    - ../../../../components/postgres
+  postBuild:
+    substitute:
+      APP: *app
+      POSTGRES_REPLICAS: "1"
+      # only LiteLLM_SpendLogs grows, and it is capped at 30d retention in
+      # general_settings, so this holds a steady state rather than a year of
+      # traffic. 3x on the longhorn pool at the default replica count.
+      POSTGRES_SIZE: 2Gi
   targetNamespace: *app
   commonMetadata:
     labels:
