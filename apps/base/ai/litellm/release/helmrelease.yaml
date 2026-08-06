@@ -44,8 +44,21 @@ spec:
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 3
+              # without this the pod counts as Ready the moment the process
+              # starts, so envoy routes to it while litellm is still booting
+              # and callers get "connection refused" on every restart. The
+              # endpoint is public and reports db state without a credential.
               readiness:
-                enabled: false
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/readiness
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
               startup:
                 enabled: false
             ports:
@@ -55,9 +68,13 @@ spec:
             resources:
               requests:
                 cpu: 100m
-                memory: 256Mi
+                # 512Mi was the limit and the pod was OOMKilled into a
+                # crashloop before it ever bound to 4000. This config loads
+                # four MCP servers plus several providers, which a python
+                # proxy does not fit in half a gig.
+                memory: 768Mi
               limits:
-                memory: 512Mi
+                memory: 2Gi
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
