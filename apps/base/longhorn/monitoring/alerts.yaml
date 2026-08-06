@@ -1,0 +1,63 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: longhorn
+spec:
+  groups:
+    - name: longhorn-capacity
+      rules:
+        # Longhorn exposes no "schedulable" metric, so derive it the way
+        # longhorn does: capacity minus what is written minus what is held
+        # back for the OS. Longhorn refuses to schedule a new replica once
+        # available space falls under storageMinimalAvailablePercentage (10
+        # in our helmrelease), so provisioning breaks at 10% — well before a
+        # disk is meaningfully full. These thresholds sit above that so the
+        # warning arrives while it is still fixable.
+        #
+        # This is pool-level headroom, which PersistentVolumeAlmostFull
+        # cannot see: that alert watches usage inside a single PVC, whereas
+        # this catches the cluster running out of room to place replicas at
+        # all — the failure that shows up as PVCs stuck Pending.
+        - alert: LonghornDiskSchedulableSpaceLow
+          expr: |
+            (
+              longhorn_disk_capacity_bytes
+                - longhorn_disk_usage_bytes
+                - longhorn_disk_reservation_bytes
+            ) / longhorn_disk_capacity_bytes < 0.15
+          for: 15m
+          labels:
+            severity: high
+            service: longhorn
+          annotations:
+            summary: >-
+              Longhorn disk {{ $labels.disk }} on {{ $labels.node }} is below
+              15% schedulable space
+            description: >-
+              Longhorn stops placing new replicas at 10% available
+              (storageMinimalAvailablePercentage), so new PVCs and replica
+              rebuilds are close to failing. Free space, expand the disk, or
+              delete unused volumes and snapshots.
+
+        - alert: LonghornDiskSchedulingBlocked
+          expr: |
+            (
+              longhorn_disk_capacity_bytes
+                - longhorn_disk_usage_bytes
+                - longhorn_disk_reservation_bytes
+            ) / longhorn_disk_capacity_bytes < 0.10
+          for: 5m
+          labels:
+            severity: critical
+            service: longhorn
+          annotations:
+            summary: >-
+              Longhorn disk {{ $labels.disk }} on {{ $labels.node }} cannot
+              schedule replicas
+            description: >-
+              Available space is under storageMinimalAvailablePercentage.
+              New PVCs will sit Pending and degraded volumes cannot rebuild
+              their replicas, which puts existing data at risk of staying
+              single-replica.
