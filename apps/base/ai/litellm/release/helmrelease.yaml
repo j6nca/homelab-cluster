@@ -59,8 +59,22 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
+              # litellm runs prisma migrations against the database on boot,
+              # which can outlast the liveness window (20s + 3x30s) on a cold
+              # start. A startup probe holds liveness and readiness off until
+              # the app answers, so a slow migration can't be mistaken for a
+              # hang and killed into a crashloop.
               startup:
-                enabled: false
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/readiness
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
             ports:
               - containerPort: *port
                 name: http
