@@ -95,6 +95,13 @@ data:
 
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
+      # LiteLLM_SpendLogs gets one row per request and is the only table
+      # that grows without bound, so cap it rather than size the PVC for a
+      # year of traffic. Takes effect once litellm has a database — it is
+      # inert while running config-only. Keep the "<n>d" string form: an
+      # unparseable value is logged as a warning and silently disables the
+      # cleanup job rather than failing.
+      maximum_spend_logs_retention_period: "30d"
 
     litellm_settings:
       drop_params: true
