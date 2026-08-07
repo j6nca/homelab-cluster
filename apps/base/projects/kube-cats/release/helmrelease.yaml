@@ -30,7 +30,7 @@ spec:
         image:
           registry: ghcr.io
           repository: j6nca/kube-cats
-          tag: d7820cd
+          tag: 33de378
           pullPolicy: IfNotPresent
 
         containerName: web
@@ -88,7 +88,7 @@ spec:
         image:
           registry: ghcr.io
           repository: j6nca/kube-cats-api
-          tag: d7820cd
+          tag: 33de378
           pullPolicy: IfNotPresent
 
         containerName: api
@@ -102,6 +102,13 @@ spec:
             value: "8080"
           - name: ENVIRONMENT
             value: production
+          # Every origin the UI is served from. A matching Origin is echoed
+          # back, so the internal route works as well as the external one —
+          # the old fixed header only ever satisfied meow.j6n.dev.
+          # Append http://localhost:3000 to develop against this API; that
+          # lets any page on any machine's localhost read it, so it is left off.
+          - name: CORS_ALLOW_ORIGINS
+            value: https://meow.j6n.dev,http://kube-cats.j6n.internal
 
         ports:
           - containerPort: 8080
