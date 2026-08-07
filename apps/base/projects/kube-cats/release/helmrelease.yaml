@@ -30,7 +30,7 @@ spec:
         image:
           registry: ghcr.io
           repository: j6nca/kube-cats
-          tag: 33de378
+          tag: 54b7a65
           pullPolicy: IfNotPresent
 
         containerName: web
@@ -41,6 +41,12 @@ spec:
           # outside the cluster.
           - name: API_URL
             value: https://kube-cats-api.j6n.dev
+          # Ratio, not a percentage. Nothing in the cluster reaches the 0.8
+          # default; at 0.6 exactly one pod (kube-ops-view, ~70% of its memory
+          # limit) burns, so the sprite is visible without implying the cluster
+          # is in trouble.
+          - name: HEAT_THRESHOLD
+            value: "0.6"
 
         ports:
           - containerPort: 3000
