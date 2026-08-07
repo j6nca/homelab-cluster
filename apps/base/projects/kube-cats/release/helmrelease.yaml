@@ -30,7 +30,7 @@ spec:
         image:
           registry: ghcr.io
           repository: j6nca/kube-cats
-          tag: 54b7a65
+          tag: cfefc8b
           pullPolicy: IfNotPresent
 
         containerName: web
