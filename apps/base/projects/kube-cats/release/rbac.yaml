@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/rbac.authorization.k8s.io/clusterrole_v1.json
+# The generic chart templates no RBAC, so the read-only cluster access the API
+# needs lives here. This replaces the ClusterRole the dedicated kube-cats chart
+# used to ship. Named kube-cats-api rather than kube-cats so it does not
+# collide with the Helm-managed ClusterRole the old chart is still holding:
+# Helm deletes that one on upgrade, and a same-named Flux resource would be
+# caught in the middle.
+#
+# list on pods/nodes is the whole scrape. metrics.k8s.io is optional: without
+# it the API still works and falls back to reporting resource requests instead
+# of live usage (pressure.source becomes "requests").
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-cats-api
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "pods"]
+    verbs: ["list"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/rbac.authorization.k8s.io/clusterrolebinding_v1.json
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-cats-api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-cats-api
+subjects:
+  # Created by the chart from serviceAccounts.api, named <release>-<key>.
+  - kind: ServiceAccount
+    name: kube-cats-api
+    namespace: kube-cats

@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./rbac.yaml
 commonLabels:
   service: kube-cats
   owner: j6n

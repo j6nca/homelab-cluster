@@ -1,21 +1,153 @@
+---
 # yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app kube-cats
 spec:
-  commonMetadata: &commonlabels
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: ctrl-research
+        namespace: flux-system
+      version: 0.3.0
+  dependsOn: []
+  interval: 15m
+  commonMetadata:
     labels:
       service: *app
       owner: j6n
       level: '3'
       group: tools
-  chart:
-    spec:
-      chart: *app
-      sourceRef:
-        kind: HelmRepository
-        name: j6nca
-        namespace: flux-system
-      version: 1.0.9
-  interval: 15m
+  values:
+    # The generic chart names every resource <release>-<key>, so these keys
+    # produce kube-cats-web and kube-cats-api. The HTTPRoutes reference those
+    # names directly.
+    deployments:
+      web:
+        image:
+          registry: ghcr.io
+          repository: j6nca/kube-cats
+          tag: d7820cd
+          pullPolicy: IfNotPresent
+
+        containerName: web
+
+        env:
+          # Resolved by the browser, not in-cluster, so this has to be the
+          # external hostname. A Service DNS name does not resolve for a client
+          # outside the cluster.
+          - name: API_URL
+            value: https://kube-cats-api.j6n.dev
+
+        ports:
+          - containerPort: 3000
+            name: http
+            protocol: TCP
+
+        livenessProbe: &webprobe
+          httpGet:
+            path: /
+            port: http
+        readinessProbe: *webprobe
+
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+          limits:
+            memory: 100Mi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+
+        podSecurityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          # Makes the emptyDir below group-writable for the runtime uid.
+          fsGroup: 1000
+
+        # The entrypoint writes the runtime config here on every start, which
+        # is the only write the container makes. Keeping it on a volume is what
+        # lets readOnlyRootFilesystem stay true.
+        volumes:
+          - name: config
+            emptyDir: {}
+        volumeMounts:
+          - name: config
+            mountPath: /app/build/config
+
+      api:
+        image:
+          registry: ghcr.io
+          repository: j6nca/kube-cats-api
+          tag: d7820cd
+          pullPolicy: IfNotPresent
+
+        containerName: api
+
+        # Needs the ClusterRole in rbac.yaml to list nodes and pods. The
+        # generic chart has no RBAC templates, so that is a plain manifest.
+        serviceAccountName: api
+
+        env:
+          - name: API_PORT
+            value: "8080"
+          - name: ENVIRONMENT
+            value: production
+
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+
+        livenessProbe: &apiprobe
+          httpGet:
+            path: /health
+            port: http
+        readinessProbe: *apiprobe
+
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+          limits:
+            memory: 100Mi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+
+        podSecurityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+
+    services:
+      web:
+        type: ClusterIP
+        ports:
+          - port: 80
+            targetPort: http
+            protocol: TCP
+            name: http
+      api:
+        type: ClusterIP
+        ports:
+          - port: 80
+            targetPort: http
+            protocol: TCP
+            name: http
+
+    serviceAccounts:
+      api: {}
