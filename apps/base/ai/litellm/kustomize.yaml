@@ -7,7 +7,8 @@ metadata:
   namespace: flux-system
 spec:
   components:
-    - ../../../../components/postgres
+    # relative to spec.path below, not to this file
+    - ../../../../../components/postgres
   postBuild:
     substitute:
       APP: *app
