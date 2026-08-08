@@ -23,8 +23,17 @@ spec:
       # Define ingress rules for the tunnel. See
       # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
       ingress:
-        - hostname: gatus.j6n.dev
-          service: http://gatus.gatus.svc.cluster.local:80
-        - hostname: grafana.j6n.dev
-          service: http://grafana-service.observability.svc.cluster.local:80
+        # Everything public goes to the external gateway, which routes by hostname
+        # from the 28 HTTPRoutes across this repo. The service name is pinned in
+        # envoy-gateway/network/envoyproxies.yaml precisely so this can target it.
+        #
+        # This replaces two per-hostname rules that had stopped reflecting reality:
+        # the gatus one never worked (it was added, found to do nothing, and left),
+        # and the grafana one was redundant since grafana has its own HTTPRoute. A
+        # committed list that does not match the running config is worse than no
+        # list — a Flux reconcile would have replaced the wildcard with those two
+        # rules and taken every other public hostname down with it, lobby.j6n.dev
+        # included.
+        - hostname: "*.j6n.dev"
+          service: http://envoy-external.network.svc.cluster.local:80
     replicaCount: 1
