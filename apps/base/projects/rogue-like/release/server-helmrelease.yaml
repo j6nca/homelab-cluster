@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rogue-like-server
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    # Dedicated game server for Abyssal Salvage (ctrl-research/rogue-like).
+    #
+    # Replaces the peer-to-peer path the signalling broker beside this exists for.
+    # Clients dial ONE address and connect outbound, which works from behind CGNAT
+    # and mobile NAT — measured: two browsers behind one NAT never connect, and
+    # home broadband to a mobile hotspot never connects. That is why this exists
+    # instead of a TURN relay.
+    #
+    # Unlike the broker, this runs the actual game simulation, so it costs real CPU
+    # rather than idling.
+    controllers:
+      rogue-like-server:
+        # ONE lobby per process, so replicas are not a scaling knob: a second
+        # replica would be a second, unreachable lobby with nothing routing crews
+        # to it. Recreate rather than RollingUpdate for the same reason — a rolling
+        # update would briefly run two servers and split a crew across them.
+        replicas: 1
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ctrl-research/rogue-like/server
+              # PLACEHOLDER — no server image is published yet. The release job that
+              # builds it is in ctrl-research/rogue-like#63; set this to the first
+              # version that job publishes, then let Renovate track it. Until then
+              # this pod will ImagePullBackOff.
+              tag: 0.1.0
+            env:
+              # Godot speaks plain ws here; TLS terminates at the gateway.
+              PORT: &port 9100
+            probes:
+              # tcpSocket, NOT httpGet: this is a WebSocket server with no HTTP
+              # endpoint at all. An httpGet probe (as the broker uses, against its
+              # /health route) would fail here and crash-loop the pod.
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 20
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              # ~0.4 of a CI-grade vCPU per lobby at 60Hz, measured from the
+              # headless sim running at ~140fps on a 2-vCPU runner. The limit
+              # leaves headroom for a boss lair at a full enemy cap; Godot's main
+              # loop is single-threaded, so more than ~1 core cannot help one lobby.
+              requests:
+                cpu: 250m
+                memory: 192Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        # Matches the uid created in the game repo's server/Dockerfile. The broker
+        # beside this runs as 1000; they are separate releases, so they can differ.
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+    persistence:
+      # Godot insists on a writable user:// directory, and the container sets
+      # HOME=/home/abyssal for it. The dedicated server has no progression to save
+      # — that is all client-side — but the engine still wants somewhere to write,
+      # and the root filesystem is read-only. Nothing here needs to survive a
+      # restart, so emptyDir rather than a volume.
+      home:
+        type: emptyDir
+        globalMounts:
+          - path: /home/abyssal
+    service:
+      app:
+        ports:
+          http:
+            port: *port

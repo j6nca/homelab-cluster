@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: rogue-like-server-external
+  # Deliberately NO gatus annotation, unlike the signalling broker beside this.
+  # Gatus checks over HTTP, and this endpoint speaks only WebSocket — there is no
+  # path that returns a 200, so a check would report the server permanently down.
+  # The k8s liveness probe covers it instead (tcpSocket, see the HelmRelease).
+spec:
+  parentRefs:
+  - name: envoy-external
+    namespace: network
+  hostnames:
+  - rogue-game.j6n.dev
+  rules:
+  - backendRefs:
+    - name: rogue-like-server
+      port: 9100
+    # A dive lasts minutes and a lobby can sit idle much longer, so the default
+    # request timeout would cut the connection mid-session. Gameplay traffic flows
+    # constantly once a dive starts, but a crew waiting in the sub sends nothing.
+    timeouts:
+      request: 0s
+      backendRequest: 0s
