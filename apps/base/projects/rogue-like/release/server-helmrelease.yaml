@@ -39,11 +39,9 @@ spec:
           app:
             image:
               repository: ghcr.io/ctrl-research/rogue-like/server
-              # PLACEHOLDER — no server image is published yet. The release job that
-              # builds it is in ctrl-research/rogue-like#63; set this to the first
-              # version that job publishes, then let Renovate track it. Until then
-              # this pod will ImagePullBackOff.
-              tag: 0.1.0
+              # Pinned rather than :latest, so a client and a server of known
+              # compatible versions stay together. Renovate tracks it from here.
+              tag: 0.1.133
             env:
               # Godot speaks plain ws here; TLS terminates at the gateway.
               PORT: &port 9100
