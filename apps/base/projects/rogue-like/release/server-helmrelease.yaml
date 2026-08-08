@@ -13,6 +13,12 @@ spec:
   values:
     # Dedicated game server for Abyssal Salvage (ctrl-research/rogue-like).
     #
+    # NOT hardened with a NetworkPolicy, deliberately: no CNI in this repo declares
+    # policy support and no NetworkPolicy exists anywhere in the cluster, so one
+    # here could be accepted by the API and silently unenforced — which is worse
+    # than none, because it reads as protection. Worth adding once the CNI is
+    # confirmed to enforce it; this pod needs no egress at all.
+    #
     # Replaces the peer-to-peer path the signalling broker beside this exists for.
     # Clients dial ONE address and connect outbound, which works from behind CGNAT
     # and mobile NAT — measured: two browsers behind one NAT never connect, and
@@ -69,6 +75,11 @@ spec:
               limits:
                 memory: 512Mi
     defaultPodOptions:
+      # Both of these are already the app-template defaults; stated because this is
+      # the one workload here reachable from the internet, and a chart default is a
+      # thing that can change under you.
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         # Matches the uid created in the game repo's server/Dockerfile. The broker
@@ -76,6 +87,10 @@ spec:
         runAsUser: 10001
         runAsGroup: 10001
         fsGroup: 10001
+        # Not a chart default. This is an internet-facing process parsing binary
+        # game traffic, so it gets the container runtime's syscall filter.
+        seccompProfile:
+          type: RuntimeDefault
     persistence:
       # Godot insists on a writable user:// directory, and the container sets
       # HOME=/home/abyssal for it. The dedicated server has no progression to save
