@@ -17,9 +17,3 @@ spec:
   - backendRefs:
     - name: rogue-like-server
       port: 9100
-    # A dive lasts minutes and a lobby can sit idle much longer, so the default
-    # request timeout would cut the connection mid-session. Gameplay traffic flows
-    # constantly once a dive starts, but a crew waiting in the sub sends nothing.
-    timeouts:
-      request: 0s
-      backendRequest: 0s
