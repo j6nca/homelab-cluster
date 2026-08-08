@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./server-externalsecret.yaml
   - ./server-helmrelease.yaml
   - ./server-httproute.yaml
 commonLabels:

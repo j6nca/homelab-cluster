@@ -47,6 +47,13 @@ spec:
             env:
               # Godot speaks plain ws here; TLS terminates at the gateway.
               PORT: &port 9100
+            # JOIN_PASSWORD comes from 1Password via server-externalsecret.yaml, not
+            # from this file: the repo is public, so a password committed here would
+            # be a published password. An empty or missing value means an OPEN
+            # server, so the ExternalSecret has to resolve before this is exposed.
+            envFrom:
+              - secretRef:
+                  name: rogue-like-server-secret
             probes:
               # tcpSocket, NOT httpGet: this is a WebSocket server with no HTTP
               # endpoint at all. An httpGet probe (as the broker uses, against its
