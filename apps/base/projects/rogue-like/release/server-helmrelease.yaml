@@ -41,7 +41,7 @@ spec:
               repository: ghcr.io/ctrl-research/rogue-like/server
               # Pinned rather than :latest, so a client and a server of known
               # compatible versions stay together. Renovate tracks it from here.
-              tag: 0.1.149
+              tag: 0.1.151
             env:
               # Godot speaks plain ws here; TLS terminates at the gateway.
               PORT: &port 9100
