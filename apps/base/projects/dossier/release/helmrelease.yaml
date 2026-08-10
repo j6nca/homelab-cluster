@@ -1,0 +1,128 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app dossier
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 15m
+  dependsOn: []
+  values:
+    defaultPodOptions:
+      securityContext:
+        # 65532 is distroless `nonroot`, which is what the image runs as. The
+        # fsGroup has to match or the process cannot write its SQLite file to
+        # the PVC.
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 65532
+        runAsNonRoot: true
+        runAsUser: 65532
+
+    controllers:
+      dossier:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # One replica, and not negotiable while the store is SQLite: two pods
+        # would be two databases behind one Service, so an alert would land in
+        # one and the incident someone made from it in the other.
+        replicas: 1
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ctrl-research/dossier
+              tag: 0.0.1
+            args:
+              - serve
+              - -addr
+              - :8080
+              - -db
+              - /data/dossier.db
+            env:
+              TZ: America/Toronto
+
+              # --- metric source ---
+              # Queries and rules live on different components in
+              # VictoriaMetrics: vmselect answers PromQL, vmalert owns the rule
+              # definitions. Dossier needs both - the rules are the only place
+              # a rule's `for` duration exists, and without it every alert
+              # looks like its condition began the moment the alert fired.
+              DOSSIER_PROM_URL: http://vmselect-vmks-victoria-metrics-k8s-stack.observability:8481/select/0/prometheus
+              DOSSIER_PROM_RULES_URL: http://vmalert-vmks-victoria-metrics-k8s-stack.observability:8080
+              DOSSIER_PROM_NAME: victoriametrics
+
+              # --- model ---
+              # LiteLLM is already in-cluster and speaks the OpenAI wire
+              # format, which is the one Dossier's provider seam normalises on.
+              # Nothing is sent to it until somebody presses the triage button
+              # on an incident.
+              DOSSIER_LLM_BASE_URL: http://litellm.litellm:4000/v1
+              DOSSIER_LLM_MODEL: glm-5
+              DOSSIER_LLM_PROVIDER: litellm
+            envFrom:
+              # DOSSIER_LLM_API_KEY, from the `dossier` 1Password item
+              - secretRef:
+                  name: *app
+            ports:
+              - containerPort: &port 8080
+                name: http
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *port
+                  initialDelaySeconds: 5
+                  periodSeconds: 15
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    # Unlike /healthz this touches the store, so the pod leaves
+                    # the Service if SQLite is unreachable rather than
+                    # accepting webhooks it cannot persist.
+                    path: /readyz
+                    port: *port
+                  initialDelaySeconds: 5
+                  periodSeconds: 15
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                # The bundle and one model response are the only large
+                # allocations; SQLite does the rest on disk.
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+              # Everything the binary serves is compiled in via embed.FS, so
+              # the data volume is the only writable path it needs.
+              readOnlyRootFilesystem: true
+
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        storageClass: longhorn
+        globalMounts:
+          - path: /data
+            readOnly: false
+
+    service:
+      app:
+        ports:
+          http:
+            port: *port

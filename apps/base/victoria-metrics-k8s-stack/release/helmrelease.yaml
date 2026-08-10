@@ -47,6 +47,32 @@ spec:
       spec:
         externalLabels:
           cluster: homelab
+    alertmanager:
+      enabled: true
+      # The chart default is a bare blackhole receiver: nothing here notified
+      # anything, and Karma reads alerts from the Alertmanager API rather than
+      # from a receiver. Spelled out so adding a second receiver is a diff
+      # against something readable rather than against a chart default.
+      config:
+        route:
+          receiver: blackhole
+          routes:
+            # continue: true is the whole point. Dossier gets a copy of every
+            # alert and no alert's delivery depends on it - if it is down, or
+            # its webhook 500s, every route below still runs. That is what makes
+            # it strictly additive rather than a new single point of failure in
+            # the notification path.
+            - receiver: dossier
+              continue: true
+        receivers:
+          - name: blackhole
+          - name: dossier
+            webhook_configs:
+              # send_resolved matters more than it looks: without it an incident
+              # never learns its alerts cleared, so nothing settles and every
+              # incident stays open forever.
+              - url: http://dossier.dossier:8080/webhook/alertmanager
+                send_resolved: true
     # Deploy operator separately
     victoria-metrics-operator:
       enabled: false
