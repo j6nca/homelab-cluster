@@ -59,10 +59,11 @@ spec:
             value: http://echo.j6n.internal
           - name: ECHO_CACHE_DIR
             value: /cache
-          # Only the writable root for now: promoted YouTube downloads land
-          # here.
+          # Order matters only in that the collection comes first; both are
+          # scanned. /music is the read-only NFS share, /library/downloads is
+          # the writable volume promoted YouTube tracks land in.
           - name: ECHO_LIBRARY_ROOTS
-            value: /library/downloads
+            value: /music,/library/downloads
           # Password sign-in, to be replaced by Authentik. The bootstrap admin
           # is created only while the users table is empty.
           - name: ECHO_LOCAL_AUTH
@@ -140,6 +141,12 @@ spec:
           runAsNonRoot: true
           fsGroup: 10001
           fsGroupChangePolicy: OnRootMismatch
+          # gid 100 ("users") is what sonarr and friends write the media share
+          # as. fsGroup does not apply to NFS volumes — the kubelet cannot
+          # chown them — so without membership in that group a uid-10001
+          # process gets EACCES on anything not world-readable.
+          supplementalGroups:
+            - 100
 
         volumes:
           - name: cache
@@ -148,6 +155,13 @@ spec:
           - name: downloads
             persistentVolumeClaim:
               claimName: echo-downloads
+          - name: music
+            nfs:
+              server: mimir.home
+              # The export root, with the subdirectory selected at mount time
+              # below — the same shape the other media apps use.
+              path: /var/nfs/shared/MEDIA
+              readOnly: true
           # Required, not incidental: the root filesystem is read-only, and
           # both yt-dlp and the transcoder stage output through temp files.
           - name: tmp
@@ -158,6 +172,12 @@ spec:
             mountPath: /cache
           - name: downloads
             mountPath: /library/downloads
+          - name: music
+            mountPath: /music
+            # Echo never writes to a library root; enforced here at the kernel
+            # rather than trusted to the application.
+            readOnly: true
+            subPath: data/media/music
           - name: tmp
             mountPath: /tmp
 
