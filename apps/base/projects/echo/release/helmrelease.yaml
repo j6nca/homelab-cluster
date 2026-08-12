@@ -1,193 +1,187 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app echo
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: app-template
-    namespace: flux-system
-  interval: 15m
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: ctrl-research
+        namespace: flux-system
+      version: 0.3.0
   # cnpg is appended by the components/postgres patch.
   dependsOn: []
+  interval: 15m
   values:
-    defaultPodOptions:
-      # 10001, not the usual 1000: the image creates its own user at that uid
-      # and chowns /cache and /library to it, so running as anything else
-      # leaves both unwritable.
-      securityContext:
-        fsGroup: 10001
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 10001
-        runAsNonRoot: true
-        runAsUser: 10001
+    deployments:
+      app:
+        image:
+          registry: ghcr.io
+          repository: ctrl-research/echo
+          tag: 0.1.0
+          pullPolicy: IfNotPresent
 
-    controllers:
-      echo:
-        # Recreate, not RollingUpdate. The PVCs are ReadWriteOnce, so a second
-        # pod cannot attach them while the first still holds them, and the
-        # filesystem watcher must be a singleton — two would each observe every
-        # event and enqueue duplicate work.
-        strategy: Recreate
-        containers:
-          app:
-            image:
-              repository: ghcr.io/ctrl-research/echo
-              tag: 0.1.0
-            env:
-              TZ: America/Toronto
-              # The image's home directory sits on the read-only root
-              # filesystem, and yt-dlp writes an extractor cache under $HOME.
-              # It degrades to warnings rather than failing, but pointing it at
-              # the tmp emptyDir keeps the log clean and the cache useful.
-              HOME: /tmp
-              ECHO_ADDR: ":8080"
-              # Scheme matters beyond cosmetics: the session cookie is marked
-              # Secure only when this is https, and a Secure cookie sent over
-              # the http-only internal gateway would be dropped by the browser,
-              # which presents as "login succeeds then immediately logs out".
-              ECHO_BASE_URL: http://echo.j6n.internal
-              ECHO_CACHE_DIR: /cache
-              # Only the writable root for now: promoted YouTube downloads land
-              # here. See the commented NFS mount below for the music library.
-              ECHO_LIBRARY_ROOTS: /library/downloads
-              # Password sign-in, to be replaced by Authentik. The bootstrap
-              # admin is created only while the users table is empty.
-              ECHO_LOCAL_AUTH: "true"
-              # Both caches live on the same 8Gi volume, so both ceilings are
-              # set and they are sized to sum well below it — the defaults
-              # (5GB + 10GB) would overcommit it almost twofold. Eviction is
-              # reactive, running after a write lands, so the slack matters:
-              # without it a burst fills the disk and every subsequent write
-              # fails with ENOSPC instead of the cache simply making room.
-              ECHO_YT_CACHE_MAX_BYTES: 4GB
-              ECHO_TRANSCODE_CACHE_MAX_BYTES: 2GB
-              ECHO_YT_CACHE_TTL: 48h
-              ECHO_LOG_LEVEL: info
-            envFrom:
-              # ECHO_DATABASE_URL, ECHO_ADMIN_EMAIL, ECHO_ADMIN_PASSWORD
-              - secretRef:
-                  name: *app
-            ports:
-              - containerPort: &port 8080
-                name: http
-                protocol: TCP
-            probes:
-              liveness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: &health /api/v1/health
-                    port: *port
-                  initialDelaySeconds: 10
-                  periodSeconds: 30
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: *health
-                    port: *port
-                  initialDelaySeconds: 5
-                  periodSeconds: 10
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: *health
-                    port: *port
-                  # Generous: migrations run at startup, and the first library
-                  # scan of a large collection takes minutes. The scan is a
-                  # background job so it does not actually gate readiness, but
-                  # a cold CNPG cluster can take a while to accept connections.
-                  failureThreshold: 30
-                  periodSeconds: 10
-            resources:
-              requests:
-                cpu: 25m
-                memory: 128Mi
-              limits:
-                # ffmpeg transcoding and yt-dlp are the only heavy work, and
-                # both are bounded by the job workers.
-                cpu: "2"
-                memory: 1Gi
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
-              readOnlyRootFilesystem: true
+        # The database URL and bootstrap admin arrive via envFrom, so restart
+        # on rotation.
+        annotations:
+          reloader.stakater.com/auto: "true"
 
-    persistence:
+        containerName: *app
+
+        replicas: 1
+        # Recreate, not the default rolling update. The volumes are
+        # ReadWriteOnce, so a second pod cannot attach them while the first
+        # still holds them, and the library watcher must be a singleton — two
+        # would each observe every event and enqueue duplicate work.
+        strategy:
+          type: Recreate
+
+        env:
+          - name: TZ
+            value: America/Toronto
+          # The image's home directory sits on the read-only root filesystem,
+          # and yt-dlp writes an extractor cache under $HOME. It degrades to
+          # warnings rather than failing, but pointing it at the tmp emptyDir
+          # keeps the log clean and the cache useful.
+          - name: HOME
+            value: /tmp
+          - name: ECHO_ADDR
+            value: ":8080"
+          # Scheme matters beyond cosmetics: the session cookie is marked
+          # Secure only when this is https, and a Secure cookie sent over the
+          # http-only internal gateway would be dropped by the browser, which
+          # presents as "login succeeds then immediately logs out".
+          - name: ECHO_BASE_URL
+            value: http://echo.j6n.internal
+          - name: ECHO_CACHE_DIR
+            value: /cache
+          # Only the writable root for now: promoted YouTube downloads land
+          # here.
+          - name: ECHO_LIBRARY_ROOTS
+            value: /library/downloads
+          # Password sign-in, to be replaced by Authentik. The bootstrap admin
+          # is created only while the users table is empty.
+          - name: ECHO_LOCAL_AUTH
+            value: "true"
+          # Both caches live on the same 8Gi volume, so both ceilings are set
+          # and sized to sum well below it — the defaults (5GB + 10GB) would
+          # overcommit it almost twofold. Eviction is reactive, running after a
+          # write lands, so the slack matters: without it a burst fills the
+          # disk and every subsequent write fails with ENOSPC instead of the
+          # cache simply making room.
+          - name: ECHO_YT_CACHE_MAX_BYTES
+            value: 4GB
+          - name: ECHO_TRANSCODE_CACHE_MAX_BYTES
+            value: 2GB
+          - name: ECHO_YT_CACHE_TTL
+            value: 48h
+          - name: ECHO_LOG_LEVEL
+            value: info
+
+        envFrom:
+          # ECHO_DATABASE_URL, ECHO_ADMIN_EMAIL, ECHO_ADMIN_PASSWORD
+          - secretRef:
+              name: *app
+
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+
+        livenessProbe:
+          httpGet:
+            path: &health /api/v1/health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: *health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        startupProbe:
+          httpGet:
+            path: *health
+            port: http
+          # Generous: migrations run at startup, and a cold CNPG cluster can
+          # take a while to accept connections. The library scan is a
+          # background job and does not gate readiness.
+          failureThreshold: 30
+          periodSeconds: 10
+
+        resources:
+          requests:
+            cpu: 25m
+            memory: 128Mi
+          limits:
+            # ffmpeg transcoding and yt-dlp are the only heavy work, and both
+            # are bounded by the job workers.
+            cpu: "2"
+            memory: 1Gi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+
+        podSecurityContext:
+          # 10001, not the usual 1000: the image creates its own user at that
+          # uid and chowns /cache and /library to it, so running as anything
+          # else leaves both unwritable.
+          runAsUser: 10001
+          runAsGroup: 10001
+          runAsNonRoot: true
+          fsGroup: 10001
+          fsGroupChangePolicy: OnRootMismatch
+
+        volumes:
+          - name: cache
+            persistentVolumeClaim:
+              claimName: echo-cache
+          - name: downloads
+            persistentVolumeClaim:
+              claimName: echo-downloads
+          # Required, not incidental: the root filesystem is read-only, and
+          # both yt-dlp and the transcoder stage output through temp files.
+          - name: tmp
+            emptyDir: {}
+
+        volumeMounts:
+          - name: cache
+            mountPath: /cache
+          - name: downloads
+            mountPath: /library/downloads
+          - name: tmp
+            mountPath: /tmp
+
+    services:
+      app:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: http
+            protocol: TCP
+            name: http
+
+    persistentVolumeClaims:
       # Disposable: transcodes rebuild on demand, extracted art on rescan, and
-      # YouTube items re-download. Sized so the app's own cache ceiling has
-      # headroom above it rather than fighting the volume for space.
+      # YouTube items re-download. Sized so the app's own cache ceilings have
+      # headroom above them rather than fighting the volume for space.
       cache:
-        type: persistentVolumeClaim
+        storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 8Gi
-        storageClass: longhorn
-        globalMounts:
-          - path: /cache
 
       # Not disposable. Promoted YouTube downloads are the only copy once the
       # cache entry expires.
       downloads:
-        type: persistentVolumeClaim
+        storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 10Gi
-        storageClass: longhorn
-        globalMounts:
-          - path: /library/downloads
-
-      # Required, not incidental: the root filesystem is read-only, and both
-      # yt-dlp and the transcoder stage output through temporary files.
-      tmp:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
-
-      # Uncomment to serve an existing music collection, read-only. The subPath
-      # is a guess — point it at wherever music actually lives on the share.
-      # Echo never writes to a library root; the mount is read-only to enforce
-      # that at the kernel rather than trusting the application.
-      #
-      # music:
-      #   type: nfs
-      #   server: mimir.home
-      #   path: /var/nfs/shared/MEDIA
-      #   globalMounts:
-      #     - path: /music
-      #       readOnly: true
-      #       subPath: data/media/music
-      #
-      # ...and add /music to ECHO_LIBRARY_ROOTS above, before
-      # /library/downloads. The last root listed is the writable one.
-
-    route:
-      app:
-        annotations:
-          gatus.home-operations.com/enabled: "true"
-          # The sidecar assumes https; envoy-internal is http-only.
-          gatus.home-operations.com/endpoint: |
-            group: Self-Hosted
-            url: http://echo.j6n.internal/api/v1/health
-        hostnames:
-          - echo.j6n.internal
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
-
-    service:
-      app:
-        ports:
-          http:
-            port: *port
