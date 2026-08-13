@@ -32,8 +32,17 @@ spec:
               # IMAGE_STEPS: 8
               # COMFYUI_BASE_URL:
               # Open-webui settings
-              # Multiple OpenAI-compatible endpoints; keys come from the secret as OPENAI_API_KEYS
-              OPENAI_API_BASE_URLS: http://jarvis.home:13305/api/v1;http://hermes-agent-app.hermes-agent:8642/v1;https://api.minimax.chat/v1
+              # Single upstream: every keyed provider this used to reach
+              # directly now sits behind litellm, so the provider keys stay in
+              # one place. Two things are therefore NOT reachable from here:
+              # hermes-agent (a client of the proxy, not a model on it) and
+              # jarvis.home (unkeyed, so litellm no longer proxies it) — which
+              # means this UI is hosted models only. Add jarvis.home back as a
+              # second entry here if local models are wanted in the UI.
+              # Model IDs shown are litellm's `model_name` values and differ
+              # from the old direct ones — a saved default may need re-picking.
+              # The key comes from the secret as OPENAI_API_KEYS.
+              OPENAI_API_BASE_URLS: http://litellm.litellm:4000/v1
               # Enable once searxng is ready
               ENABLE_RAG_WEB_SEARCH: false
               ENABLE_SEARCH_QUERY: false

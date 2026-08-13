@@ -5,11 +5,18 @@ metadata:
   name: &app hermes-agent
 data:
   config.yaml: |
-    model: minimax/MiniMax-M3
+    # Model names are litellm's `model_name` values, not the upstream provider's
+    # — litellm exposes MiniMax as a bare `MiniMax-M3`, so the old
+    # `minimax/MiniMax-M3` would 400 as an unknown model here.
+    model: litellm/MiniMax-M3
     providers:
-      minimax:
-        api_key: ${MINIMAX_API_KEY}
-        base_url: https://api.minimax.chat/v1
+      # The upstream MiniMax key now lives only in the litellm secret; this app
+      # holds a litellm virtual key so its spend is attributable in litellm's
+      # own logs. litellm deliberately exposes no model that routes back here,
+      # which is what keeps this from being able to loop.
+      litellm:
+        api_key: ${LITELLM_API_KEY}
+        base_url: http://litellm.litellm:4000/v1
       local:
         base_url: ${OLLAMA_URL}
     terminal:

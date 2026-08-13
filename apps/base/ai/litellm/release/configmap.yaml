@@ -13,18 +13,22 @@ data:
           api_base: https://api.minimax.chat/v1
           api_key: os.environ/MINIMAX_API_KEY
 
-      - model_name: hermes-agent
+      # Vision model. Only openclaw asked for it, but it has to be listed here
+      # to survive openclaw moving off its direct MiniMax provider.
+      - model_name: MiniMax-VL-01
         litellm_params:
-          model: openai/hermes-agent
-          api_base: http://hermes-agent-app.hermes-agent:8642/v1
-          api_key: os.environ/HERMES_AGENT_API_KEY
+          model: openai/MiniMax-VL-01
+          api_base: https://api.minimax.chat/v1
+          api_key: os.environ/MINIMAX_API_KEY
 
-      # local ollama/openai-compatible passthrough (jarvis.home)
-      - model_name: jarvis/*
-        litellm_params:
-          model: openai/*
-          api_base: http://jarvis.home:13305/v1
-          api_key: "none"
+      # Two things are deliberately absent here.
+      #   hermes-agent: it is a *client* of this proxy, so routing a model back
+      #     to it would let a request loop.
+      #   jarvis.home: the local endpoint needs no credential, so proxying it
+      #     buys nothing this config exists to provide. Callers that want the
+      #     local models dial jarvis.home directly (hermes-agent's `local`
+      #     provider, openclaw's `lemonade` provider), which also means they
+      #     keep working when this proxy is down.
 
       # --- opencode-go models (https://opencode.ai/zen/go/v1) ---
       - model_name: glm-5.1
