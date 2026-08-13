@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: echo-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Self-Hosted
+      url: http://echo.j6n.internal/api/v1/health
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  hostnames:
+    - echo.j6n.internal
+  rules:
+    - backendRefs:
+        # generic names resources <release>-<key>, so the service backing
+        # deployments.app is echo-app rather than echo
+        - name: echo-app
+          port: 8080
