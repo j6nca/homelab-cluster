@@ -31,6 +31,13 @@ spec:
   interval: 5m
   path: ./apps/base/csi-driver-nfs/storageclasses
   prune: true
+  # StorageClass parameters are immutable, so renaming the NFS server cannot
+  # be patched in place — the apply fails with "updates to parameters are
+  # forbidden" and the kustomization stalls until the object is deleted by
+  # hand. force lets Flux delete and recreate it instead. Safe here because
+  # this path holds nothing but StorageClasses: recreating one does not touch
+  # any PV or PVC already provisioned through it.
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

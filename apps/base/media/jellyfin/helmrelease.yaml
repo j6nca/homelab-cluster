@@ -15,6 +15,14 @@ spec:
       version: 2.6.0
   interval: 15m
   values:
+    # The chart defaults to RollingUpdate, which deadlocks here: config and
+    # media are both ReadWriteOnce Longhorn volumes, so the replacement pod
+    # cannot attach them while the outgoing pod still holds them, and the
+    # outgoing pod is not torn down until the replacement is ready. Recreate
+    # accepts a few seconds of downtime instead of hanging indefinitely.
+    deploymentStrategy:
+      type: Recreate
+
     persistence:
       # Jellyfin configs
       config:

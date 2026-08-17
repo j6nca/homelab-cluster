@@ -157,7 +157,7 @@ spec:
               claimName: echo-downloads
           - name: music
             nfs:
-              server: mimir.home
+              server: mimir.internal
               # The export root, with the subdirectory selected at mount time
               # below — the same shape the other media apps use.
               path: /var/nfs/shared/MEDIA

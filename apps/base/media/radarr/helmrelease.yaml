@@ -13,6 +13,10 @@ spec:
   values:
     controllers:
       radarr:
+        # The config volume is ReadWriteOnce, so the default RollingUpdate
+        # deadlocks: the incoming pod waits for a volume the outgoing pod will
+        # not release until the incoming pod is ready.
+        strategy: Recreate
         containers:
           app:
             image:
