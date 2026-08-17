@@ -24,9 +24,9 @@ data:
       # Two things are deliberately absent here.
       #   hermes-agent: it is a *client* of this proxy, so routing a model back
       #     to it would let a request loop.
-      #   jarvis.home: the local endpoint needs no credential, so proxying it
-      #     buys nothing this config exists to provide. Callers that want the
-      #     local models dial jarvis.home directly (hermes-agent's `local`
+      #   jarvis.internal: the local endpoint needs no credential, so proxying
+      #     it buys nothing this config exists to provide. Callers that want the
+      #     local models dial jarvis.internal directly (hermes-agent's `local`
       #     provider, openclaw's `lemonade` provider), which also means they
       #     keep working when this proxy is down.
 

@@ -70,7 +70,7 @@ spec:
         accessMode: ReadWriteOnce
       media:
         type: nfs
-        server: mimir.home
+        server: mimir.internal
         path: /var/nfs/shared/MEDIA
         # Needs access to both downloads and media
         globalMounts:

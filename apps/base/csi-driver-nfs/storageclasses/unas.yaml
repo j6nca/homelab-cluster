@@ -6,7 +6,7 @@ metadata:
   name: nfs-unas-media
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: mimir.home
+  server: mimir.internal
   share: /var/nfs/shared/MEDIA
 reclaimPolicy: Delete
 volumeBindingMode: Immediate

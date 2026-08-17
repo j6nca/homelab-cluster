@@ -30,7 +30,7 @@ spec:
     volumes:
       - name: data
         nfs:
-          server: mimir.home
+          server: mimir.internal
           path: /var/nfs/shared/MEDIA
 
     volumeMounts:

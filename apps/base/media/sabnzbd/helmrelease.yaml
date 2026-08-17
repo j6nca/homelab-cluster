@@ -87,7 +87,7 @@ spec:
         accessMode: ReadWriteOnce
       media:
         type: nfs
-        server: mimir.home
+        server: mimir.internal
         path: /var/nfs/shared/MEDIA
         globalMounts:
           - subPath: data/usenet

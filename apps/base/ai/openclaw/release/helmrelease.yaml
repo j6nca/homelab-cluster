@@ -97,7 +97,7 @@ spec:
       # Workspace data
       workspace:
         type: nfs
-        server: mimir.home
+        server: mimir.internal
         path: /var/nfs/shared/LLM
         globalMounts:
           - subPath: openclaw/workspaces
