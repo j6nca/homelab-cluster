@@ -51,12 +51,15 @@ spec:
             value: /tmp
           - name: ECHO_ADDR
             value: ":8080"
-          # Scheme matters beyond cosmetics: the session cookie is marked
-          # Secure only when this is https, and a Secure cookie sent over the
-          # http-only internal gateway would be dropped by the browser, which
-          # presents as "login succeeds then immediately logs out".
+          # The public name, not the internal one: Google rejects redirect URIs
+          # on private domains and over plain http, so the OAuth callback can
+          # only land here. The session cookie is marked Secure because this is
+          # https, which is also why signing in over echo.j6n.internal does not
+          # work — the browser drops a Secure cookie sent over the http-only
+          # internal gateway, presenting as "login succeeds then immediately
+          # logs out".
           - name: ECHO_BASE_URL
-            value: http://echo.j6n.internal
+            value: https://music.j6n.dev
           - name: ECHO_CACHE_DIR
             value: /cache
           # Order matters only in that the collection comes first; both are
@@ -64,20 +67,10 @@ spec:
           # the writable volume promoted YouTube tracks land in.
           - name: ECHO_LIBRARY_ROOTS
             value: /music,/library/downloads
-          # Sign-in is Authentik only. The issuer is config rather than a
-          # secret, so it lives here where it is visible — but the app refuses
-          # to start unless the issuer, client id, and client secret are all
-          # present, and the other two arrive via envFrom below.
-          #
-          # Copied verbatim from Authentik's discovery document: the issuer is
-          # compared as an exact string, so a missing trailing slash or a
-          # mismatched application slug fails at startup rather than at
-          # sign-in.
-          - name: ECHO_OIDC_ISSUER_URL
-            value: https://auth.j6n.dev/application/o/echo/
-          # Button label. Defaults to "SSO" when unset.
-          - name: ECHO_OIDC_NAME
-            value: Authentik
+          # Sign-in is Google only; the client id and secret arrive together
+          # via envFrom below. Nothing else is needed here — the redirect URI
+          # is derived from ECHO_BASE_URL as $ECHO_BASE_URL/auth/google/callback
+          # and must be registered on the OAuth client verbatim.
           # Both caches live on the same 8Gi volume, so both ceilings are set
           # and sized to sum well below it — the defaults (5GB + 10GB) would
           # overcommit it almost twofold. Eviction is reactive, running after a
@@ -94,7 +87,7 @@ spec:
             value: info
 
         envFrom:
-          # ECHO_DATABASE_URL, ECHO_OIDC_CLIENT_ID, ECHO_OIDC_CLIENT_SECRET
+          # ECHO_DATABASE_URL, ECHO_GOOGLE_CLIENT_ID, ECHO_GOOGLE_CLIENT_SECRET
           - secretRef:
               name: *app
 

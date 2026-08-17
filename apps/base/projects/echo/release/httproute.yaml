@@ -3,6 +3,29 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  name: echo-external
+  annotations:
+    # group: External inherited from the envoy-external gateway
+    gatus.home-operations.com/enabled: "true"
+spec:
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  # Public because Google will not accept a redirect URI on a private domain
+  # or over plain http, so sign-in has to happen here rather than on the
+  # internal name.
+  hostnames:
+    - music.j6n.dev
+  rules:
+    - backendRefs:
+        # generic names resources <release>-<key>, so the service backing
+        # deployments.app is echo-app rather than echo
+        - name: echo-app
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
   name: echo-internal
   annotations:
     gatus.home-operations.com/enabled: "true"
@@ -14,11 +37,12 @@ spec:
   parentRefs:
     - name: envoy-internal
       namespace: network
+  # Kept for the health check and LAN access, but signing in over this name
+  # does not work: ECHO_BASE_URL is https, so the session cookie is marked
+  # Secure and the browser drops it over the http-only internal gateway.
   hostnames:
     - echo.j6n.internal
   rules:
     - backendRefs:
-        # generic names resources <release>-<key>, so the service backing
-        # deployments.app is echo-app rather than echo
         - name: echo-app
           port: 8080
