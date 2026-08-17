@@ -64,10 +64,20 @@ spec:
           # the writable volume promoted YouTube tracks land in.
           - name: ECHO_LIBRARY_ROOTS
             value: /music,/library/downloads
-          # Password sign-in, to be replaced by Authentik. The bootstrap admin
-          # is created only while the users table is empty.
-          - name: ECHO_LOCAL_AUTH
-            value: "true"
+          # Sign-in is Authentik only. The issuer is config rather than a
+          # secret, so it lives here where it is visible — but the app refuses
+          # to start unless the issuer, client id, and client secret are all
+          # present, and the other two arrive via envFrom below.
+          #
+          # Copied verbatim from Authentik's discovery document: the issuer is
+          # compared as an exact string, so a missing trailing slash or a
+          # mismatched application slug fails at startup rather than at
+          # sign-in.
+          - name: ECHO_OIDC_ISSUER_URL
+            value: https://auth.j6n.dev/application/o/echo/
+          # Button label. Defaults to "SSO" when unset.
+          - name: ECHO_OIDC_NAME
+            value: Authentik
           # Both caches live on the same 8Gi volume, so both ceilings are set
           # and sized to sum well below it — the defaults (5GB + 10GB) would
           # overcommit it almost twofold. Eviction is reactive, running after a
@@ -84,7 +94,7 @@ spec:
             value: info
 
         envFrom:
-          # ECHO_DATABASE_URL, ECHO_ADMIN_EMAIL, ECHO_ADMIN_PASSWORD
+          # ECHO_DATABASE_URL, ECHO_OIDC_CLIENT_ID, ECHO_OIDC_CLIENT_SECRET
           - secretRef:
               name: *app
 
