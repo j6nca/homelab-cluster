@@ -28,6 +28,13 @@ spec:
       config:
         enabled: true
         storageClass: longhorn
+        # 20Gi, not the chart's default 5Gi. This volume holds far more than
+        # configuration: the library database, and a downloaded image for every
+        # artist, album, and track, which is what actually grows. 10.11 refuses
+        # to start when the data path has less than 2G free, so filling it is
+        # not a degradation — the server simply stops coming up, which is how
+        # this was found.
+        size: 20Gi
       # Jellyfin metadata (not to be confused with actual media files)
       media:
         enabled: true
