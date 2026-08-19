@@ -13,7 +13,6 @@ spec:
         name: ctrl-research
         namespace: flux-system
       version: 0.3.0
-  # cnpg is appended by the components/postgres patch.
   dependsOn: []
   interval: 15m
   values:
@@ -21,112 +20,53 @@ spec:
       app:
         image:
           registry: ghcr.io
-          repository: ctrl-research/echo
-          tag: 0.1.0
+          # The client image, not the standalone server: static files behind
+          # nginx, with no database and no yt-dlp. The server image is still
+          # published from the same repo under ctrl-research/echo.
+          repository: ctrl-research/echo-client
+          tag: 0.3.0
           pullPolicy: IfNotPresent
-
-        # The database URL and bootstrap admin arrive via envFrom, so restart
-        # on rotation.
-        annotations:
-          reloader.stakater.com/auto: "true"
 
         containerName: *app
 
-        replicas: 1
-        # Recreate, not the default rolling update. The volumes are
-        # ReadWriteOnce, so a second pod cannot attach them while the first
-        # still holds them, and the library watcher must be a singleton — two
-        # would each observe every event and enqueue duplicate work.
-        strategy:
-          type: Recreate
+        # Two, and a rolling update, both of which the standalone server could
+        # not have: there are no ReadWriteOnce volumes to contend over and no
+        # singleton filesystem watcher. The pod holds nothing but a copy of the
+        # built assets, so rollouts are now zero-downtime.
+        replicas: 2
 
         env:
           - name: TZ
             value: America/Toronto
-          # The image's home directory sits on the read-only root filesystem,
-          # and yt-dlp writes an extractor cache under $HOME. It degrades to
-          # warnings rather than failing, but pointing it at the tmp emptyDir
-          # keeps the log clean and the cache useful.
-          - name: HOME
-            value: /tmp
-          - name: ECHO_ADDR
-            value: ":8080"
-          # The public name, not the internal one: Google rejects redirect URIs
-          # on private domains and over plain http, so the OAuth callback can
-          # only land here. The session cookie is marked Secure because this is
-          # https, which is also why signing in over echo.j6n.internal does not
-          # work — the browser drops a Secure cookie sent over the http-only
-          # internal gateway, presenting as "login succeeds then immediately
-          # logs out".
-          - name: ECHO_BASE_URL
-            value: https://music.j6n.dev
-          - name: ECHO_CACHE_DIR
-            value: /cache
-          # Order matters only in that the collection comes first; both are
-          # scanned. /music is the read-only NFS share, /library/downloads is
-          # the writable volume promoted YouTube tracks land in.
-          - name: ECHO_LIBRARY_ROOTS
-            value: /music,/library/downloads
-          # Sign-in is Google only; the client id and secret arrive together
-          # via envFrom below. Nothing else is needed here — the redirect URI
-          # is derived from ECHO_BASE_URL as $ECHO_BASE_URL/auth/google/callback
-          # and must be registered on the OAuth client verbatim.
-          # Both caches live on the same 8Gi volume, so both ceilings are set
-          # and sized to sum well below it — the defaults (5GB + 10GB) would
-          # overcommit it almost twofold. Eviction is reactive, running after a
-          # write lands, so the slack matters: without it a burst fills the
-          # disk and every subsequent write fails with ENOSPC instead of the
-          # cache simply making room.
-          - name: ECHO_YT_CACHE_MAX_BYTES
-            value: 4GB
-          - name: ECHO_TRANSCODE_CACHE_MAX_BYTES
-            value: 2GB
-          - name: ECHO_YT_CACHE_TTL
-            value: 48h
-          - name: ECHO_LOG_LEVEL
-            value: info
-
-        envFrom:
-          # ECHO_DATABASE_URL, ECHO_GOOGLE_CLIENT_ID, ECHO_GOOGLE_CLIENT_SECRET
-          - secretRef:
-              name: *app
 
         ports:
           - containerPort: 8080
             name: http
             protocol: TCP
 
+        # Static files: if nginx is listening it is serving. No startupProbe,
+        # because there is no migration or scan to wait on — the old one existed
+        # for a database that no longer exists.
         livenessProbe:
           httpGet:
-            path: &health /api/v1/health
+            path: &health /index.html
             port: http
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: *health
             port: http
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        startupProbe:
-          httpGet:
-            path: *health
-            port: http
-          # Generous: migrations run at startup, and a cold CNPG cluster can
-          # take a while to accept connections. The library scan is a
-          # background job and does not gate readiness.
-          failureThreshold: 30
+          initialDelaySeconds: 2
           periodSeconds: 10
 
         resources:
           requests:
-            cpu: 25m
-            memory: 128Mi
+            cpu: 10m
+            memory: 32Mi
           limits:
-            # ffmpeg transcoding and yt-dlp are the only heavy work, and both
-            # are bounded by the job workers.
-            cpu: "2"
-            memory: 1Gi
+            cpu: 200m
+            memory: 128Mi
 
         securityContext:
           allowPrivilegeEscalation: false
@@ -136,53 +76,25 @@ spec:
           readOnlyRootFilesystem: true
 
         podSecurityContext:
-          # 10001, not the usual 1000: the image creates its own user at that
-          # uid and chowns /cache and /library to it, so running as anything
-          # else leaves both unwritable.
-          runAsUser: 10001
-          runAsGroup: 10001
+          # 101 is the uid baked into nginx-unprivileged.
+          runAsUser: 101
+          runAsGroup: 101
           runAsNonRoot: true
-          fsGroup: 10001
-          fsGroupChangePolicy: OnRootMismatch
-          # gid 100 ("users") is what sonarr and friends write the media share
-          # as. fsGroup does not apply to NFS volumes — the kubelet cannot
-          # chown them — so without membership in that group a uid-10001
-          # process gets EACCES on anything not world-readable.
-          supplementalGroups:
-            - 100
 
+        # Required by readOnlyRootFilesystem: nginx writes its pid to /tmp and
+        # buffers request bodies and proxy responses under /var/cache/nginx.
+        # Without both it fails to start rather than degrading.
         volumes:
-          - name: cache
-            persistentVolumeClaim:
-              claimName: echo-cache
-          - name: downloads
-            persistentVolumeClaim:
-              claimName: echo-downloads
-          - name: music
-            nfs:
-              server: mimir.internal
-              # The export root, with the subdirectory selected at mount time
-              # below — the same shape the other media apps use.
-              path: /var/nfs/shared/MEDIA
-              readOnly: true
-          # Required, not incidental: the root filesystem is read-only, and
-          # both yt-dlp and the transcoder stage output through temp files.
           - name: tmp
+            emptyDir: {}
+          - name: cache
             emptyDir: {}
 
         volumeMounts:
-          - name: cache
-            mountPath: /cache
-          - name: downloads
-            mountPath: /library/downloads
-          - name: music
-            mountPath: /music
-            # Echo never writes to a library root; enforced here at the kernel
-            # rather than trusted to the application.
-            readOnly: true
-            subPath: data/media/music
           - name: tmp
             mountPath: /tmp
+          - name: cache
+            mountPath: /var/cache/nginx
 
     services:
       app:
@@ -192,19 +104,3 @@ spec:
             targetPort: http
             protocol: TCP
             name: http
-
-    persistentVolumeClaims:
-      # Disposable: transcodes rebuild on demand, extracted art on rescan, and
-      # YouTube items re-download. Sized so the app's own cache ceilings have
-      # headroom above them rather than fighting the volume for space.
-      cache:
-        storageClass: longhorn
-        accessMode: ReadWriteOnce
-        size: 8Gi
-
-      # Not disposable. Promoted YouTube downloads are the only copy once the
-      # cache entry expires.
-      downloads:
-        storageClass: longhorn
-        accessMode: ReadWriteOnce
-        size: 10Gi

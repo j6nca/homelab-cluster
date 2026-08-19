@@ -6,40 +6,10 @@ metadata:
   name: &app echo
   namespace: flux-system
 spec:
-  components:
-    - ../../../../../components/postgres
-  # Echo needs PostgreSQL 18 or newer: primary keys default to uuidv7(), which
-  # is a builtin only from 18 — on 17 the very first migration fails with
-  # "function uuidv7() does not exist" and the app never starts. The shared
-  # component leaves imageName unset, so the cluster would otherwise get
-  # whatever major the operator happens to default to. Pinned here rather than
-  # in the component so no other app's database moves as a side effect.
-  patches:
-    - target:
-        group: postgresql.cnpg.io
-        version: v1
-        kind: Cluster
-        # Selected by kind alone, with no name. These patches are applied
-        # before postBuild substitution runs, so at this point the Cluster is
-        # still literally named ${APP}-postgres — a `name: echo-postgres`
-        # selector matches nothing, and kustomize reports no error when a
-        # target misses. It would simply deploy the default major and fail at
-        # the first migration. This path renders exactly one Cluster.
-      patch: |-
-        - op: add
-          path: /spec/imageName
-          # Major-only tag: CNPG applies minor updates in place, and pinning a
-          # specific minor here would mean hand-editing this file for routine
-          # patch releases. Majors never move on their own.
-          value: ghcr.io/cloudnative-pg/postgresql:18
-  postBuild:
-    substitute:
-      APP: *app
-      POSTGRES_REPLICAS: "1"
-      # Holds library metadata, play history, and playlists — text and
-      # timestamps, no audio. A 2Gi volume covers a library far larger than
-      # this cluster will hold.
-      POSTGRES_SIZE: 2Gi
+  # No postgres component any more. Echo is a client now: the library and its
+  # metadata, playlists, favourites, and play history all live in Jellyfin, so
+  # there is nothing left for it to store. Removing the component prunes the
+  # CNPG Cluster and Database along with their volume.
   targetNamespace: *app
   commonMetadata:
     labels:
