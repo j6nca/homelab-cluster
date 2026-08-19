@@ -41,7 +41,16 @@ spec:
                 storageClassName: longhorn
                 resources:
                   requests:
-                    storage: 15Gi
+                    # 2Gi per replica, down from 15Gi. Kubernetes cannot shrink
+                    # a PVC, so this applies only to volumes created after it —
+                    # the existing pair has to be deleted and recreated by the
+                    # StatefulSet.
+                    #
+                    # Sized against the one month retentionPeriod above. If a
+                    # month of samples outgrows 2Gi, vmstorage does not crash:
+                    # it trips its own free-space guard and goes read-only,
+                    # dropping writes quietly rather than loudly.
+                    storage: 2Gi
     vmagent:
       enabled: true
       spec:
