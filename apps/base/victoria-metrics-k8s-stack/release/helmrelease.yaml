@@ -51,6 +51,24 @@ spec:
                     # it trips its own free-space guard and goes read-only,
                     # dropping writes quietly rather than loudly.
                     storage: 2Gi
+        vmselect:
+          # The chart defaults this to a 2Gi longhorn PVC per replica, so the
+          # query cache was claiming 4Gi — as much as the metrics it serves.
+          # A select cache is rebuildable by definition: vmselect repopulates
+          # it from vmstorage on a miss, so the only cost of losing it is a
+          # few slow queries after a restart.
+          #
+          # `null` rather than a smaller size, and rather than an empty map:
+          # helm deletes a key whose user-supplied value is null, and the
+          # operator's rule is "add a persistent volume for cacheMountPath if
+          # storage is defined, else emptyDir". Leaving it absent is what
+          # selects emptyDir. cacheMountPath stays set — blanking that would
+          # disable caching outright rather than move it off longhorn.
+          #
+          # Also the point of the exercise: with no PVC there is nothing here
+          # for volsync to replicate, so the cache cannot re-enter the backup
+          # set by someone later pointing a ReplicationSource at it.
+          storage: null
     vmagent:
       enabled: true
       spec:

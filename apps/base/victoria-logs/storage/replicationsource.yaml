@@ -21,7 +21,10 @@ spec:
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: vmks-1
+  # vlc-1, not vmks-1: this and the victoria-metrics stack both deploy into
+  # observability, so the old name collided with that stack's own vmks-1 and
+  # the two Flux Kustomizations fought over one object.
+  name: vlc-1
 spec:
   sourcePVC: vlstorage-volume-vlc-victoria-logs-cluster-vlstorage-1
   trigger:
