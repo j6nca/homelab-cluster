@@ -2,6 +2,12 @@
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
+  # The only source here: vmstorage runs a single node, and it was never
+  # sharded even at two — both nodes held the whole dataset, so this one PVC
+  # is a complete backup rather than half of a pair. The vmks-1 source and its
+  # vmks-1-replication secret were removed alongside the scale-down; the
+  # restic repo they wrote is now orphaned and can be deleted from R2 once its
+  # snapshots are no longer wanted.
   name: vmks-0
 spec:
   sourcePVC: vmstorage-db-vmstorage-vmks-victoria-metrics-k8s-stack-0
@@ -12,25 +18,6 @@ spec:
     pruneIntervalDays: 7
     # Name of secret with bucket config
     repository: vmks-0-replication
-    # Backup retention policy
-    retain:
-      daily: 7
-    # Use Snapshot method for longhorn
-    copyMethod: Snapshot
----
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationSource
-metadata:
-  name: vmks-1
-spec:
-  sourcePVC: vmstorage-db-vmstorage-vmks-victoria-metrics-k8s-stack-1
-  trigger:
-    # Run backup daily @ midnight
-    schedule: "0 0 * * *"
-  restic:
-    pruneIntervalDays: 7
-    # Name of secret with bucket config
-    repository: vmks-1-replication
     # Backup retention policy
     retain:
       daily: 7

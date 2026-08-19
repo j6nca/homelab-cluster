@@ -31,9 +31,17 @@ spec:
       enabled: true
       spec:
         retentionPeriod: "1"
-        replicationFactor: 2
+        # RF must not exceed the vmstorage node count — vminsert refuses to
+        # start otherwise. It was 2 against 2 nodes, which is not sharding:
+        # every node held the whole dataset, so dropping to a single node
+        # loses no capacity and no series. Durability comes from longhorn
+        # replicating the volume underneath, not from a second VM node.
+        replicationFactor: 1
         vmstorage:
-          replicaCount: 2
+          # One node, down from two. The tradeoff bought here is availability,
+          # not durability: while this pod restarts there is no other node to
+          # serve reads, so queries fail for that window instead of degrading.
+          replicaCount: 1
           storageDataPath: /vm-data
           storage:
             volumeClaimTemplate:
