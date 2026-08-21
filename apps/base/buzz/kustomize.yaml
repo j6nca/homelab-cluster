@@ -1,4 +1,14 @@
 ---
+# NOT DEPLOYED. clusters/homelab/apps/buzz was removed to reclaim longhorn
+# pool: buzz-postgres at 3Gi and seaweedfs at 1Gi cost ~12Gi between them once
+# the storageclass's 3 replicas are counted. Kept here so re-enabling is a
+# matter of restoring that directory, the buzz entry under
+# clusters/homelab/repos/oci, and seaweedfs alongside it.
+#
+# Nothing was backed up before the prune — buzz had no volsync
+# ReplicationSource — so the relay database and the buzz-media bucket are
+# gone. A redeploy is a fresh install, not a restore, and would want a
+# ReplicationSource of its own before it holds anything worth keeping.
 # yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
