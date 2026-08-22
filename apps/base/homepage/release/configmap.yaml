@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/configmap_v1.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: &app homepage
+data:
+  # Every file homepage looks for has to be present. It creates defaults for
+  # any that are missing, which fails against read-only subPath mounts — so
+  # the empty ones below are deliberate rather than leftovers.
+  settings.yaml: |
+    title: homelab
+    headerStyle: clean
+    statusStyle: dot
+    # Group order and width. Names must match the gethomepage.dev/group
+    # annotations on the HTTPRoutes; anything discovered under a group not
+    # listed here still renders, just after these.
+    layout:
+      Observability:
+        style: row
+        columns: 4
+      AI:
+        style: row
+        columns: 3
+      Media:
+        style: row
+        columns: 4
+      Self-Hosted:
+        style: row
+        columns: 4
+      Home:
+        style: row
+        columns: 3
+      Storage:
+        style: row
+        columns: 3
+      Network:
+        style: row
+        columns: 3
+      Tools:
+        style: row
+        columns: 4
+
+  kubernetes.yaml: |
+    # cluster mode uses the in-cluster service account rather than a
+    # kubeconfig, which is what the RBAC alongside this grants.
+    mode: cluster
+    # The reason homepage was picked over the alternatives: this cluster
+    # exposes everything through Gateway API HTTPRoutes and has no Ingress
+    # objects at all, so without this nothing would ever be discovered.
+    gateway: true
+
+  services.yaml: |
+    # Intentionally empty. Services come from gethomepage.dev/* annotations
+    # on the HTTPRoutes themselves, so a new app appears here by being
+    # deployed rather than by editing this file. Anything that needs a link
+    # without a route of its own would go here.
+    []
+
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: homelab
+        # Per-node rows are noise on a cluster this size; the aggregate above
+        # is the useful number.
+        nodes:
+          show: false
+    - search:
+        provider: duckduckgo
+        target: _blank
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: medium
+
+  bookmarks.yaml: |
+    - Cluster:
+        - Repo:
+            - abbr: GH
+              href: https://github.com/j6nca/homelab-cluster
+        - Longhorn:
+            - abbr: LH
+              href: http://longhorn.j6n.internal
+
+  # No docker socket is mounted — discovery here is kubernetes-only — but the
+  # file still has to exist so homepage does not try to write one.
+  docker.yaml: |
+    {}

@@ -6,6 +6,12 @@ metadata:
   name: echo-internal
   annotations:
     gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Echo
+    gethomepage.dev/group: Self-Hosted
+    gethomepage.dev/icon: mdi-music
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Self-Hosted

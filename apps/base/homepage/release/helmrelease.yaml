@@ -1,0 +1,110 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app homepage
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      homepage:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: *app
+        containers:
+          app:
+            image:
+              repository: ghcr.io/gethomepage/homepage
+              # Deliberately on 2.1.x rather than the settled 1.13: gateway-api
+              # discovery got real fixes in 2.1.0 (routeNamespace fallback,
+              # error logging) and that discovery is the entire reason this app
+              # was chosen. .2 specifically — 2.1.1 shipped a yaml parsing bug
+              # that breaks config files and was fixed hours later.
+              tag: v2.1.2
+            env:
+              TZ: America/Toronto
+              # Not optional. Homepage validates the Host header and answers
+              # 400 for anything unlisted, so without this the route returns
+              # errors while the pod looks perfectly healthy. localhost and
+              # 127.0.0.1 are always allowed; the LAN name is not.
+              HOMEPAGE_ALLOWED_HOSTS: home.j6n.internal
+            probes:
+              # kubelet probes dial the pod IP, which is not in ALLOWED_HOSTS
+              # and cannot be without templating the pod IP in. Overriding the
+              # Host header is the deterministic fix: the request presents the
+              # name homepage already trusts.
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 3000
+                    httpHeaders:
+                      - name: Host
+                        value: home.j6n.internal
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            ports:
+              - containerPort: *port
+                name: http
+                protocol: TCP
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+    serviceAccount:
+      homepage: {}
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    persistence:
+      # Mounted file-by-file rather than as a directory. A whole-directory
+      # configMap mount would make /app/config read-only, and homepage writes
+      # into it — see the logs volume below.
+      config:
+        type: configMap
+        name: *app
+        globalMounts:
+          - path: /app/config/settings.yaml
+            subPath: settings.yaml
+            readOnly: true
+          - path: /app/config/kubernetes.yaml
+            subPath: kubernetes.yaml
+            readOnly: true
+          - path: /app/config/services.yaml
+            subPath: services.yaml
+            readOnly: true
+          - path: /app/config/widgets.yaml
+            subPath: widgets.yaml
+            readOnly: true
+          - path: /app/config/bookmarks.yaml
+            subPath: bookmarks.yaml
+            readOnly: true
+          - path: /app/config/docker.yaml
+            subPath: docker.yaml
+            readOnly: true
+      # Homepage writes its logs under the config directory. Without a
+      # writable volume here it logs an error on every start.
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/config/logs

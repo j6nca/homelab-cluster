@@ -5,6 +5,12 @@ metadata:
   name: gatus-internal
   annotations:
     gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Gatus
+    gethomepage.dev/group: Observability
+    gethomepage.dev/icon: gatus.png
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Observability
