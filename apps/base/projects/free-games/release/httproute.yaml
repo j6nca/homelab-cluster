@@ -23,6 +23,12 @@ metadata:
   name: free-games-internal
   annotations:
     gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Free Games
+    gethomepage.dev/group: Self-Hosted
+    gethomepage.dev/icon: mdi-gift
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Self-Hosted

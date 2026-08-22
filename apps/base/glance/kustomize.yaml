@@ -1,3 +1,15 @@
+# NOT DEPLOYED. Replaced by homepage as the cluster dashboard, and
+# clusters/homelab/apps/glance was removed alongside that change.
+#
+# Kept rather than deleted because the two do different jobs, and the part
+# below is the part that is not reproducible. homepage is an application
+# launcher populated from HTTPRoute annotations; the config here is a curated
+# news start page — RSS feeds, subreddits, youtube channels, markets — which
+# homepage has no equivalent for. Restoring that reading list means restoring
+# this file.
+#
+# Nothing here held state, so re-enabling is just putting the cluster
+# directory back.
 # yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

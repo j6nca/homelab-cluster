@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/serviceaccount_v1.json
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: &app homepage
+---
+# Cluster-scoped and read-only. Homepage has to see routes in every namespace
+# to build the dashboard, so this cannot be a namespaced Role — but it is
+# strictly get/list, and nothing here grants access to secrets or to any
+# object's contents.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+  # The one that matters here. Everything in this cluster is exposed through
+  # HTTPRoutes rather than Ingress, so without this the dashboard renders
+  # empty — and it does so silently, with no error on the page.
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+      - gateways
+    verbs:
+      - get
+      - list
+  # Backs the cluster cpu/memory widget. Served by metrics-server, which is
+  # already deployed under kube-system.
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: homepage

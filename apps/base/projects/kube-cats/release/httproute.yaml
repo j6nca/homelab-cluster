@@ -41,6 +41,12 @@ metadata:
   name: kube-cats-internal
   annotations:
     gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Kube Cats
+    gethomepage.dev/group: Tools
+    gethomepage.dev/icon: mdi-cat
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Tools
@@ -62,6 +68,12 @@ metadata:
   name: kube-cats-api-internal
   annotations:
     gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Kube Cats API
+    gethomepage.dev/group: Tools
+    gethomepage.dev/icon: mdi-api
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Tools

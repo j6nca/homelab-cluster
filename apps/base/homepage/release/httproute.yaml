@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: homepage-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Tools
+      url: http://home.j6n.internal
+    # No gethomepage.dev annotations here on purpose — the dashboard has no
+    # business listing itself as one of its own tiles.
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  hostnames:
+    # Must stay in step with HOMEPAGE_ALLOWED_HOSTS and the probe Host header
+    # in the helmrelease; homepage 400s on any name it is not told about.
+    - home.j6n.internal
+  rules:
+    - backendRefs:
+        - name: homepage
+          port: 3000
