@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/storage.k8s.io/storageclass_v1.json
+---
+# General-purpose cluster storage on the UNAS, for anything that wants a
+# volume off the longhorn pool.
+#
+# There is deliberately no per-application class here. A StorageClass models
+# a storage *policy* — where it lives, how it is mounted, what happens when
+# the claim goes away — not a location, and a class per consumer would mean a
+# new manifest every time something wanted a directory. Layout is handled by
+# subDir templating instead: every volume lands at
+#
+#     /var/nfs/shared/KUBERNETES/<namespace>/<pvc-name>
+#
+# which is self-organising, readable on the NAS, and unique without anyone
+# choosing a path. Note that subDir is settable only on the class — a PVC
+# cannot pick its own — so this templating is the mechanism that replaces
+# per-consumer classes rather than a convenience on top of them.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-unas
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: mimir.internal
+  share: /var/nfs/shared/KUBERNETES
+  subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - nfsvers=4.2
+  - nconnect=16
+  - hard
+  - noatime
+---
+# Same server, same share, same layout — the only thing that differs is what
+# happens when the claim is deleted, which is the one axis that actually
+# justifies a second class.
+#
+# For anything whose loss is unrecoverable, principally garage's object data:
+# that is the restore path for every other volume in the cluster, so a bad
+# prune, a renamed release or a fat-fingered namespace delete must not be
+# able to take it. reclaimPolicy keeps the PV, and onDelete keeps the
+# directory even if the PV is removed by hand — the two guard different
+# halves of the same accident.
+#
+# One consequence worth knowing: because the path is derived from namespace
+# and PVC name rather than a generated ID, recreating a PVC with the same
+# name reattaches it to the existing directory. That is intended — a
+# redeployed garage should find its blocks rather than silently start empty —
+# but it does mean the data outlives the claim, and stale directories have to
+# be cleared by hand on the NAS.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-unas-retain
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: mimir.internal
+  share: /var/nfs/shared/KUBERNETES
+  subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
+  onDelete: retain
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+mountOptions:
+  - nfsvers=4.2
+  - nconnect=16
+  - hard
+  - noatime

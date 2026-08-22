@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/storage.k8s.io/storageclass_v1.json
+---
+# A deliberately unreplicated longhorn class, for volumes whose loss costs a
+# retry rather than data.
+#
+# The motivating case is volsync's point-in-time copy. Kubernetes cannot mount
+# a VolumeSnapshot — the CSI spec has no such operation — so the only way to
+# get a filesystem the restic mover can read is to provision a fresh volume
+# from the snapshot. On the default class that fresh volume is replicated
+# three times, which means backing up a 2Gi PVC briefly allocates 6Gi of pool
+# to hold a second copy of data the source already keeps three copies of.
+#
+# One replica is the honest setting here: the copy lives for the length of a
+# backup run, and if it is lost the run fails and retries against a source
+# that is still intact. Nothing is trusted to this class that is not already
+# durable somewhere else.
+#
+# best-effort locality on top, because with a single replica there is no
+# redundancy to trade away — colocating it with the mover pod turns a
+# network-bound read into a local one.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-single
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+  dataLocality: "best-effort"
+  staleReplicaTimeout: "30"
+  fromBackup: ""
+  fsType: "ext4"
+  unmapMarkSnapChainRemoved: "ignored"
+  disableRevisionCounter: "true"
+  dataEngine: "v1"

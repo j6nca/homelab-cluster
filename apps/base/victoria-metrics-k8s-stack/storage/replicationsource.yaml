@@ -23,3 +23,23 @@ spec:
       daily: 7
     # Use Snapshot method for longhorn
     copyMethod: Snapshot
+    # --- working volumes ---
+    # Both of these default to the *source* PVC's storage class, which is the
+    # 3-replica longhorn default. Left alone, backing up a 2Gi volume costs
+    # 3Gi of pool for the cache plus 6Gi for the point-in-time copy: nine
+    # gigabytes of replicated storage to protect two.
+    #
+    # The point-in-time copy is a throwaway restore of a snapshot whose source
+    # is still intact, so it goes on the unreplicated class. Losing it fails
+    # the run; it cannot lose data.
+    storageClassName: longhorn-single
+    # restic's metadata cache — rebuildable by definition, so it does not
+    # belong on replicated storage either. On the NAS it costs its face value
+    # instead of triple. The plain class rather than -retain: this is scratch,
+    # and keeping it after the claim goes away would just litter the share.
+    cacheStorageClassName: nfs-unas
+    # Sized against 7 dailies of a 2Gi source, where the index is megabytes,
+    # not the 1Gi default. This is the one number here that fails closed:
+    # if un-pruned metadata ever outgrows it the backup errors rather than
+    # silently degrading, so raise it rather than trimming further.
+    cacheCapacity: 512Mi

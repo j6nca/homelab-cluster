@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app garage
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      garage:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # Recreate, not RollingUpdate. Both pods would otherwise hold the same
+        # LMDB metadata directory open at once, which is exactly the unclean
+        # concurrent access that corrupts it.
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: dxflrs/garage
+              # Pinned rather than tracking v2: the LMDB metadata format is
+              # not portable across architectures and majors have migrated it
+              # before, so an unattended jump is a restore-path risk.
+              tag: v2.3.0
+            env:
+              TZ: America/Toronto
+            envFrom:
+              - secretRef:
+                  name: *app
+            # The image sets no ENTRYPOINT — its whole invocation lives in
+            # Cmd as ["/garage", "server"]. Supplying only args would leave
+            # kubernetes trying to exec "server" as the binary, so the path
+            # has to be spelled out here.
+            command:
+              - /garage
+            args:
+              - server
+            probes:
+              # /health on the admin port reports whether the node considers
+              # itself up and its layout applied. Before the init job runs it
+              # returns unhealthy, which is correct — there is no bucket to
+              # serve yet.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &admin 3903
+                  initialDelaySeconds: 20
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *admin
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            ports:
+              - containerPort: &s3 3900
+                name: s3
+                protocol: TCP
+              - containerPort: 3901
+                name: rpc
+                protocol: TCP
+              - containerPort: *admin
+                name: admin
+                protocol: TCP
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                # LMDB memory-maps its metadata, so RSS tracks the working set
+                # rather than staying flat. 1Gi is generous for a store whose
+                # whole job is a nightly restic push.
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+    service:
+      app:
+        ports:
+          s3:
+            port: *s3
+          admin:
+            port: *admin
+          rpc:
+            port: 3901
+    persistence:
+      config:
+        type: configMap
+        name: *app
+        globalMounts:
+          - path: /etc/garage.toml
+            subPath: garage.toml
+            readOnly: true
+      # LMDB on longhorn. Small on purpose — this holds the object index, not
+      # the objects — but it is the one piece of this deployment whose loss
+      # makes the data on the NAS unreadable, so it wants a volsync source of
+      # its own once this is proven.
+      meta:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: longhorn
+        globalMounts:
+          - path: /var/lib/garage/meta
+      # The actual objects, on the NAS. Off longhorn deliberately: this is the
+      # restore path for longhorn volumes, so it must not share their failure
+      # domain, and at 3 replicas it would cost triple the pool this cluster
+      # is already short of.
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 100Gi
+        # -retain, not the plain class: this is the only copy of every other
+        # volume's backups, so the directory has to survive the claim.
+        storageClass: nfs-unas-retain
+        globalMounts:
+          - path: /var/lib/garage/data

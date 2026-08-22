@@ -1,0 +1,168 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/batch/job_v1.json
+---
+# Garage's first-time setup is imperative — a fresh node has no cluster
+# layout, no bucket and no keys, and serves no S3 traffic until all three
+# exist. There is no declarative equivalent, so it lives here rather than as
+# a runbook step nobody remembers on the next rebuild.
+#
+# This drives the admin API rather than the garage CLI, because the
+# dxflrs/garage image ships exactly one file — /garage — with no shell to
+# script against. Python rather than curl+jq for the same reason in reverse:
+# a stock python image already has HTTP and a real JSON parser, so nothing
+# has to be installed at runtime.
+#
+# Every step is create-only and checks for its own result first, so re-runs
+# are no-ops. Nothing here deletes or overwrites: the worst outcome of a bad
+# run is an error and a half-configured cluster that the garage CLI can
+# finish by hand.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-init
+spec:
+  # Outlive the run briefly so the log is readable when something downstream
+  # looks wrong, then stop cluttering the namespace.
+  ttlSecondsAfterFinished: 3600
+  # Generous, because this legitimately races garage's own startup on a cold
+  # cluster — the pod may lose that race several times before the admin API
+  # answers.
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: garage-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: python:3.13-alpine
+          env:
+            - name: GARAGE_ADMIN_URL
+              value: http://garage.garage.svc:3903
+            - name: BUCKET
+              value: volsync
+            - name: KEY_NAME
+              value: volsync
+            - name: ZONE
+              value: homelab
+            # Weighting hint for placement between nodes. With one node it
+            # only has to be non-zero and roughly honest about the backing
+            # volume — 100Gi, matching the data PVC.
+            - name: CAPACITY_BYTES
+              value: "107374182400"
+          envFrom:
+            # GARAGE_ADMIN_TOKEN
+            - secretRef:
+                name: garage
+            # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY — the identity the
+            # volsync movers will present, imported rather than generated so
+            # the two cannot drift.
+            - secretRef:
+                name: garage-volsync-key
+          command:
+            - python3
+            - -c
+            - |
+              import json, os, sys, time, urllib.error, urllib.request
+
+              BASE = os.environ["GARAGE_ADMIN_URL"].rstrip("/")
+              TOKEN = os.environ["GARAGE_ADMIN_TOKEN"]
+              BUCKET = os.environ["BUCKET"]
+              KEY_NAME = os.environ["KEY_NAME"]
+              ZONE = os.environ["ZONE"]
+              CAPACITY = int(os.environ["CAPACITY_BYTES"])
+              AK = os.environ["AWS_ACCESS_KEY_ID"]
+              SK = os.environ["AWS_SECRET_ACCESS_KEY"]
+
+
+              def call(method, path, body=None, tolerate=()):
+                  """Returns parsed JSON, or None if the status was tolerated."""
+                  data = json.dumps(body).encode() if body is not None else None
+                  req = urllib.request.Request(
+                      BASE + path,
+                      method=method,
+                      data=data,
+                      headers={
+                          "Authorization": "Bearer " + TOKEN,
+                          "Content-Type": "application/json",
+                      },
+                  )
+                  try:
+                      with urllib.request.urlopen(req, timeout=30) as r:
+                          raw = r.read()
+                          return json.loads(raw) if raw else {}
+                  except urllib.error.HTTPError as e:
+                      detail = e.read().decode("utf-8", "replace")[:500]
+                      if e.code in tolerate:
+                          print("  (%s tolerated: %s)" % (e.code, detail.strip()))
+                          return None
+                      # Surfaced in full: the shapes here are version-sensitive
+                      # and a bare status code is not enough to debug from.
+                      raise RuntimeError(
+                          "%s %s -> %s: %s" % (method, path, e.code, detail)
+                      )
+
+
+              # Garage may still be opening its LMDB when this lands.
+              status = None
+              for attempt in range(60):
+                  try:
+                      status = call("GET", "/v2/GetClusterStatus")
+                      break
+                  except Exception as e:
+                      print("waiting for admin api (%d): %s" % (attempt, e))
+                      time.sleep(5)
+              if status is None:
+                  sys.exit("garage admin api did not answer within 5m")
+
+              nodes = status.get("nodes") or []
+              if not nodes:
+                  sys.exit("cluster status reported no nodes")
+              node = nodes[0]
+              print("node: %s" % node.get("id"))
+
+              # A node with no role accepts no writes. Only stage a change if
+              # it is genuinely unassigned — re-assigning every run would
+              # leave a permanently pending layout.
+              if node.get("role"):
+                  print("layout: already assigned, skipping")
+              else:
+                  print("layout: assigning %s cap=%d" % (ZONE, CAPACITY))
+                  call(
+                      "POST",
+                      "/v2/UpdateClusterLayout",
+                      [{"id": node["id"], "zone": ZONE,
+                        "capacity": CAPACITY, "tags": []}],
+                  )
+                  # apply refuses without the version the staged change will
+                  # produce, as a guard against concurrent edits.
+                  version = call("GET", "/v2/GetClusterStatus")["layoutVersion"] + 1
+                  call("POST", "/v2/ApplyClusterLayout", {"version": version})
+                  print("layout: applied v%d" % version)
+
+              # 409/400 here means the alias is taken, which on a re-run is
+              # exactly the state we want.
+              info = call("POST", "/v2/CreateBucket",
+                          {"globalAlias": BUCKET}, tolerate=(400, 409))
+              if info is None:
+                  print("bucket: %s exists, looking up id" % BUCKET)
+                  info = call("GET", "/v2/GetBucketInfo?globalAlias=" + BUCKET)
+              bucket_id = info["id"]
+              print("bucket: %s -> %s" % (BUCKET, bucket_id))
+
+              # import, not create: the credential already exists in 1Password
+              # and is what volsync presents. Letting garage mint its own
+              # would leave the two out of step.
+              call("POST", "/v2/ImportKey",
+                   {"accessKeyId": AK, "secretAccessKey": SK, "name": KEY_NAME},
+                   tolerate=(400, 409))
+
+              # Unconditional and idempotent server-side — cheap insurance
+              # against a key that exists but lost its grant.
+              call("POST", "/v2/AllowBucketKey", {
+                  "bucketId": bucket_id,
+                  "accessKeyId": AK,
+                  "permissions": {"read": True, "write": True, "owner": False},
+              })
+              print("grant: %s may read/write %s" % (KEY_NAME, BUCKET))
+              print("done.")

@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/configmap_v1.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: &app garage
+data:
+  # No secrets in here — rpc_secret and admin_token come from the environment
+  # as GARAGE_RPC_SECRET / GARAGE_ADMIN_TOKEN, which garage reads in place of
+  # the config keys of the same name. That is what lets this whole file be a
+  # plain ConfigMap.
+  garage.toml: |
+    # One node, so one copy. Redundancy here would be a lie anyway: every
+    # replica would land on the same NFS share. The durability story for this
+    # data is the NAS underneath, not garage.
+    replication_factor = 1
+
+    # The split that makes this design work. Metadata is LMDB, which wants
+    # real filesystem semantics and is documented as corruption-prone on an
+    # unclean shutdown — that stays on longhorn. Data blocks are immutable
+    # and content-addressed, so they are safe over NFS and go to the NAS,
+    # which is both a separate failure domain from the volumes being backed
+    # up and not part of the longhorn pool this cluster keeps running out of.
+    metadata_dir = "/var/lib/garage/meta"
+    data_dir = "/var/lib/garage/data"
+
+    db_engine = "lmdb"
+
+    # LMDB cannot always be repaired after a hard pod kill, and losing the
+    # metadata makes the blocks on the NAS unreadable — garage cannot rebuild
+    # one from the other. Snapshots are the recovery path, so they are on.
+    metadata_auto_snapshot_interval = "6h"
+    # Costs write throughput, which a nightly backup target can afford, and
+    # buys protection against a node losing power mid-write.
+    metadata_fsync = true
+
+    rpc_bind_addr = "[::]:3901"
+
+    [s3_api]
+    api_bind_addr = "[::]:3900"
+    # Arbitrary for a self-hosted store, but restic sends it and it has to
+    # match what the client is configured with. Keep in step with the
+    # AWS_DEFAULT_REGION in the volsync secrets.
+    s3_region = "garage"
+
+    [admin]
+    api_bind_addr = "[::]:3903"
+    # metrics_token is deliberately unset and metrics_require_token left at
+    # its default of false, which leaves /metrics open. It is reachable only
+    # from inside the cluster and exposes no object contents, and requiring a
+    # token would mean handing one to the scrape config for no gain.
