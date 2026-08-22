@@ -11,6 +11,9 @@ metadata:
     gethomepage.dev/name: Jellystat
     gethomepage.dev/group: Media
     gethomepage.dev/icon: jellystat.png
+    # Without this homepage looks for app.kubernetes.io/name=<the
+    # display name above> and renders 'not found' when it misses.
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=jellystat
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Media
