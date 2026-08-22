@@ -127,6 +127,8 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 100Gi
-        storageClass: nfs-unas-backup
+        # -retain, not the plain class: this is the only copy of every other
+        # volume's backups, so the directory has to survive the claim.
+        storageClass: nfs-unas-retain
         globalMounts:
           - path: /var/lib/garage/data

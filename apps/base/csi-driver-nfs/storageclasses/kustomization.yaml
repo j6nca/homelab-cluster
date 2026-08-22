@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
   - ./synology.yaml
   - ./unas.yaml
-  - ./unas-backup.yaml
+  - ./unas-kubernetes.yaml
