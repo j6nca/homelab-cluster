@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app garage
+  namespace: flux-system
+spec:
+  dependsOn:
+    # longhorn backs the metadata volume and csi-driver-nfs backs the data
+    # volume; the pod stays Pending without either. external-secrets supplies
+    # the rpc secret, which garage will not boot without.
+    - name: longhorn
+    - name: csi-driver-nfs
+    - name: external-secrets-resources
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  # The init job's spec is immutable, so an edit to its script would other-
+  # wise wedge this Kustomization on a failed patch forever. force replaces
+  # the job instead; safe because the script is written to be re-runnable.
+  force: true
+  interval: 5m
+  path: ./apps/base/garage/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

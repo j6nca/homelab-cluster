@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: garage-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Storage
+      url: http://garage.j6n.internal
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  hostnames:
+    - garage.j6n.internal
+  rules:
+    - backendRefs:
+        # S3 only. The admin API on 3903 is deliberately not routed: it can
+        # rewrite the cluster layout and mint keys, and nothing outside the
+        # namespace needs it. Reach it with a port-forward when required.
+        - name: garage
+          port: 3900

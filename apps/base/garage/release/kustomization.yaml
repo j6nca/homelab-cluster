@@ -2,6 +2,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./synology.yaml
-  - ./unas.yaml
-  - ./unas-backup.yaml
+  - ./configmap.yaml
+  - ./externalsecrets.yaml
+  - ./helmrelease.yaml
+  - ./httproute.yaml
+  - ./init-job.yaml
