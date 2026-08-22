@@ -7,11 +7,16 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: mimir.internal
-  # Separate share from nfs-unas-media on purpose: backups and media have
+  # Separate path from nfs-unas-media on purpose: backups and media have
   # opposite handling. This one is never pruned by an app and its reclaim
-  # policy differs, so mixing them under one share would make a media cleanup
+  # policy differs, so sharing a root with MEDIA would make a media cleanup
   # capable of taking the backups with it.
-  share: /var/nfs/shared/BACKUP
+  #
+  # The driver creates one subdirectory per PV beneath this path, so
+  # .../volsync ends up holding a directory per volume rather than a pile of
+  # loose objects — which is also what keeps garage's blocks from landing
+  # directly in a path something else might tidy up.
+  share: /var/nfs/shared/KUBERNETES/volsync
 # Retain, unlike every other storageclass here. This backs garage's object
 # data, which is the restore path for everything else in the cluster —
 # deleting the PVC (a bad prune, a renamed release, a fat-fingered namespace
