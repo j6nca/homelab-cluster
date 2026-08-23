@@ -14,9 +14,31 @@ spec:
       version: 1.8.1
   interval: 10m
   values:
+    # Manager/UI deployment replicas. Unrelated to volume replicas, which are
+    # set under persistence and defaultSettings below — an easy pair to confuse.
     replicaCount: 2
     metrics:
       serviceMonitor:
         enabled: false
+    persistence:
+      # Two copies, not the chart's default three. Anything whose loss actually
+      # costs something is already shipped off-cluster by volsync — to S3 on the
+      # NAS, or to R2 — so the third replica is not what stands between us and
+      # data loss, and on a pool this size it mostly buys space consumption.
+      #
+      # Two remains meaningfully better than one. Longhorn mirrors writes
+      # synchronously and serves from whichever replica is healthy rather than
+      # voting on a quorum, so there is no even-number penalty the way there
+      # would be for etcd. A volume rides through a single node reboot — which
+      # Talos upgrades make routine — instead of going offline with it.
+      #
+      # This only governs newly provisioned volumes: a StorageClass cannot be
+      # edited in place, and existing volumes keep the replica count they were
+      # created with until patched.
+      defaultClassReplicaCount: 2
     defaultSettings:
       storageMinimalAvailablePercentage: 10
+      # Kept in step with defaultClassReplicaCount above, so volumes created
+      # outside the default class — from the UI, or restored from a backup —
+      # land on the same policy rather than silently reverting to three.
+      defaultReplicaCount: 2
