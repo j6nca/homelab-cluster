@@ -41,16 +41,32 @@ spec:
             args:
               - server
             probes:
-              # /health on the admin port reports whether the node considers
-              # itself up and its layout applied. Before the init job runs it
-              # returns unhealthy, which is correct — there is no bucket to
-              # serve yet.
+              # Both probes are deliberately tcpSocket rather than GET /health.
+              #
+              # /health reports whether the *cluster* is ready — layout applied,
+              # enough nodes present — not whether this process is alive. On a
+              # fresh node it returns unhealthy until garage-init assigns the
+              # layout, and wiring either probe to it deadlocks the bootstrap:
+              #
+              #   - as readiness, it holds the pod out of the garage Service's
+              #     endpoints, and a ClusterIP with no endpoints is REJECTed by
+              #     kube-proxy. The init job reaches garage only through that
+              #     Service, so it gets connection refused and can never apply
+              #     the layout that would make /health pass.
+              #   - as liveness, it kills the node ~110s after every start, so
+              #     the pod CrashLoops before init gets a window at all.
+              #
+              # A listener on the admin port is the honest answer to both
+              # questions here: it is what liveness actually wants to know, and
+              # with one node and one client there is no second replica for
+              # readiness to shed traffic towards anyway. The cost is that a
+              # garage which is up but has lost its layout still reads Ready —
+              # acceptable when the only consumer is volsync, which retries.
               liveness:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /health
+                  tcpSocket:
                     port: &admin 3903
                   initialDelaySeconds: 20
                   periodSeconds: 30
@@ -60,8 +76,7 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /health
+                  tcpSocket:
                     port: *admin
                   initialDelaySeconds: 10
                   periodSeconds: 10
