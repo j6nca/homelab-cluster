@@ -17,6 +17,12 @@ spec:
         # deadlocks: the incoming pod waits for a volume the outgoing pod will
         # not release until the incoming pod is ready.
         strategy: Recreate
+        # TORRENTING_PORT and the whole gluetun env come from gluetun-secret.
+        # Without this, an AirVPN forwarded-port rotation updates the Secret
+        # but the pod keeps the stale port, so no peer can reach it inbound
+        # and torrents stall at 0 seeds until something else restarts it.
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -34,6 +40,33 @@ spec:
               - containerPort: *port
                 name: http
                 protocol: TCP
+            probes:
+              # The WebUI answers on / once the session is up. Restarting on
+              # failure is the point: if gluetun rebuilds the tunnel under it,
+              # qbittorrent keeps its old listen socket bound to the dead
+              # interface and never re-announces to trackers.
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 4
+              readiness: *probes
+            resources:
+              # Was unset, which made the pod BestEffort and the first thing
+              # evicted under node pressure -- and with strategy: Recreate on
+              # an RWO Longhorn volume, each eviction is a full outage rather
+              # than a rolling one.
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
         initContainers:
           vpn:
             image:
@@ -48,6 +81,12 @@ spec:
                 # privileged: true
             # Keep gluetun running for the duration of the pod
             restartPolicy: Always
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
           ping:
             image:
               repository: busybox

@@ -200,3 +200,46 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app bazarr
+  namespace: flux-system
+spec:
+  targetNamespace: media
+  commonMetadata:
+    labels:
+      service: *app
+  dependsOn:
+    - name: media-storage
+  interval: 5m
+  path: ./apps/base/media/bazarr
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  # The directory has existed since the recyclarr commit but was never
+  # registered here, so Flux never built it -- which is why the broken
+  # ./externalsecret.yaml reference in its kustomization never surfaced as a
+  # reconcile error. Trash Guides sync has never actually run.
+  name: &app recyclarr
+  namespace: flux-system
+spec:
+  targetNamespace: media
+  commonMetadata:
+    labels:
+      service: *app
+  dependsOn:
+    - name: sonarr
+    - name: radarr
+  interval: 5m
+  path: ./apps/base/media/recyclarr
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
