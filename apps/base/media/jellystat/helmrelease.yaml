@@ -12,7 +12,14 @@ spec:
   interval: 15m
   values:
     controllers:
-      jellyseerr:
+      # Renamed from `jellyseerr`, a copy-paste artifact from the app this
+      # replaced. The key feeds app.kubernetes.io/controller, which lands in
+      # the Deployment's spec.selector.matchLabels -- immutable, so this
+      # change needs a one-time
+      #   kubectl -n media delete deployment jellystat
+      # to let helm recreate it. Safe here only because jellystat is
+      # stateless: it has no PVC and keeps everything in media-postgres.
+      jellystat:
         containers:
           app:
             image:
