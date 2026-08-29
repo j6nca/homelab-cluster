@@ -4,6 +4,5 @@ kind: Kustomization
 resources:
   - ./server-helmrelease.yaml
   - ./client-helmrelease.yaml
-  - ./allowlist-job.yaml
   - ./externalsecrets.yaml
   - ./httproute.yaml

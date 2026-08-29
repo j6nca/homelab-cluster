@@ -16,11 +16,6 @@ spec:
       POSTGRES_SIZE: 2Gi
       DRAGONFLY_REPLICAS: "1"
       DRAGONFLY_MAX_MEMORY: 512Mi
-  # The allowlist job's spec is immutable, so adding a username would other-
-  # wise wedge this Kustomization on a failed patch forever. force replaces
-  # the job instead; safe because `mmo allow` is INSERT ... ON CONFLICT DO
-  # NOTHING and the job is written to be re-runnable.
-  force: true
   targetNamespace: *app
   commonMetadata:
     labels:

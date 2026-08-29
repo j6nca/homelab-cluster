@@ -27,7 +27,7 @@ spec:
               # the server simulates with the Go build of that package, so a
               # mismatched pair is silent prediction drift rather than an error
               # anything reports. Renovate tracks the version from here.
-              tag: 0.1.1
+              tag: 0.1.2
             args:
               - "--roles=all"
               - "--addr=:8080"
@@ -51,6 +51,16 @@ spec:
             env:
               TZ: America/Toronto
               PUBLIC_URL: http://mmo.j6n.internal
+              # Seeds the allowlist at boot, replacing the job that used to do
+              # it with one init container per user -- the image is distroless
+              # with no shell to loop with, so six names meant six containers.
+              #
+              # Additive: names not listed here are left alone, so anyone added
+              # later with `mmo allow` survives a rollout. But a name that
+              # stays here is re-asserted on every boot, so revoking someone
+              # for good means deleting them from this line too, not just
+              # running `mmo revoke`.
+              SEED_ALLOWLIST: jonathan,test1,test2,test3,test4,test5
             envFrom:
               - secretRef:
                   name: mmo
