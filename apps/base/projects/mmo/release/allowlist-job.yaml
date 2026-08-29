@@ -53,6 +53,81 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+        # Spare slots so someone can be handed a login without a commit,
+        # a reconcile and a job run first. They are ordinary local accounts
+        # with no elevated rights -- being on the allowlist only permits
+        # registering, so an unclaimed one is an unused invitation rather
+        # than a live account anyone can sign into.
+        - name: allow-test1
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args:
+            - "allow"
+            - "test1"
+            - "--note=spare slot 1, seeded by allowlist-job.yaml"
+          envFrom:
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+        - name: allow-test2
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args:
+            - "allow"
+            - "test2"
+            - "--note=spare slot 2, seeded by allowlist-job.yaml"
+          envFrom:
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+        - name: allow-test3
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args:
+            - "allow"
+            - "test3"
+            - "--note=spare slot 3, seeded by allowlist-job.yaml"
+          envFrom:
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+        - name: allow-test4
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args:
+            - "allow"
+            - "test4"
+            - "--note=spare slot 4, seeded by allowlist-job.yaml"
+          envFrom:
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+        - name: allow-test5
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args:
+            - "allow"
+            - "test5"
+            - "--note=spare slot 5, seeded by allowlist-job.yaml"
+          envFrom:
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
       containers:
         # Prints the resulting rules, so the Job's log is a record of what the
         # allowlist actually contains rather than only what this run added.
