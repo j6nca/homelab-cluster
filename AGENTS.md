@@ -24,6 +24,7 @@ A personal homelab Kubernetes cluster managed via GitOps. Used for learning and 
 - `components/` — shared building blocks (e.g. `postgres`, `dragonfly`) composed into apps
 - `dashboards/` — Grafana dashboards organized by domain (kubernetes, observability, storage, fitness, system)
 - `apps/base/flux-system/` — Flux operator + instance + monitoring bootstrap
+- `talos/` — node machine configuration: `patches/` applied with `talosctl`, `secrets/` SOPS-encrypted. Never reconciled by Flux; the cluster syncs only `clusters/homelab`
 
 ## Conventions
 

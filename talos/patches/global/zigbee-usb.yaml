@@ -1,15 +1,20 @@
 # Talos machine config patch for the Zigbee coordinator.
 #
-# NOT applied by Flux. The Talos machine config lives outside this repo, so
-# this is versioned here next to the app that depends on it and applied by
-# hand:
+# NOT applied by Flux -- nothing under talos/ is. Machine config is applied
+# with talosctl, out of band from the cluster's own reconciliation:
 #
-#   talosctl -n <node-ip> patch mc --patch @apps/base/home-assistant/talos/zigbee-usb.yaml
+#   talosctl -n <node-ip> patch mc --patch @talos/patches/global/zigbee-usb.yaml
 #   talosctl -n <node-ip> get links      # confirm the module loaded
 #   ls -l /dev/zigbee                    # via talosctl -n <node-ip> ls /dev
 #
 # Talos ships a minimal kernel and loads no USB serial driver by default, so
 # without this the dongle enumerates on the USB bus and never gets a tty.
+# Global rather than per-node on purpose. Loading a serial driver on a node
+# with no dongle costs nothing and the udev rules match nothing, so every node
+# is ready to host the coordinator. That mirrors the Kubernetes side, where
+# the pod follows a `zigbee=true` label -- if this patch were node-scoped,
+# moving the stick would mean patching a node and waiting for it before the
+# label could follow.
 machine:
   kernel:
     modules:

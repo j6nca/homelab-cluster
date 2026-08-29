@@ -1,2 +1,11 @@
 .claude/
 .DS_Store
+
+# Talos: never the private key, and never generated machine configs -- they
+# inline the cluster CA and bootstrap token, so a committed one is a committed
+# secret regardless of how it got there.
+*.agekey
+age.key
+keys.txt
+talos/clusterconfig/
+talos/secrets/*.decrypted.yaml

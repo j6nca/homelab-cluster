@@ -70,9 +70,10 @@ spec:
         storageClass: longhorn
         size: 5Gi
         accessMode: ReadWriteOnce
-      # The Zigbee coordinator, via the /dev/zigbee symlink the udev rule in
-      # ../talos/zigbee-usb.yaml creates. Mounted at the same path inside, so
-      # ZHA's stored device path is stable across reboots and re-plugs.
+      # The Zigbee coordinator, via the /dev/zigbee symlink created by the
+      # udev rule in talos/patches/global/zigbee-usb.yaml. Mounted at the same
+      # path inside, so ZHA's stored device path is stable across reboots and
+      # re-plugs.
       zigbee:
         type: hostPath
         hostPath: /dev/zigbee
