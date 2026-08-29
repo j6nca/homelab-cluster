@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mmo-server
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  # The postgres and dragonfly components append cnpg and dragonfly-operator
+  # here, so this has to exist for their patch to have somewhere to add to.
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      mmo-server:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ctrl-research/mmo/server
+              # Pin to a sha- or SemVer tag once the Images workflow has
+              # published one. Client and server are built from the same commit
+              # in the same run and share a tag set -- keep them on the SAME
+              # tag, because the client predicts with a WASM build of
+              # internal/world/sim and the server simulates with the Go build
+              # of that package. Different commits mean silent prediction drift.
+              tag: latest
+            args:
+              - "--roles=all"
+              - "--addr=:8080"
+              # Reachable from the cluster so the kubelet can probe it and
+              # metrics can be scraped. It is deliberately not routed.
+              - "--admin-addr=0.0.0.0:9090"
+              # No --client-dir: the client is a separate Deployment served by
+              # nginx, joined to this one at the gateway.
+              #
+              # No --dev-auth either. That issues game tickets with no identity
+              # check whatsoever. --local-auth (on by default) plus the
+              # allowlist is the real path; see the bootstrap note in the PR.
+              #
+              # No --origins: empty means same-origin only, which is exactly
+              # what the single-hostname routing below preserves.
+              #
+              # --secure-cookies stays off while this is on envoy-internal,
+              # which has no TLS listener. Turn it on the same day this moves
+              # to envoy-external, or session cookies will not be sent.
+              - "--log-json"
+            env:
+              TZ: America/Toronto
+              PUBLIC_URL: http://mmo.j6n.internal
+            envFrom:
+              - secretRef:
+                  name: mmo
+            ports:
+              - containerPort: &port 8080
+                name: http
+                protocol: TCP
+              - containerPort: 9090
+                name: admin
+                protocol: TCP
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+              limits:
+                # The tick loop is the hot path and a 50 ms budget is an SLO,
+                # so no CPU limit -- throttling here shows up as tick overrun,
+                # not as a slow request.
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        # Matches the distroless nonroot user the image ships with.
+        runAsUser: 65532
+        runAsGroup: 65532
+
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+          admin:
+            port: 9090

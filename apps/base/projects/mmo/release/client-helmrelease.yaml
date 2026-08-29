@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mmo-client
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  # Static assets only -- no database, no cache. The entry exists because the
+  # postgres and dragonfly components patch every HelmRelease in this
+  # directory; the added ordering is harmless here.
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      mmo-client:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ctrl-research/mmo/client
+              # Keep on the SAME tag as mmo-server. See the note there.
+              tag: latest
+            env:
+              TZ: America/Toronto
+            ports:
+              - containerPort: &port 8080
+                name: http
+                protocol: TCP
+            probes:
+              # Deliberately not "/" -- the SPA fallback returns 200 for any
+              # path, so probing it would report healthy even with an empty
+              # document root.
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /nginx-healthz
+                    port: *port
+                  initialDelaySeconds: 5
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        # nginx-unprivileged runs as uid 101 and binds 8080, so nothing here
+        # needs elevating.
+        runAsUser: 101
+        runAsGroup: 101
+
+    service:
+      app:
+        ports:
+          http:
+            port: *port
