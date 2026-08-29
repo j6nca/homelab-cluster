@@ -21,13 +21,13 @@ spec:
           app:
             image:
               repository: ghcr.io/ctrl-research/mmo/server
-              # Pin to a sha- or SemVer tag once the Images workflow has
-              # published one. Client and server are built from the same commit
-              # in the same run and share a tag set -- keep them on the SAME
-              # tag, because the client predicts with a WASM build of
-              # internal/world/sim and the server simulates with the Go build
-              # of that package. Different commits mean silent prediction drift.
-              tag: latest
+              # Client and server are built from the same commit in the same
+              # workflow run and share a tag set. Keep them on the SAME tag:
+              # the client predicts with a WASM build of internal/world/sim and
+              # the server simulates with the Go build of that package, so a
+              # mismatched pair is silent prediction drift rather than an error
+              # anything reports. Renovate tracks the version from here.
+              tag: 0.1.0
             args:
               - "--roles=all"
               - "--addr=:8080"
