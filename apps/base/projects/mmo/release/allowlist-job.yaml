@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/batch/job_v1.json
+---
+# Seeding the allowlist is imperative: it lives in Postgres, is written by the
+# `mmo allow` subcommand, and admits nobody until someone is added. An empty
+# allowlist is only a warning at boot, so the server comes up perfectly
+# healthy and every sign-in is refused -- which reads as a broken server
+# rather than a missing row. This exists so a rebuild does not depend on
+# someone remembering a kubectl exec.
+#
+# One initContainer per username, because the server image is distroless and
+# ships no shell to loop with, and `mmo allow` takes a single value per
+# invocation. Init containers run in order and any failure fails the Job.
+#
+# Re-runs are free: AddAllowlistEntry is an INSERT ... ON CONFLICT DO NOTHING,
+# covered by TestAddingAnAllowlistEntryTwiceIsFine upstream.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mmo-allowlist
+spec:
+  # Outlive the run briefly so `kubectl logs` still explains what was granted,
+  # then stop cluttering the namespace.
+  ttlSecondsAfterFinished: 3600
+  # This races the server's own first boot and CNPG's migrations on a cold
+  # namespace, and will lose that race a few times before Postgres answers.
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mmo-allowlist
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+      initContainers:
+        # Usernames are normalised and matched case-insensitively, so this
+        # also admits "Jonathan".
+        - name: allow-jonathan
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args:
+            - "allow"
+            - "jonathan"
+            - "--note=seeded by allowlist-job.yaml"
+          envFrom:
+            # DATABASE_URL. Every admin subcommand reads it from the
+            # environment, so nothing needs a flag here.
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        # Prints the resulting rules, so the Job's log is a record of what the
+        # allowlist actually contains rather than only what this run added.
+        - name: list
+          image: ghcr.io/ctrl-research/mmo/server:0.1.1
+          args: ["allowlist"]
+          envFrom:
+            - secretRef:
+                name: mmo
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
