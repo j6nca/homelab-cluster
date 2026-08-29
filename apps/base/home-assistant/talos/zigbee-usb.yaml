@@ -1,0 +1,37 @@
+# Talos machine config patch for the Zigbee coordinator.
+#
+# NOT applied by Flux. The Talos machine config lives outside this repo, so
+# this is versioned here next to the app that depends on it and applied by
+# hand:
+#
+#   talosctl -n <node-ip> patch mc --patch @apps/base/home-assistant/talos/zigbee-usb.yaml
+#   talosctl -n <node-ip> get links      # confirm the module loaded
+#   ls -l /dev/zigbee                    # via talosctl -n <node-ip> ls /dev
+#
+# Talos ships a minimal kernel and loads no USB serial driver by default, so
+# without this the dongle enumerates on the USB bus and never gets a tty.
+machine:
+  kernel:
+    modules:
+      # All three, because which one binds depends on the dongle. The
+      # ZBDongle-E ships with either a CH9102 or a CP2102 serial chip
+      # depending on the production batch, and the EFR32 can also enumerate
+      # as a CDC ACM device. Loading a module whose hardware is absent costs
+      # nothing; guessing wrong means the device never appears.
+      - name: cp210x
+      - name: ch341
+      - name: cdc_acm
+
+  udev:
+    rules:
+      # A stable name, because the kernel one is not: cp210x and ch341 both
+      # produce /dev/ttyUSB0 while cdc_acm produces /dev/ttyACM0, and the
+      # number shifts if another serial device is ever attached. ZHA stores
+      # the path in its config entry, so a path that moves means a broken
+      # integration on the next reboot rather than an error anyone connects
+      # back to USB enumeration.
+      #
+      # 1a86:55d4 is the CH9102, 10c4:ea60 the CP2102. Both rules are
+      # harmless on a node holding neither.
+      - SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d4", SYMLINK+="zigbee"
+      - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="zigbee"

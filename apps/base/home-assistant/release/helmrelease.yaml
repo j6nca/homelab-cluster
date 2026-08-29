@@ -24,9 +24,36 @@ spec:
               - containerPort: &port 8123
                 name: http
                 protocol: TCP
+            securityContext:
+              # Needed for the Zigbee dongle, not for HA itself. A hostPath
+              # character device is visible inside the container but the
+              # device cgroup denies read and write to it unless the
+              # container is privileged, so ZHA would see /dev/zigbee and get
+              # EPERM opening it -- which surfaces as the integration failing
+              # to set up rather than as a permissions error.
+              #
+              # The hardening path is a device plugin (smarter-device-manager
+              # advertises devices as extended resources, no privilege
+              # needed). That is a DaemonSet and a second moving part; worth
+              # revisiting if anything else ever needs a host device.
+              privileged: true
+
     # No non-root securityContext: the official image's s6-overlay init
     # requires root at startup (it drops privileges itself); forcing
     # runAsNonRoot crashloops the pod before HA starts.
+
+    defaultPodOptions:
+      # The dongle is physically in one machine, so the pod has to land
+      # there. A label rather than a hostname: moving the stick to another
+      # node is then `kubectl label`, not a commit and a reconcile.
+      #
+      #   kubectl label node <node> zigbee=true
+      #
+      # With the label absent the pod stays Pending, which is the right
+      # failure -- HA running without its coordinator would mark every Zigbee
+      # entity unavailable and start firing automations off stale state.
+      nodeSelector:
+        zigbee: "true"
 
     service:
       app:
@@ -43,5 +70,14 @@ spec:
         storageClass: longhorn
         size: 5Gi
         accessMode: ReadWriteOnce
+      # The Zigbee coordinator, via the /dev/zigbee symlink the udev rule in
+      # ../talos/zigbee-usb.yaml creates. Mounted at the same path inside, so
+      # ZHA's stored device path is stable across reboots and re-plugs.
+      zigbee:
+        type: hostPath
+        hostPath: /dev/zigbee
+        hostPathType: CharDevice
+        globalMounts:
+          - path: /dev/zigbee
       tmp:
         type: emptyDir
