@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app seerr
+  name: &app lidarr
 spec:
   chartRef:
     kind: OCIRepository
@@ -12,33 +12,36 @@ spec:
   interval: 15m
   values:
     controllers:
-      sonarr:
+      lidarr:
         # The config volume is ReadWriteOnce, so the default RollingUpdate
         # deadlocks: the incoming pod waits for a volume the outgoing pod will
         # not release until the incoming pod is ready.
         strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/seerr-team/seerr
-              # v3.4.1 patches a path traversal vulnerability in the avatar
-              # image proxy. This is one of only three services published on
-              # envoy-external, so it is reachable from the internet and worth
-              # keeping current rather than pinning for stability.
-              tag: v3.4.1
+              repository: linuxserver/lidarr
+              tag: 3.1.0
             env:
-              TZ: America/Toronto
-              PORT: &port 5055
-              DB_TYPE: "postgres"
-              DB_HOST: "media-postgres-rw"
-              DB_PORT: "5432"
-              DB_USER: "{{ .Release.Name }}"
-              DB_PASS:
+              LIDARR__APP__INSTANCENAME: Lidarr
+              LIDARR__APP__THEME: dark
+              LIDARR__AUTH__METHOD: External
+              LIDARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              LIDARR__LOG__DBENABLED: "False"
+              LIDARR__LOG__LEVEL: info
+              LIDARR__POSTGRES__HOST: "media-postgres-rw"
+              LIDARR__POSTGRES__MAINDB: "{{ .Release.Name }}"
+              LIDARR__POSTGRES__PASSWORD:
                 valueFrom:
                   secretKeyRef:
                     name: "{{ .Release.Name }}-postgres"
                     key: password
-              DB_NAME: "{{ .Release.Name }}"
+              LIDARR__POSTGRES__PORT: "5432"
+              LIDARR__POSTGRES__USER: "{{ .Release.Name }}"
+              LIDARR__SERVER__PORT: &port 8686
+              TZ: America/Toronto
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
@@ -64,7 +67,7 @@ spec:
     persistence:
       config:
         globalMounts:
-          - path: /app/config
+          - path: /config
             readOnly: false
         type: persistentVolumeClaim
         storageClass: longhorn
@@ -74,9 +77,10 @@ spec:
         type: nfs
         server: mimir.internal
         path: /var/nfs/shared/MEDIA
-        # Needs access to media
+        # Needs access to both downloads and media, same /data root sonarr and
+        # radarr use so the paths handed to qbittorrent resolve identically.
         globalMounts:
-          - subPath: data/media
-            path: /data/media
+          - subPath: data
+            path: /data
       tmp:
         type: emptyDir

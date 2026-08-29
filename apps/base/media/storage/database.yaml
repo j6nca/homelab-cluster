@@ -26,6 +26,10 @@ spec:
         login: true
         passwordSecret:
           name: prowlarr-postgres
+      - name: lidarr
+        login: true
+        passwordSecret:
+          name: lidarr-postgres
   storage:
     storageClass: longhorn
     size: 15Gi
@@ -78,5 +82,15 @@ spec:
   cluster:
     name: media-postgres
   name: &app prowlarr
+  owner: *app
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lidarr-postgres
+spec:
+  cluster:
+    name: media-postgres
+  name: &app lidarr
   owner: *app
 ---
