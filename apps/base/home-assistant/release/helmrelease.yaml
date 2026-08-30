@@ -13,11 +13,6 @@ spec:
   values:
     controllers:
       home-assistant:
-        # TEMPORARY: 0 for the migration. The config volume is ReadWriteOnce,
-        # so Home Assistant has to let go of it before restore-helper.yaml can
-        # mount it -- with both at 1 replica, one pod stays Pending and which
-        # one is a race. Back to 1 in the exit commit.
-        replicas: 0
         containers:
           app:
             image:
