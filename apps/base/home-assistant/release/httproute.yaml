@@ -22,8 +22,22 @@ spec:
   parentRefs:
   - name: envoy-internal
     namespace: network
+  # Internal only, deliberately. Home Assistant has no OIDC of its own, so it
+  # cannot sit behind Authentik the way the other externally published
+  # services do -- and with cameras and locks attached it is the worst
+  # candidate in the cluster for being reachable on its own auth alone.
+  #
+  # If it is published later, the answer is a Cloudflare Access policy in
+  # front of hass.j6n.dev, plus `http.use_x_forwarded_for` and
+  # `trusted_proxies: 10.244.0.0/16` in configuration.yaml, or HA returns 400
+  # to everything arriving through the proxy.
   hostnames:
+  # Both resolve. home-assistant.j6n.internal is the name already in use and
+  # in anything bookmarked; hass.j6n.internal matches the external name, so
+  # the same host is not called two different things depending on which side
+  # of the tunnel you are on.
   - home-assistant.j6n.internal
+  - hass.j6n.internal
   rules:
   - backendRefs:
     - name: home-assistant
