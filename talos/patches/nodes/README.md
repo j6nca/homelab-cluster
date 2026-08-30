@@ -1,9 +1,5 @@
 # Per-node patches
 
-One directory per node, named for the node. Each holds `labels.yaml` (what
-this node is *for*) and `certsans.yaml` (what names its API certificate
-answers to).
-
 One directory per node, named for the node. A node gets a directory whether or
 not it has anything unusual about it, so "what is applied where" is answered by
 reading this tree rather than by querying a cluster that may not be reachable
@@ -22,28 +18,43 @@ quietly gone stale is worse than no table.
 
 ## Addressing nodes by name
 
-`talosconfig` can hold hostnames instead of IPs, but three things have to line
-up and only one of them is DNS:
-
-1. **The name resolves** from wherever `talosctl` runs.
-2. **The name is in that node's `certSANs`** — see `certsans.yaml`. Without it
-   the TLS handshake fails with `x509: certificate is valid for <ip>, not
-   <hostname>`. A certificate is issued for what was listed when it was
-   issued, so this is not something DNS can paper over.
-3. **`talosconfig` is updated** to use the names.
-
-Order matters: patch `certSANs` and confirm with `talosctl get certsans`
-*before* switching `talosconfig` over, or the next command fails and the
-error points at the certificate rather than at the step that was skipped.
+`talosconfig` can hold hostnames instead of IPs, and on this cluster that
+works without any patch: Talos manages certificate SANs itself and already
+includes each node's addresses and name. Verify rather than assume, since it
+is one command:
 
 ```bash
-talosctl --talosconfig ~/.talos/config config endpoint k-controlplane-1
-talosctl --talosconfig ~/.talos/config config node k-worker-1 k-worker-2 k-worker-3
-talosctl version                                   # proves all three
+talosctl -n <ip> get certsans
+talosctl -e k-controlplane-1 -n k-worker-2 version
 ```
 
-Keep the IPs in `certSANs` alongside the names. Removing them means a DNS
-outage takes the Talos API with it, which is when it is most wanted.
+Then point `talosconfig` at the names:
+
+```bash
+talosctl config endpoint k-controlplane-1
+talosctl config node k-worker-1 k-worker-2 k-worker-3
+```
+
+`machine.certSANs` is only needed for names Talos cannot know about — an
+external DNS name, a load balancer VIP, an address reached from outside the
+cluster. Adding one here is what produces
+
+```
+x509: certificate is valid for <ip>, not <name>
+```
+
+for that name and not for the node's own. Worth knowing which case you are in
+before reaching for it, because the error is identical either way.
+
+Two details that make hostnames behave unevenly if only half of it is set up:
+
+- `-e` names are resolved by **your workstation**; `-n` names are resolved by
+  **the endpoint node**, since that is what proxies the request onward. A name
+  your laptop resolves can still fail if the control plane cannot. Check with
+  `talosctl -n <ip> get resolvers`.
+- Both hops validate certificates independently, so a failure on one says
+  nothing about the other. `-e <name> -n <ip>` and `-e <ip> -n <name>` isolate
+  them.
 
 ## Applying
 
