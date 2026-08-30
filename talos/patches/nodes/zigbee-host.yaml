@@ -1,0 +1,27 @@
+# Marks the one node with the Zigbee coordinator physically plugged into it.
+#
+# Node-scoped, unlike patches/global/zigbee-usb.yaml. That one loads serial
+# drivers everywhere so any node *could* host the dongle; this one says which
+# node actually does. Applying it everywhere would let the scheduler put Home
+# Assistant on a machine with no radio, which is precisely the failure the
+# label exists to prevent.
+#
+#   talosctl -n <ip-of-the-node-with-the-dongle> patch mc \
+#     --patch @talos/patches/nodes/zigbee-host.yaml
+#
+#   kubectl get nodes -l zigbee=true     # expect exactly one
+#
+# Declared here rather than run as `kubectl label` so it survives a node
+# rebuild: a reset node comes back already carrying it, instead of Home
+# Assistant sitting Pending until someone remembers the command.
+#
+# Talos writes these using the node's own kubelet identity, so NodeRestriction
+# applies -- it rejects the node-restriction.kubernetes.io/ and
+# node-role.kubernetes.io/ prefixes. A bare key like this one is unaffected,
+# but that is why the label is not called something more official-looking.
+#
+# Once this is applied, Talos is the source of truth: labels added with
+# `kubectl label` outside this config get reconciled away.
+machine:
+  nodeLabels:
+    zigbee: "true"

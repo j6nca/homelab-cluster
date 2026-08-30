@@ -12,7 +12,7 @@ hand.
 talos/
   patches/
     global/     applied to every node
-    nodes/      applied to one node, named by hostname
+    nodes/      applied to specific nodes
   secrets/      SOPS-encrypted; see below
 ```
 
@@ -20,6 +20,24 @@ talos/
 apply everywhere: a node-scoped patch means a node has to be prepared before
 it can take on a role, which turns "move the USB stick" into "patch a node,
 wait for it to settle, then move the USB stick".
+
+The zigbee pair shows where the line falls. `global/zigbee-usb.yaml` loads the
+serial drivers on every node, so any of them *could* host the coordinator —
+harmless where no dongle exists. `nodes/zigbee-host.yaml` says which one
+actually does, and would be actively wrong applied everywhere: the scheduler
+would be free to place Home Assistant on a machine with no radio.
+
+## Node labels
+
+Labels go in `machine.nodeLabels` here rather than being applied with
+`kubectl label`, so a rebuilt node comes back already carrying them instead of
+a workload sitting `Pending` until someone remembers the command. Once a label
+is declared here Talos owns it — one added out of band gets reconciled away.
+
+Talos writes them using the node's own kubelet identity, so the
+NodeRestriction admission plugin applies. It rejects the
+`node-restriction.kubernetes.io/` and `node-role.kubernetes.io/` prefixes,
+which is why node roles cannot be set this way. Bare keys are unaffected.
 
 ## Applying
 
