@@ -5,3 +5,5 @@ resources:
   - ./helmrelease.yaml
   - ./matter-server.yaml
   - ./httproute.yaml
+  # TEMPORARY, see the file. Removed by the exit commit.
+  - ./restore-helper.yaml

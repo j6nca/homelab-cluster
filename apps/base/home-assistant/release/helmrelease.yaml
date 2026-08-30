@@ -13,6 +13,11 @@ spec:
   values:
     controllers:
       home-assistant:
+        # TEMPORARY: 0 for the migration. The config volume is ReadWriteOnce,
+        # so Home Assistant has to let go of it before restore-helper.yaml can
+        # mount it -- with both at 1 replica, one pod stays Pending and which
+        # one is a race. Back to 1 in the exit commit.
+        replicas: 0
         containers:
           app:
             image:
@@ -24,9 +29,38 @@ spec:
               - containerPort: &port 8123
                 name: http
                 protocol: TCP
+            securityContext:
+              # Needed for the Zigbee dongle, not for HA itself. A hostPath
+              # character device is visible inside the container but the
+              # device cgroup denies read and write to it unless the
+              # container is privileged, so ZHA would see /dev/zigbee and get
+              # EPERM opening it -- which surfaces as the integration failing
+              # to set up rather than as a permissions error.
+              #
+              # The hardening path is a device plugin (smarter-device-manager
+              # advertises devices as extended resources, no privilege
+              # needed). That is a DaemonSet and a second moving part; worth
+              # revisiting if anything else ever needs a host device.
+              privileged: true
+
     # No non-root securityContext: the official image's s6-overlay init
     # requires root at startup (it drops privileges itself); forcing
     # runAsNonRoot crashloops the pod before HA starts.
+
+    defaultPodOptions:
+      # The dongle is physically in one machine, so the pod has to land
+      # there. A label rather than a hostname, so the manifest does not carry
+      # a machine name that changes when hardware does.
+      #
+      # The label is set declaratively in talos/patches/nodes/k-worker-2/labels.yaml
+      # rather than with `kubectl label`, so a rebuilt node comes back already
+      # carrying it.
+      #
+      # With the label absent the pod stays Pending, which is the right
+      # failure -- HA running without its coordinator would mark every Zigbee
+      # entity unavailable and start firing automations off stale state.
+      nodeSelector:
+        zigbee: "true"
 
     service:
       app:
@@ -41,7 +75,28 @@ spec:
             readOnly: false
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 5Gi
+        # The migrated config is ~300 MB, most of it the recorder database.
+        # Sized small deliberately: Longhorn can grow a volume but Kubernetes
+        # can never shrink one, so starting under and expanding is the
+        # reversible direction. Growing needs a healthy volume, so watch
+        # replica health before letting it get close to full.
+        size: 1Gi
         accessMode: ReadWriteOnce
+      # The Zigbee coordinator: the /dev/zigbee symlink created by the udev
+      # rule in talos/patches/global/zigbee-usb.yaml, mounted at /dev/ttyUSB0.
+      #
+      # The two names are deliberately different. On the host, /dev/zigbee is
+      # stable -- the kernel name moves depending on which driver binds and
+      # what else is plugged in. Inside, /dev/ttyUSB0 is what the standalone
+      # node presented (docker mapped the by-id path to /dev/ttyUSB0), so it
+      # is what ZHA has stored in its config entry. Matching it means the
+      # migrated config works untouched, instead of needing the device path
+      # rewritten in .storage before first boot.
+      zigbee:
+        type: hostPath
+        hostPath: /dev/zigbee
+        hostPathType: CharDevice
+        globalMounts:
+          - path: /dev/ttyUSB0
       tmp:
         type: emptyDir

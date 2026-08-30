@@ -1,0 +1,57 @@
+# Talos machine config patch for the Zigbee coordinator.
+#
+# NOT applied by Flux -- nothing under talos/ is. Machine config is applied
+# with talosctl, out of band from the cluster's own reconciliation:
+#
+#   talosctl -n <node-ip> patch mc --patch @talos/patches/global/zigbee-usb.yaml
+#   talosctl -n <node-ip> get links      # confirm the module loaded
+#   ls -l /dev/zigbee                    # via talosctl -n <node-ip> ls /dev
+#
+# Talos ships a minimal kernel and loads no USB serial driver by default, so
+# without this the dongle enumerates on the USB bus and never gets a tty.
+# Global rather than per-node on purpose. Loading a serial driver on a node
+# with no dongle costs nothing and the udev rules match nothing, so every node
+# is ready to host the coordinator. That mirrors the Kubernetes side, where
+# the pod follows a `zigbee=true` label -- if this patch were node-scoped,
+# moving the stick would mean patching a node and waiting for it before the
+# label could follow.
+machine:
+  kernel:
+    modules:
+      # All three, because which one binds depends on the dongle. The
+      # ZBDongle-E ships with either a CH9102 or a CP2102 serial chip
+      # depending on the production batch, and the EFR32 can also enumerate
+      # as a CDC ACM device. Loading a module whose hardware is absent costs
+      # nothing; guessing wrong means the device never appears.
+      - name: cp210x
+      - name: ch341
+      # cdc_acm is almost certainly not the one -- the by-id name on the old
+      # machine ends -if00-port0, which is the usbserial form (/dev/ttyUSB*);
+      # a cdc_acm device ends -if00 and gives /dev/ttyACM*. Kept anyway
+      # because it costs nothing and the alternative is a node that cannot see
+      # the dongle at all.
+      - name: cdc_acm
+
+  udev:
+    rules:
+      # A stable name, because the kernel one is not: cp210x and ch341 both
+      # produce /dev/ttyUSB0 while cdc_acm produces /dev/ttyACM0, and the
+      # number shifts if another serial device is ever attached. ZHA stores
+      # the path in its config entry, so a path that moves means a broken
+      # integration on the next reboot rather than an error anyone connects
+      # back to USB enumeration.
+      #
+      # Matched on the dongle's serial, taken from the by-id name it had on
+      # the machine it is migrating from:
+      #   usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_e45c2b72391fef11be674ad0639e525b-if00-port0
+      #
+      # The serial identifies this exact stick regardless of which serial chip
+      # the batch shipped with, which the vendor/product pair cannot: the
+      # ZBDongle-E ships as either 1a86:55d4 (CH9102) or 10c4:ea60 (CP2102).
+      # It also stays correct if a second serial device is ever attached.
+      #
+      # Replacing the dongle means updating this line. The vendor/product form
+      # below is the looser alternative if that is ever the trade you want.
+      - SUBSYSTEM=="tty", ATTRS{serial}=="e45c2b72391fef11be674ad0639e525b", SYMLINK+="zigbee"
+      # - SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d4", SYMLINK+="zigbee"
+      # - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="zigbee"
