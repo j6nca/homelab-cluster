@@ -75,15 +75,21 @@ spec:
         # replica health before letting it get close to full.
         size: 1Gi
         accessMode: ReadWriteOnce
-      # The Zigbee coordinator, via the /dev/zigbee symlink created by the
-      # udev rule in talos/patches/global/zigbee-usb.yaml. Mounted at the same
-      # path inside, so ZHA's stored device path is stable across reboots and
-      # re-plugs.
+      # The Zigbee coordinator: the /dev/zigbee symlink created by the udev
+      # rule in talos/patches/global/zigbee-usb.yaml, mounted at /dev/ttyUSB0.
+      #
+      # The two names are deliberately different. On the host, /dev/zigbee is
+      # stable -- the kernel name moves depending on which driver binds and
+      # what else is plugged in. Inside, /dev/ttyUSB0 is what the standalone
+      # node presented (docker mapped the by-id path to /dev/ttyUSB0), so it
+      # is what ZHA has stored in its config entry. Matching it means the
+      # migrated config works untouched, instead of needing the device path
+      # rewritten in .storage before first boot.
       zigbee:
         type: hostPath
         hostPath: /dev/zigbee
         hostPathType: CharDevice
         globalMounts:
-          - path: /dev/zigbee
+          - path: /dev/ttyUSB0
       tmp:
         type: emptyDir
