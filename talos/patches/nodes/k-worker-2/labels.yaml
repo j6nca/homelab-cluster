@@ -1,19 +1,25 @@
 # Node labels for k-worker-2.
 #
-# A stub: no labels declared, so there is nothing to apply yet. It exists so
-# every node has a file, and the answer to "what is labelled where" is this
-# directory rather than `kubectl get nodes --show-labels` against a cluster
-# that may not be reachable.
+# This is the node the Zigbee coordinator is physically plugged into, which is
+# what `zigbee: "true"` means -- home-assistant carries a matching nodeSelector
+# so it lands here and nowhere else.
 #
-# To declare one, uncomment and apply to THIS node only:
+# Node-scoped on purpose. talos/patches/global/zigbee-usb.yaml loads the serial
+# drivers on every node, so any of them *could* host the dongle; this says
+# which one does. Applied everywhere it would let the scheduler place Home
+# Assistant on a machine with no radio, which is the exact failure the label
+# exists to prevent.
 #
-#   machine:
-#     nodeLabels:
-#       example: "true"
+# Moving the dongle means moving this block to the new node's labels.yaml and
+# applying to both -- the old node to drop the label, the new one to gain it.
 #
 #   talosctl -n <ip-of-k-worker-2> patch mc --patch @talos/patches/nodes/k-worker-2/labels.yaml
+#   kubectl get nodes -l zigbee=true            # expect exactly one
 #
 # Talos owns a label once it is declared here -- one added with
 # `kubectl label` outside this config gets reconciled away. NodeRestriction
 # rejects the node-restriction.kubernetes.io/ and node-role.kubernetes.io/
 # prefixes, since Talos writes these using the node's own kubelet identity.
+machine:
+  nodeLabels:
+    zigbee: "true"

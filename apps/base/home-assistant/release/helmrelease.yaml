@@ -52,7 +52,7 @@ spec:
       # there. A label rather than a hostname, so the manifest does not carry
       # a machine name that changes when hardware does.
       #
-      # The label is set declaratively in talos/patches/nodes/zigbee-host.yaml
+      # The label is set declaratively in talos/patches/nodes/k-worker-2/labels.yaml
       # rather than with `kubectl label`, so a rebuilt node comes back already
       # carrying it.
       #

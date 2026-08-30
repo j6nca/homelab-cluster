@@ -23,8 +23,8 @@ wait for it to settle, then move the USB stick".
 
 The zigbee pair shows where the line falls. `global/zigbee-usb.yaml` loads the
 serial drivers on every node, so any of them *could* host the coordinator —
-harmless where no dongle exists. `nodes/zigbee-host.yaml` says which one
-actually does, and would be actively wrong applied everywhere: the scheduler
+harmless where no dongle exists. `nodes/k-worker-2/labels.yaml` says which
+one actually does, and would be actively wrong applied everywhere: the scheduler
 would be free to place Home Assistant on a machine with no radio.
 
 ## Node labels

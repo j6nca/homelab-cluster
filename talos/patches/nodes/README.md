@@ -9,7 +9,7 @@ when the question comes up.
 |---|---|---|
 | `k-controlplane-1` | — | |
 | `k-worker-1` | — | |
-| `k-worker-2` | — | |
+| `k-worker-2` | `zigbee=true` | Zigbee coordinator; home-assistant pins here |
 | `k-worker-3` | — | |
 
 Keep the table current when a label is declared. A stub whose comments claim
