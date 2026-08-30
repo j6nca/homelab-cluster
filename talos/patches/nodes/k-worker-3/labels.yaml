@@ -1,0 +1,19 @@
+# Node labels for k-worker-3.
+#
+# A stub: no labels declared, so there is nothing to apply yet. It exists so
+# every node has a file, and the answer to "what is labelled where" is this
+# directory rather than `kubectl get nodes --show-labels` against a cluster
+# that may not be reachable.
+#
+# To declare one, uncomment and apply to THIS node only:
+#
+#   machine:
+#     nodeLabels:
+#       example: "true"
+#
+#   talosctl -n <ip-of-k-worker-3> patch mc --patch @talos/patches/nodes/k-worker-3/labels.yaml
+#
+# Talos owns a label once it is declared here -- one added with
+# `kubectl label` outside this config gets reconciled away. NodeRestriction
+# rejects the node-restriction.kubernetes.io/ and node-role.kubernetes.io/
+# prefixes, since Talos writes these using the node's own kubelet identity.
