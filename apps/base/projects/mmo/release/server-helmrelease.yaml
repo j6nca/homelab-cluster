@@ -27,7 +27,7 @@ spec:
               # the server simulates with the Go build of that package, so a
               # mismatched pair is silent prediction drift rather than an error
               # anything reports. Renovate tracks the version from here.
-              tag: 0.2.2
+              tag: 0.2.5
             args:
               - "--roles=all"
               - "--addr=:8080"
