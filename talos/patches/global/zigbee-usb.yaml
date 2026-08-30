@@ -3,7 +3,16 @@
 # NOT applied by Flux -- nothing under talos/ is. Machine config is applied
 # with talosctl, out of band from the cluster's own reconciliation:
 #
-#   talosctl -n <node-ip> patch mc --patch @talos/patches/global/zigbee-usb.yaml
+# Loading a kernel module needs a reboot -- it cannot be done to a running
+# system, so --mode=try is rejected outright with "this config change can't be
+# applied in immediate mode". Stage it and reboot deliberately rather than
+# letting the default mode pick the moment:
+#
+#   talosctl -n <node> patch mc --patch @talos/patches/global/zigbee-usb.yaml --mode=staged
+#   talosctl -n <node> reboot
+#
+# One node at a time. `-n a,b,c` is accepted and would reboot all of them at
+# once.
 #   talosctl -n <node-ip> get links      # confirm the module loaded
 #   ls -l /dev/zigbee                    # via talosctl -n <node-ip> ls /dev
 #

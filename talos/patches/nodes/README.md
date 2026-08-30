@@ -62,9 +62,15 @@ Node patches target one node, so the `-n` is the whole point — a node patch
 applied to every node is usually wrong in a way nothing complains about:
 
 ```bash
-talosctl -n <ip-of-that-node> patch mc --patch @talos/patches/nodes/<node>/labels.yaml
+talosctl -n <node> patch mc --patch @talos/patches/nodes/<node>/labels.yaml
 kubectl get nodes --show-labels
 ```
+
+Labels apply immediately -- they are a Kubernetes write, not a machine change.
+Patches that touch the kernel are not: `machine.kernel.modules` needs a reboot
+and is refused in immediate mode, so `--mode=try` fails there with "this config
+change can't be applied in immediate mode". Check with `--dry-run` first; it
+says whether a reboot is required before anything is written.
 
 Cluster-wide settings belong in `../global/` instead.
 
