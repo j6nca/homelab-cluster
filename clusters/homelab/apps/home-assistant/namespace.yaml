@@ -4,3 +4,31 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: home-assistant
+  # Talos enables Pod Security Admission cluster-wide and enforces `baseline`
+  # on namespaces that do not say otherwise. Both workloads here legitimately
+  # break it, so without this label neither can start -- and the failure is at
+  # admission, so it surfaces as the ReplicaSet reporting "failed create"
+  # rather than as a pod that exists and is unhealthy:
+  #
+  #   home-assistant  privileged: true   to open /dev/ttyUSB0. A hostPath
+  #                                      character device is visible without
+  #                                      it, but the device cgroup denies
+  #                                      access, so ZHA gets EPERM.
+  #   matter-server   hostNetwork: true  Matter commissioning needs mDNS and
+  #                                      LAN IPv6, which the pod overlay does
+  #                                      not carry.
+  #
+  # Scoped to this namespace rather than relaxing the cluster default.
+  #
+  # enforce only. audit and warn stay at the cluster default of restricted, so
+  # a reconcile still reports what breaks it -- which is the point: if a third
+  # workload here ever turns up privileged, that should be visible rather than
+  # inheriting an exemption written for these two. The cost is a warning on
+  # every apply, in the kustomize-controller log where it bothers nobody.
+  #
+  # The narrower fix for home-assistant is a device plugin
+  # (smarter-device-manager advertises host devices as extended resources, no
+  # privilege needed). It would not help matter-server, which needs the host
+  # network regardless.
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
