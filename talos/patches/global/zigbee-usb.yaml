@@ -3,7 +3,16 @@
 # NOT applied by Flux -- nothing under talos/ is. Machine config is applied
 # with talosctl, out of band from the cluster's own reconciliation:
 #
-#   talosctl -n <node-ip> patch mc --patch @talos/patches/global/zigbee-usb.yaml
+# Loading a kernel module needs a reboot -- it cannot be done to a running
+# system, so --mode=try is rejected with "this config change can't be applied
+# in immediate mode". Stage it and reboot deliberately rather than letting the
+# default mode choose the moment:
+#
+#   talosctl -n <node> patch mc --patch @talos/patches/global/zigbee-usb.yaml --mode=staged
+#   talosctl -n <node> reboot
+#
+# One node at a time. `-n a,b,c` is accepted and would reboot all of them at
+# once.
 #   talosctl -n <node-ip> get links      # confirm the module loaded
 #   ls -l /dev/zigbee                    # via talosctl -n <node-ip> ls /dev
 #
@@ -18,19 +27,19 @@
 machine:
   kernel:
     modules:
-      # All three, because which one binds depends on the dongle. The
-      # ZBDongle-E ships with either a CH9102 or a CP2102 serial chip
-      # depending on the production batch, and the EFR32 can also enumerate
-      # as a CDC ACM device. Loading a module whose hardware is absent costs
-      # nothing; guessing wrong means the device never appears.
+      # cp210x only. Confirmed on k-worker-2: of the drivers tried, this is
+      # the one that binds, so this dongle is the CP2102 batch.
+      #
+      # ch341 and cdc_acm were carried while the batch was unknown -- the
+      # ZBDongle-E ships with either a CP2102 or a CH9102 -- and are dropped
+      # now that it is not.
+      #
+      # The cost of that is worth stating, because the symptom is misleading:
+      # a replacement stick from the CH9102 batch will enumerate on the USB
+      # bus and never get a tty, which looks like dead hardware rather than a
+      # missing driver. The fix is adding `ch341` back here plus a node
+      # reboot, since a module cannot be loaded into a running system.
       - name: cp210x
-      - name: ch341
-      # cdc_acm is almost certainly not the one -- the by-id name on the old
-      # machine ends -if00-port0, which is the usbserial form (/dev/ttyUSB*);
-      # a cdc_acm device ends -if00 and gives /dev/ttyACM*. Kept anyway
-      # because it costs nothing and the alternative is a node that cannot see
-      # the dongle at all.
-      - name: cdc_acm
 
   udev:
     rules:
