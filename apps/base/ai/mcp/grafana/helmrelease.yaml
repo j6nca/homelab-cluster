@@ -21,17 +21,15 @@ spec:
               repository: mcp/grafana
               tag: latest
               pullPolicy: Always
+            # The image entrypoint is /app/mcp-grafana --transport sse
+            # --address 0.0.0.0:8000 (SSE transport, basePath=/). The previous
+            # docker-CLI style args were ignored and only misled. The server
+            # also defaults -allowed-hosts to loopback variants of --address,
+            # which rejects in-cluster clients dialing the Service DNS —
+            # allowlist the Service name so LiteLLM can connect.
             args:
-              - "run"
-              - "--rm"
-              - "-i"
-              - "-e"
-              - "GRAFANA_URL"
-              - "-e"
-              - "GRAFANA_AUTH"
-              - "mcp/grafana"
-              - "-t"
-              - "streamable-http"
+              - "-allowed-hosts"
+              - "grafana-mcp.mcp:8000"
             env:
               GRAFANA_URL: "http://grafana-service.observability:3000"
             envFrom:

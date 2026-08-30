@@ -89,11 +89,21 @@ data:
 
     mcp_servers:
       grafana_mcp:
-        url: "http://grafana-mcp.mcp:8000/mcp"
+        # The grafana-mcp pod runs the SSE transport (GET /sse,
+        # POST /message), not streamable HTTP at /mcp.
+        url: "http://grafana-mcp.mcp:8000/sse"
+        transport: sse
       github_mcp:
+        # ghcr.io/github/github-mcp-server requires the caller to present the
+        # PAT on every request via Authorization: Bearer, even when the
+        # server-side GITHUB_PERSONAL_ACCESS_TOKEN env var is set (verified:
+        # 401 without the header, 200 with it).
         url: "http://github-mcp.mcp:8082/mcp"
+        auth_type: bearer_token
+        authentication_token: os.environ/GITHUB_MCP_TOKEN
       context7_mcp:
-        url: "http://context7-mcp.mcp:3000/mcp"
+        # Pod listens on 8080, not the 3000 the Service used to target.
+        url: "http://context7-mcp.mcp:8080/mcp"
       kubernetes_mcp:
         url: "http://kubernetes-mcp.mcp:8080/mcp"
 
