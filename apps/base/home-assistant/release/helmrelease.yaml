@@ -68,7 +68,12 @@ spec:
             readOnly: false
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 5Gi
+        # The migrated config is ~300 MB, most of it the recorder database.
+        # Sized small deliberately: Longhorn can grow a volume but Kubernetes
+        # can never shrink one, so starting under and expanding is the
+        # reversible direction. Growing needs a healthy volume, so watch
+        # replica health before letting it get close to full.
+        size: 1Gi
         accessMode: ReadWriteOnce
       # The Zigbee coordinator, via the /dev/zigbee symlink created by the
       # udev rule in talos/patches/global/zigbee-usb.yaml. Mounted at the same
