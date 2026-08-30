@@ -1,0 +1,27 @@
+# Extra names on k-worker-2's API certificate, so talosctl can address it by
+# hostname instead of by IP.
+#
+# Without this the handshake fails outright:
+#
+#   x509: certificate is valid for 192.168.x.x, not k-worker-2
+#
+# The certificate is issued for whatever is in certSANs, so a name that is not
+# listed cannot be connected to no matter how well it resolves. DNS is
+# necessary and not sufficient.
+#
+#   talosctl -n <ip-of-k-worker-2> patch mc --patch @talos/patches/nodes/k-worker-2/certsans.yaml
+#   talosctl -n <ip-of-k-worker-2> get certsans          # confirm before switching
+#   talosctl -n k-worker-2 version                       # then prove it by name
+#
+# Keep the IP listed alongside the names. Dropping it means a DNS outage takes
+# the API with it, which is exactly when it is most wanted.
+machine:
+  certSANs:
+    - k-worker-2
+    # Add the FQDN too if short names do not resolve from where talosctl runs
+    # -- a resolver with no search domain for the LAN will not find the bare
+    # form.
+    # - k-worker-2.j6n.internal
+    # The address it already answers on. Adjust to this node's real IP; a
+    # certSANs list that omits it silently narrows what can reach the node.
+    # - 192.168.1.x
