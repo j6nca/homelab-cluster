@@ -27,18 +27,21 @@
 machine:
   kernel:
     modules:
-      # All three, because which one binds depends on the dongle. The
-      # ZBDongle-E ships with either a CH9102 or a CP2102 serial chip
-      # depending on the production batch, and the EFR32 can also enumerate
-      # as a CDC ACM device. Loading a module whose hardware is absent costs
-      # nothing; guessing wrong means the device never appears.
+      # Confirmed on k-worker-2: cp210x is the one that binds, so this
+      # dongle is the CP2102 batch. The other two load and bind nothing.
+      #
+      # They stay anyway. The ZBDongle-E ships with either a CP2102 or a
+      # CH9102 depending on the batch, so a replacement stick may well need
+      # ch341 instead -- and adding a module later is not a config edit, it is
+      # a config edit plus a node reboot, because modules cannot be loaded
+      # into a running system. Carrying two unused modules is cheaper than
+      # that, and cheaper still than diagnosing a dead dongle that is only
+      # missing a driver.
       - name: cp210x
       - name: ch341
-      # cdc_acm is almost certainly not the one -- the by-id name on the old
-      # machine ends -if00-port0, which is the usbserial form (/dev/ttyUSB*);
-      # a cdc_acm device ends -if00 and gives /dev/ttyACM*. Kept anyway
-      # because it costs nothing and the alternative is a node that cannot see
-      # the dongle at all.
+      # Not this one: the by-id name ends -if00-port0, the usbserial form
+      # giving /dev/ttyUSB*, where a cdc_acm device ends -if00 and gives
+      # /dev/ttyACM*. Kept for the same reason as ch341.
       - name: cdc_acm
 
   udev:
