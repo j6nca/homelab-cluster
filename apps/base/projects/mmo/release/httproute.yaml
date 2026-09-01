@@ -50,7 +50,9 @@ spec:
         type: PathPrefix
         value: /auth
     backendRefs:
-    - name: mmo-server
+    # The gateway, which is the only half that terminates a socket. World nodes
+    # are not routed and have no game port: a player reaches them through here.
+    - name: mmo-gateway
       port: 8080
   # Everything else is the client bundle, including deep links: nginx falls
   # back to index.html so the SPA renders rather than 404ing.
