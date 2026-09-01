@@ -39,7 +39,13 @@ spec:
         # the job queue coordinates through Postgres — so this is a storage
         # constraint rather than an architectural one.
         replicas: 1
-        strategy: Recreate
+        # An object, not the bare string app-template accepts: the generic
+        # chart passes this straight into the Deployment spec, where a string
+        # is not a valid strategy. Recreate rather than a rolling update
+        # because the cache PVC is ReadWriteOnce — a second pod would sit
+        # unschedulable waiting for a volume the outgoing one still holds.
+        strategy:
+          type: Recreate
 
         podSecurityContext:
           # 10001 is the uid the image runs as. The fsGroup has to match or the
