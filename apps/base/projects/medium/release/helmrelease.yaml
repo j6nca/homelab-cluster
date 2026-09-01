@@ -25,7 +25,7 @@ spec:
           # publishes it alongside :latest — bump this deliberately rather
           # than following a moving tag, so what is running here is a thing
           # anyone can go and read the diff for.
-          tag: 0.0.2
+          tag: 0.0.3
           pullPolicy: IfNotPresent
 
         # 0.3.0 dropped the built-in reloader annotation; the app reads its
@@ -99,6 +99,14 @@ spec:
 
           # Well under the 20Gi volume: the server evicts least-recently-used
           # transcodes to stay beneath this, and artwork shares the same disk.
+          # Lyrics for music that has none beside it or in its tags, fetched
+          # from lrclib.net. This is the one setting here that sends anything
+          # about the library outwards: the artist, title, album and duration
+          # of tracks with no words yet. Tracks that already have lyrics are
+          # never sent, and a track LRCLIB does not know is remembered as such
+          # rather than asked about again every scan.
+          - name: MEDIUM_LRCLIB
+            value: "true"
           - name: MEDIUM_TRANSCODE_CACHE_MAX_BYTES
             value: "12884901888"
 
