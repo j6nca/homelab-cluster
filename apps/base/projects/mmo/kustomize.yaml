@@ -26,3 +26,20 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: mmo-monitoring
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: mmo
+  interval: 5m
+  path: ./apps/base/projects/mmo/monitoring
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

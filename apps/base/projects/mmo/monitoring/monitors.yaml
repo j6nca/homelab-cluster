@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: mmo-gateway
+spec:
+  endpoints:
+    # The admin port, not the game port. Metrics and pprof live on a separate
+    # listener so they can be kept off the routed hostname, and /metrics is not
+    # served on 8080 at all.
+    - honorLabels: true
+      interval: 30s
+      path: /metrics
+      port: admin
+      scheme: http
+      scrapeTimeout: 10s
+  jobLabel: mmo-gateway
+  namespaceSelector:
+    matchNames:
+      - mmo
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mmo-gateway
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: mmo-world
+spec:
+  endpoints:
+    - honorLabels: true
+      # More often than the gateway: this is where the tick loop runs, and the
+      # tick histogram is the number the whole design is measured against.
+      # Thirty seconds of averaging hides a stall that lasted ten.
+      interval: 15s
+      path: /metrics
+      port: admin
+      scheme: http
+      scrapeTimeout: 10s
+  jobLabel: mmo-world
+  namespaceSelector:
+    matchNames:
+      - mmo
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mmo-world

@@ -83,3 +83,15 @@ spec:
   title: Observability
   uid: observability
 ---
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: projects
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  title: Projects
+  uid: projects
