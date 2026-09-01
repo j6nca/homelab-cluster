@@ -2,47 +2,62 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app mmo-server
+  name: &app mmo-gateway
 spec:
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
-  # The postgres and dragonfly components append cnpg and dragonfly-operator
-  # here, so this has to exist for their patch to have somewhere to add to.
-  dependsOn: []
+  # The bus is how the two halves reach each other, so neither is any use
+  # before it exists. Without this they crash-loop until NATS turns up, which
+  # recovers on its own but makes a first install look broken.
+  #
+  # The postgres and dragonfly components append cnpg and dragonfly-operator to
+  # this list, so it has to be a list they can append to.
+  dependsOn:
+    - name: mmo-nats
   interval: 15m
   values:
     controllers:
-      mmo-server:
+      mmo-gateway:
         annotations:
           reloader.stakater.com/auto: "true"
+        # ONE replica, and not because a gateway cannot be scaled -- it runs no
+        # simulation and holds no character state, which is the entire point of
+        # splitting it out.
+        #
+        # It is one because SESSION_SECRET is not set yet (see
+        # externalsecrets.yaml: the 1Password item does not exist). Without it
+        # each gateway generates its own signing key at boot, so a ticket
+        # issued over HTTP by one gateway is rejected by whichever gateway the
+        # WebSocket lands on. With one replica that is invisible. With two it
+        # is a login that fails roughly half the time.
+        #
+        # Raise this the same day the secret exists, not before.
+        replicas: 1
         containers:
           app:
             image:
               repository: ghcr.io/ctrl-research/mmo/server
-              # Client and server are built from the same commit in the same
-              # workflow run and share a tag set. Keep them on the SAME tag:
-              # the client predicts with a WASM build of internal/world/sim and
-              # the server simulates with the Go build of that package, so a
-              # mismatched pair is silent prediction drift rather than an error
-              # anything reports. Renovate tracks the version from here.
-              tag: 0.2.5
+              # Same tag as the world nodes and the client. See the note there.
+              tag: 0.2.16
             args:
-              - "--roles=all"
+              - "--roles=gateway"
               - "--addr=:8080"
-              # Reachable from the cluster so the kubelet can probe it and
-              # metrics can be scraped. It is deliberately not routed.
               - "--admin-addr=0.0.0.0:9090"
-              # No --client-dir: the client is a separate Deployment served by
-              # nginx, joined to this one at the gateway.
+              # A gateway with no world node of its own reaches one over the
+              # bus and finds it through the directory, so it refuses to start
+              # without both rather than timing out every login.
               #
-              # No --dev-auth either. That issues game tickets with no identity
-              # check whatsoever. --local-auth (on by default) plus the
-              # allowlist is the real path; see the bootstrap note in the PR.
+              # No --client-dir: the client is a separate Deployment served by
+              # nginx, joined to this one at the route.
+              #
+              # No --dev-auth. That issues game tickets with no identity check
+              # whatsoever. --local-auth (on by default) plus the allowlist is
+              # the real path.
               #
               # No --origins: empty means same-origin only, which is exactly
-              # what the single-hostname routing below preserves.
+              # what the single-hostname routing preserves.
               #
               # --secure-cookies stays off while this is on envoy-internal,
               # which has no TLS listener. Turn it on the same day this moves
@@ -51,9 +66,12 @@ spec:
             env:
               TZ: America/Toronto
               PUBLIC_URL: http://mmo.j6n.internal
-              # Seeds the allowlist at boot, replacing the job that used to do
-              # it with one init container per user -- the image is distroless
-              # with no shell to loop with, so six names meant six containers.
+              # Both halves must agree on which bus and which directory, or
+              # they are two clusters that cannot see each other.
+              NATS_URL: nats://mmo-nats:4222
+              # Seeded here rather than on the world nodes: signing in is the
+              # gateway's job, and seeding it on both would have every world
+              # node reassert the same six rows on every boot.
               #
               # Additive: names not listed here are left alone, so anyone added
               # later with `mmo allow` survives a rollout. But a name that
@@ -86,13 +104,12 @@ spec:
               readiness: *probe
             resources:
               requests:
-                cpu: 200m
-                memory: 256Mi
+                # Lighter than a world node: no tick loop, no rooms. It moves
+                # bytes between a socket and the bus.
+                cpu: 50m
+                memory: 128Mi
               limits:
-                # The tick loop is the hot path and a 50 ms budget is an SLO,
-                # so no CPU limit -- throttling here shows up as tick overrun,
-                # not as a slow request.
-                memory: 1Gi
+                memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

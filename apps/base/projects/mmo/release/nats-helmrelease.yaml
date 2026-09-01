@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mmo-nats
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  # The postgres and dragonfly components append to this on every HelmRelease
+  # in the directory, so it has to exist even though NATS needs neither.
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      mmo-nats:
+        containers:
+          app:
+            image:
+              repository: docker.io/library/nats
+              tag: 2.12.1-alpine
+            args:
+              # Core NATS only. The bus uses publish, subscribe and
+              # request/reply and nothing else -- no streams, no consumers, no
+              # replay -- so JetStream would be a disk to manage and back up
+              # for a feature nothing asks for. A message that arrives while a
+              # node is down is a message about a room that node is not running
+              # any more.
+              - "--http_port=8222"
+            ports:
+              - containerPort: &client 4222
+                name: client
+                protocol: TCP
+              - containerPort: &monitor 8222
+                name: monitor
+                protocol: TCP
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    # /healthz on the monitoring port, which is NATS's own and
+                    # is not the game's /healthz.
+                    path: /healthz
+                    port: *monitor
+                  initialDelaySeconds: 5
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 25m
+                memory: 32Mi
+              limits:
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+
+    service:
+      app:
+        ports:
+          client:
+            port: *client
+          monitor:
+            port: *monitor

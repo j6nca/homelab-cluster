@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mmo-world
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  # The bus is how the two halves reach each other, so neither is any use
+  # before it exists. Without this they crash-loop until NATS turns up, which
+  # recovers on its own but makes a first install look broken.
+  #
+  # The postgres and dragonfly components append cnpg and dragonfly-operator to
+  # this list, so it has to be a list they can append to.
+  dependsOn:
+    - name: mmo-nats
+  interval: 15m
+  values:
+    controllers:
+      mmo-world:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # A StatefulSet for the pod names, not for storage -- there are no
+        # volumes here and nothing on disk survives a restart.
+        #
+        # A world node identifies itself to the room directory by hostname, and
+        # the directory keeps every node it has ever seen in registration order
+        # so that placement is stable across restarts. Under a Deployment every
+        # rollout invents new hostnames, which means a new node on every deploy
+        # and a registration list that only grows. mmo-world-0 and -1 come back
+        # as themselves.
+        type: statefulset
+        replicas: 2
+        statefulset:
+          podManagementPolicy: Parallel
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ctrl-research/mmo/server
+              # Same tag as the gateway and the client: the client predicts
+              # with a WASM build of internal/world/sim and this simulates with
+              # the Go build of it, so a mismatched pair is silent prediction
+              # drift rather than an error anything reports.
+              tag: 0.2.16
+            args:
+              - "--roles=world"
+              # No --addr: a world node terminates no sockets. Players reach it
+              # through a gateway, over NATS. The admin listener below is the
+              # only thing it serves over HTTP.
+              - "--admin-addr=0.0.0.0:9090"
+              - "--log-json"
+            env:
+              TZ: America/Toronto
+              # Both halves must agree on which bus and which directory, or
+              # they are two clusters that cannot see each other.
+              NATS_URL: nats://mmo-nats:4222
+            envFrom:
+              - secretRef:
+                  name: mmo
+            ports:
+              - containerPort: &admin 9090
+                name: admin
+                protocol: TCP
+            probes:
+              # On the admin port, unlike the gateway: there is no game port to
+              # probe here, and /healthz on 8080 would be probing a listener
+              # that was never started.
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *admin
+                  initialDelaySeconds: 10
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+              limits:
+                # The tick loop is the hot path and a 50 ms budget is an SLO,
+                # so no CPU limit -- throttling here shows up as tick overrun,
+                # not as a slow request.
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        # Matches the distroless nonroot user the image ships with.
+        runAsUser: 65532
+        runAsGroup: 65532
+
+    service:
+      app:
+        # Headless: nothing load-balances a world node. A gateway addresses one
+        # by name over NATS after the directory tells it which, and a room is
+        # reached the same way -- so a virtual IP in front of these would be a
+        # hop that no traffic takes.
+        clusterIP: None
+        ports:
+          admin:
+            port: *admin
