@@ -21,11 +21,12 @@ spec:
         image:
           registry: ghcr.io
           repository: ctrl-research/medium
-          # Following the branch rather than a release: there are no version
-          # tags yet. Every push to main publishes this and its commit sha, so
-          # a rollback has an immutable digest to point at.
-          tag: main
-          pullPolicy: Always
+          # Pinned to a release. Merging to main cuts the next version and
+          # publishes it alongside :latest — bump this deliberately rather
+          # than following a moving tag, so what is running here is a thing
+          # anyone can go and read the diff for.
+          tag: 0.0.1
+          pullPolicy: IfNotPresent
 
         # 0.3.0 dropped the built-in reloader annotation; the app reads its
         # secret via envFrom, so restart on rotation
