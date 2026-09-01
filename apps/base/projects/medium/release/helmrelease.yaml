@@ -64,10 +64,20 @@ spec:
             value: America/Toronto
           - name: MEDIUM_ADDR
             value: ":8080"
+          # The external hostname, not the internal one, and that is forced
+          # rather than chosen: Google builds the OAuth redirect from this, and
+          # it refuses a redirect that is not https on a public domain — which
+          # http://medium.j6n.internal fails on both counts. Jellyfin is
+          # exposed the same way through the tunnel.
           - name: MEDIUM_BASE_URL
-            value: http://medium.j6n.internal
+            value: https://medium.j6n.dev
+          # Google sign-in only. Local accounts exist for development and for a
+          # break-glass administrator, and they cannot coexist with the
+          # bootstrap admin being absent: the server refuses MEDIUM_ADMIN_EMAIL
+          # unless local sign-in is on, because a password account nobody can
+          # sign into is not a fallback.
           - name: MEDIUM_LOCAL_AUTH
-            value: "true"
+            value: "false"
           - name: MEDIUM_CACHE_DIR
             value: /cache
 
@@ -86,7 +96,7 @@ spec:
             value: "12884901888"
 
         envFrom:
-          # MEDIUM_DATABASE_URL, the admin bootstrap, and the TMDB key
+          # MEDIUM_DATABASE_URL, the Google credentials, and the allowlist
           - secretRef:
               name: *app
 
