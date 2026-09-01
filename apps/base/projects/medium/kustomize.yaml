@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app medium
+  namespace: flux-system
+spec:
+  components:
+    - ../../../../../components/postgres
+  postBuild:
+    substitute:
+      APP: *app
+      POSTGRES_REPLICAS: "1"
+      # Metadata, watch state, grants and every provider match. It holds no
+      # media and no artwork — those live on the NFS share and in the cache
+      # volume respectively — so it stays small even for a large library.
+      POSTGRES_SIZE: 2Gi
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/projects/medium/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

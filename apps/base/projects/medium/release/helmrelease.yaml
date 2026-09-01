@@ -1,0 +1,173 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app medium
+spec:
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: ctrl-research
+        namespace: flux-system
+      version: 0.3.0
+  dependsOn: []
+  interval: 15m
+  values:
+    deployments:
+      app:
+        image:
+          registry: ghcr.io
+          repository: ctrl-research/medium
+          # Pinned to a release. Merging to main cuts the next version and
+          # publishes it alongside :latest — bump this deliberately rather
+          # than following a moving tag, so what is running here is a thing
+          # anyone can go and read the diff for.
+          tag: 0.0.1
+          pullPolicy: IfNotPresent
+
+        # 0.3.0 dropped the built-in reloader annotation; the app reads its
+        # secret via envFrom, so restart on rotation
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        containerName: *app
+
+        # One, and not negotiable while the cache is ReadWriteOnce: two pods
+        # could not both attach it. Nothing else in the server is a singleton —
+        # the job queue coordinates through Postgres — so this is a storage
+        # constraint rather than an architectural one.
+        replicas: 1
+        # An object, not the bare string app-template accepts: the generic
+        # chart passes this straight into the Deployment spec, where a string
+        # is not a valid strategy. Recreate rather than a rolling update
+        # because the cache PVC is ReadWriteOnce — a second pod would sit
+        # unschedulable waiting for a volume the outgoing one still holds.
+        strategy:
+          type: Recreate
+
+        podSecurityContext:
+          # 10001 is the uid the image runs as. The fsGroup has to match or the
+          # process cannot write artwork or transcodes into the cache volume.
+          runAsUser: 10001
+          runAsGroup: 10001
+          runAsNonRoot: true
+          fsGroup: 10001
+          fsGroupChangePolicy: OnRootMismatch
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          # The web client is compiled into the binary, so the cache volume and
+          # a temporary directory are the only writable paths it needs.
+          readOnlyRootFilesystem: true
+
+        env:
+          - name: TZ
+            value: America/Toronto
+          - name: MEDIUM_ADDR
+            value: ":8080"
+          # The external hostname, not the internal one, and that is forced
+          # rather than chosen: Google builds the OAuth redirect from this, and
+          # it refuses a redirect that is not https on a public domain — which
+          # http://medium.j6n.internal fails on both counts. Jellyfin is
+          # exposed the same way through the tunnel.
+          - name: MEDIUM_BASE_URL
+            value: https://medium.j6n.dev
+          # Google sign-in only. Local accounts exist for development and for a
+          # break-glass administrator, and they cannot coexist with the
+          # bootstrap admin being absent: the server refuses MEDIUM_ADMIN_EMAIL
+          # unless local sign-in is on, because a password account nobody can
+          # sign into is not a fallback.
+          - name: MEDIUM_LOCAL_AUTH
+            value: "false"
+          - name: MEDIUM_CACHE_DIR
+            value: /cache
+
+          # Sign-in attempts are counted against the caller's address, and
+          # behind a gateway every request arrives from the gateway. Without
+          # this the whole house shares one allowance and one person mistyping
+          # a password locks everybody out; with it the forwarded header is
+          # believed, but only from inside the cluster. Talos' default pod
+          # network — widen it here if the cluster's podSubnets differ.
+          - name: MEDIUM_TRUSTED_PROXIES
+            value: 10.244.0.0/16
+
+          # Well under the 20Gi volume: the server evicts least-recently-used
+          # transcodes to stay beneath this, and artwork shares the same disk.
+          - name: MEDIUM_TRANSCODE_CACHE_MAX_BYTES
+            value: "12884901888"
+
+        envFrom:
+          # MEDIUM_DATABASE_URL, the Google credentials, and the allowlist
+          - secretRef:
+              name: *app
+
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+
+        # A scan of a large library runs for a long time in the background, but
+        # it runs in the job queue rather than in the request path, so the
+        # server answers throughout. Nothing here needs a long startup grace.
+        livenessProbe:
+          httpGet:
+            path: &health /api/v1/health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: *health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            # Transcoding is software x264 — there is no hardware acceleration
+            # configured — so a single conversion can use most of a core for
+            # minutes. No CPU limit deliberately: a throttled transcode stalls
+            # playback, and the queue already bounds how many run at once.
+            memory: 2Gi
+
+        volumes:
+          - name: cache
+            persistentVolumeClaim:
+              claimName: medium-cache
+          - name: tmp
+            emptyDir: {}
+          # The library itself. Read-only at the mount as well as in the
+          # server: Medium opens media files for reading and writes only into
+          # its cache directory, and the mount says so independently of that.
+          - name: media
+            nfs:
+              server: mimir.internal
+              path: /var/nfs/shared/MEDIA
+
+        volumeMounts:
+          - name: cache
+            mountPath: /cache
+          - name: tmp
+            mountPath: /tmp
+          - name: media
+            mountPath: /media
+            readOnly: true
+            subPath: data/media
+
+    services:
+      app:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: http
+            protocol: TCP
+            name: http
