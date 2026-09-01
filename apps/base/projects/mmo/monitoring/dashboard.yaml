@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: mmo
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: projects
+  # Fetched from the repo that emits the metrics rather than kept here.
+  #
+  # A dashboard is the one piece of a system nothing compiles and nobody tests,
+  # and its failure mode is a panel that renders an empty graph -- which looks
+  # exactly like a system doing nothing. Keeping it next to the code means a
+  # test there asserts every metric it names is one the server actually
+  # exports, and that every metric the server exports is on it. This repo
+  # cannot check either.
+  url: https://raw.githubusercontent.com/ctrl-research/mmo/main/deploy/grafana/mmo.json
