@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/persistentvolumeclaim_v1.json
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: medium-cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      # Artwork and transcoded files. Both are derived: losing this volume
+      # costs time rather than content — transcodes are made again on demand,
+      # artwork found beside the media is found again by a scan, and artwork a
+      # provider supplied is refetched by the next matching pass. It is sized
+      # for the transcode cache, which is the part that grows: the server
+      # evicts least-recently-used files to stay under
+      # MEDIUM_TRANSCODE_CACHE_MAX_BYTES, set below to leave headroom here.
+      storage: 20Gi
