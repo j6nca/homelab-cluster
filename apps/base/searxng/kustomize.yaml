@@ -5,7 +5,19 @@ metadata:
   name: &app searxng
   namespace: flux-system
 spec:
-  targetNamespace: kube-system
+  components:
+    # The HelmRelease already dials searxng-dragonfly for the limiter and
+    # cache; without this that host does not exist.
+    - ../../../../components/dragonfly
+  postBuild:
+    substitute:
+      APP: *app
+      DRAGONFLY_REPLICAS: "1"
+      DRAGONFLY_MAX_MEMORY: 512Mi
+  # Was kube-system, which is where nothing that is not part of Kubernetes
+  # belongs -- and it is the one namespace exempt from Pod Security
+  # Admission, so a workload there quietly loses a guardrail it should keep.
+  targetNamespace: *app
   commonMetadata:
     labels:
       service: *app

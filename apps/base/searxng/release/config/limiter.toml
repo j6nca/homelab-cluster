@@ -1,0 +1,14 @@
+# Botdetection settings. Largely inert while server.limiter is false in
+# settings.yml, but the file has to exist -- SearXNG logs an error and falls
+# back to defaults when the path is mounted and unreadable, which is a
+# confusing way to discover a typo.
+[real_ip]
+x_for = 1
+ipv4_prefix = 32
+ipv6_prefix = 48
+
+[botdetection.ip_limit]
+# The link-token method requires a browser to fetch a token before searching.
+# Programmatic clients cannot, so it stays off for the same reason the limiter
+# does.
+link_token = false
