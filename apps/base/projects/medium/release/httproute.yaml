@@ -30,6 +30,18 @@ spec:
     - backendRefs:
         - name: medium-app
           port: 8080
+      # A transcode is converted in full before a single byte is served, and a
+      # feature film re-encoded from HEVC takes minutes. The default request
+      # timeout cuts that connection long before it finishes, so a file that
+      # needs converting looks broken while the conversion is in fact still
+      # running — the same default rogue-like had to turn off for a long dive.
+      #
+      # The conversion is not lost when a caller goes away: the server runs it
+      # on its own context, bounded by its own two-hour limit rather than by
+      # this one.
+      timeouts:
+        request: 0s
+        backendRequest: 0s
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -54,3 +66,15 @@ spec:
     - backendRefs:
         - name: medium-app
           port: 8080
+      # A transcode is converted in full before a single byte is served, and a
+      # feature film re-encoded from HEVC takes minutes. The default request
+      # timeout cuts that connection long before it finishes, so a file that
+      # needs converting looks broken while the conversion is in fact still
+      # running — the same default rogue-like had to turn off for a long dive.
+      #
+      # The conversion is not lost when a caller goes away: the server runs it
+      # on its own context, bounded by its own two-hour limit rather than by
+      # this one.
+      timeouts:
+        request: 0s
+        backendRequest: 0s
