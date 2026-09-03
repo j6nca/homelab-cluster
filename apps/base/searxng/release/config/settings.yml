@@ -1,0 +1,46 @@
+# SearXNG settings. Mounted read-only at /etc/searxng/settings.yml.
+#
+# use_default_settings pulls in upstream's full engine list and only the keys
+# below override it -- so an engine added or fixed upstream arrives on the next
+# image bump rather than needing this file edited.
+use_default_settings: true
+
+general:
+  instance_name: "j6n search"
+  # No contact link and no donation banner on a single-user instance.
+  contact_url: false
+  enable_metrics: true
+
+server:
+  # Read from the environment (SEARXNG_SECRET, via the ExternalSecret).
+  secret_key: ""
+  # The limiter blocks requests that do not look like a browser, which is
+  # every programmatic caller: the MCP server, open-webui, anything scripted.
+  # Off is safe here because nothing reaches this instance from outside the
+  # LAN -- the route is envoy-internal only.
+  limiter: false
+  public_instance: false
+  image_proxy: true
+  method: "GET"
+
+search:
+  # The whole point of running this. JSON is NOT enabled by default and
+  # requesting an unset format returns 403, so without this line every agent
+  # and every open-webui query fails with a permission error that says nothing
+  # about formats.
+  formats:
+    - html
+    - json
+  safe_search: 0
+  autocomplete: "duckduckgo"
+  default_lang: "en"
+
+ui:
+  default_theme: simple
+  infinite_scroll: true
+  query_in_title: true
+
+# Redis-compatible, served by the dragonfly component. Used for the limiter
+# and for caching; SearXNG runs without it but re-fetches far more.
+redis:
+  url: redis://searxng-dragonfly:6379/0

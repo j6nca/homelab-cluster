@@ -43,11 +43,15 @@ spec:
               # from the old direct ones — a saved default may need re-picking.
               # The key comes from the secret as OPENAI_API_KEYS.
               OPENAI_API_BASE_URLS: http://litellm.litellm:4000/v1
-              # Enable once searxng is ready
-              ENABLE_RAG_WEB_SEARCH: false
-              ENABLE_SEARCH_QUERY: false
-              # RAG_WEB_SEARCH_ENGINE: searxng
-              # SEARXNG_QUERY_URL: http://searxng:8080/search?q=<query>
+              ENABLE_RAG_WEB_SEARCH: true
+              ENABLE_SEARCH_QUERY: true
+              RAG_WEB_SEARCH_ENGINE: searxng
+              # Cross-namespace, and the <query> placeholder is literal --
+              # open-webui substitutes it. searxng returns 403 for JSON unless
+              # search.formats lists it, which its configmap now does; without
+              # that this fails as a permission error saying nothing about
+              # formats.
+              SEARXNG_QUERY_URL: http://searxng.searxng:8080/search?q=<query>
               # Enable redis for scaling
               # ENABLE_WEBSOCKET_SUPPORT: "true"
               # WEBSOCKET_MANAGER: "redis"
