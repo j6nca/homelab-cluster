@@ -108,7 +108,11 @@ spec:
           - path: /usr/src/paperless/media
         type: persistentVolumeClaim
         storageClass: nfs-unas-retain
-        size: 100Gi
+        # Advisory rather than enforced: the NFS CSI driver creates a
+        # directory and NFS applies no quota, so this number reserves nothing
+        # and caps nothing. The real limit is free space on mimir. Kept honest
+        # at 10Gi rather than aspirational.
+        size: 10Gi
         accessMode: ReadWriteMany
       # Drop files here and paperless ingests them. ReadWriteMany and on the
       # NAS so a scanner can write to it directly, rather than everything
