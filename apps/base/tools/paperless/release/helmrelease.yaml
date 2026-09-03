@@ -89,14 +89,26 @@ spec:
             port: *port
 
     persistence:
-      # The Tantivy search index and the task database. On Longhorn rather
-      # than NFS: this is the latency-sensitive half, and it is small.
+      # The Tantivy search index. On Longhorn rather than NFS: this is the
+      # latency-sensitive half, and it is small. Documents and thumbnails are
+      # not here -- they live in media/ on the NAS -- and the database is in
+      # postgres, so this holds the index and logs and little else.
+      #
+      # The index scales with extracted text, not file size: a 5 MB scan may
+      # hold 10 KB of text. A few hundred documents is tens of megabytes, and
+      # 10k is roughly 500 MB to 1 GB at the high end.
+      #
+      # 1Gi is therefore ample now and close to the ceiling later. Unlike the
+      # NFS claims this one is real -- 1Gi requested is 2Gi of Longhorn pool at
+      # two replicas -- so it is deliberately not oversized. Worth watching
+      # past ~5k documents: Longhorn can expand it, but only while the volume
+      # is healthy, and a full index volume fails writes rather than degrading.
       data:
         globalMounts:
           - path: /usr/src/paperless/data
         type: persistentVolumeClaim
         storageClass: longhorn
-        size: 5Gi
+        size: 1Gi
         accessMode: ReadWriteOnce
       # The documents themselves. nfs-unas-retain keeps the directory when the
       # claim goes away and derives its path from namespace and PVC name, so a
