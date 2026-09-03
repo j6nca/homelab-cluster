@@ -40,7 +40,7 @@ spec:
             image:
               repository: ghcr.io/ctrl-research/mmo/server
               # Same tag as the world nodes and the client. See the note there.
-              tag: 0.2.16
+              tag: 0.2.23
             args:
               - "--roles=gateway"
               - "--addr=:8080"

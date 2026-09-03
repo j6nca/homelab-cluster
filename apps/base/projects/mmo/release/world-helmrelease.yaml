@@ -43,7 +43,7 @@ spec:
               # with a WASM build of internal/world/sim and this simulates with
               # the Go build of it, so a mismatched pair is silent prediction
               # drift rather than an error anything reports.
-              tag: 0.2.16
+              tag: 0.2.23
             args:
               - "--roles=world"
               # No --addr: a world node terminates no sockets. Players reach it
