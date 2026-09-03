@@ -26,5 +26,7 @@ spec:
   - searxng.j6n.internal
   rules:
   - backendRefs:
-    - name: searxng
+    # generic names resources <release>-<key>, so the service backing
+    # deployments.app is searxng-app rather than searxng
+    - name: searxng-app
       port: 8080

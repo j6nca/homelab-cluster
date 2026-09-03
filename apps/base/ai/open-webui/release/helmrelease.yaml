@@ -51,7 +51,7 @@ spec:
               # search.formats lists it, which its configmap now does; without
               # that this fails as a permission error saying nothing about
               # formats.
-              SEARXNG_QUERY_URL: http://searxng.searxng:8080/search?q=<query>
+              SEARXNG_QUERY_URL: http://searxng-app.searxng:8080/search?q=<query>
               # Enable redis for scaling
               # ENABLE_WEBSOCKET_SUPPORT: "true"
               # WEBSOCKET_MANAGER: "redis"
