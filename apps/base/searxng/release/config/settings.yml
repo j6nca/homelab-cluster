@@ -3,7 +3,24 @@
 # use_default_settings pulls in upstream's full engine list and only the keys
 # below override it -- so an engine added or fixed upstream arrives on the next
 # image bump rather than needing this file edited.
-use_default_settings: true
+use_default_settings:
+  engines:
+    remove:
+      # Removed rather than disabled, and the distinction matters. A disabled
+      # engine is merely absent from the default search set; a removed one
+      # cannot be re-enabled in preferences at all.
+      #
+      # wikidata's SPARQL endpoint answers this instance with 403 and suspends
+      # it for a day. That alone would be survivable, but it is not how it
+      # fails: the engine's processor never registers while wikidata stays in
+      # the search set, so every query dies on
+      #
+      #   KeyError: 'wikidata'   searx/search/__init__.py, _get_requests
+      #
+      # A 500 on every search from one engine failing to initialise. Anyone
+      # turning it back on in preferences would hit exactly that, which is why
+      # this is not merely disabled.
+      - wikidata
 
 general:
   instance_name: "j6n search"
@@ -14,11 +31,11 @@ general:
 server:
   # Read from the environment (SEARXNG_SECRET, via the ExternalSecret).
   secret_key: ""
-  # The limiter blocks requests that do not look like a browser, which is
-  # every programmatic caller: the MCP server, open-webui, anything scripted.
-  # Off is safe here because nothing reaches this instance from outside the
-  # LAN -- the route is envoy-internal only.
-  limiter: false
+  # On, with the private ranges passed in limiter.toml. Leaving bot detection
+  # active and exempting the networks that actually call this is a smaller
+  # hole than switching it off outright: pod-to-pod traffic and the LAN sail
+  # through, anything else still gets filtered.
+  limiter: true
   public_instance: false
   image_proxy: true
   method: "GET"
@@ -32,15 +49,62 @@ search:
     - html
     - json
   safe_search: 0
-  autocomplete: "duckduckgo"
   default_lang: "en"
+  # Both deliberately empty rather than left to a provider.
+  #
+  # Autocomplete fires an upstream request per keystroke and the favicon
+  # resolver one per result row. Nothing here has a human typing into it --
+  # the callers are open-webui and agents -- so those requests produce nothing
+  # anyone sees while counting against the same provider's rate limit as the
+  # searches that do matter. On a single egress IP that is how an instance
+  # talks itself into a captcha.
+  autocomplete: ""
+  favicon_resolver: ""
 
 ui:
   default_theme: simple
   infinite_scroll: true
   query_in_title: true
 
+# Ranking nudge, not a filter: everything else still appears, these just sort
+# higher. Aimed at what this instance is actually asked about.
+hostnames:
+  high_priority:
+    - (.*)\/blog\/(.*)
+    - (.*\.)?wikipedia.org$
+    - (.*\.)?github.com$
+    - (.*\.)?stackoverflow.com$
+    - (.*\.)?archlinux.org$
+    - (.*\.)?kubernetes.io$
+    - (.*\.)?talos.dev$
+
+# Merged by name against the defaults. These are engines that fail because
+# every request from this cluster arrives from one address -- a shape that
+# looks like a scraper to anyone rate-limiting by IP. Re-enable any of them if
+# it stops failing.
+engines:
+  # Returns "Suspended: CAPTCHA" rather than results.
+  - name: startpage
+    disabled: true
+  # The legacy scraper against html.duckduckgo.com, which is captcha-prone.
+  # The image ships a newer implementation under a different name; swap rather
+  # than lose duckduckgo entirely.
+  - name: duckduckgo
+    disabled: true
+  - name: duckduckgo web
+    disabled: false
+  # brave's HTML scraper gets IP-blocked the same way. The API-backed engine
+  # is the reliable alternative but needs a key, so it stays off -- it is
+  # inactive by default and this only makes that explicit, so the reason is
+  # recorded rather than rediscovered.
+  - name: braveapi
+    disabled: true
+
 # Redis-compatible, served by the dragonfly component. Used for the limiter
 # and for caching; SearXNG runs without it but re-fetches far more.
+#
+# Still `redis:` rather than `valkey:` -- upstream renamed it during the
+# Valkey migration and accepts both, but the new name may not exist in the
+# pinned image. Worth revisiting at the next bump.
 redis:
   url: redis://searxng-dragonfly:6379/0
