@@ -8,3 +8,30 @@ resources:
   - ./client-helmrelease.yaml
   - ./externalsecrets.yaml
   - ./httproute.yaml
+# Room placement is a Lua script, and it reaches keys it cannot name in
+# advance: the directory holds one hash per room instance
+# (mmo:{dir}:inst:<id>), and the ids come from a sorted set the script reads
+# as its first step. Dragonfly validates Lua per shard and refuses a key that
+# was not declared in KEYS, so every placement dies with
+#
+#   script tried accessing undeclared key, key: mmo:{dir}:inst:13
+#
+# and the player is told "could not enter the world". Redis standalone -- what
+# deploy/docker-compose.yml runs and what the directory tests run against --
+# permits the same access, which is why this only ever appeared here.
+#
+# The flag costs some Lua throughput: Dragonfly can no longer plan a script
+# against one shard. Placement runs on login and on room creation, not in the
+# 50 ms tick loop, so that is not a budget this spends.
+#
+# Scoped to mmo deliberately. components/dragonfly is shared, and no other app
+# here runs scripts that need it.
+patches:
+  - target:
+      group: dragonflydb.io
+      version: v1alpha1
+      kind: Dragonfly
+    patch: |-
+      - op: add
+        path: /spec/args/-
+        value: --default_lua_flags=allow-undeclared-keys
