@@ -3,7 +3,20 @@
 # use_default_settings pulls in upstream's full engine list and only the keys
 # below override it -- so an engine added or fixed upstream arrives on the next
 # image bump rather than needing this file edited.
-use_default_settings: true
+use_default_settings:
+  engines:
+    remove:
+      # wikidata's SPARQL endpoint returns 403 to this instance and suspends
+      # it for a day. That alone would be survivable, but it is not how it
+      # fails: the engine's processor never registers, while wikidata stays in
+      # the default engine set, so every search looks it up and dies on
+      #
+      #   KeyError: 'wikidata'   (searx/search/__init__.py, _get_requests)
+      #
+      # A 500 on every query from one engine failing to initialise. Removing
+      # it rather than disabling it means nobody can re-enable it in
+      # preferences and hit the same crash.
+      - wikidata
 
 general:
   instance_name: "j6n search"
