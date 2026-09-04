@@ -9,12 +9,34 @@
 # new manifest every time something wanted a directory. Layout is handled by
 # subDir templating instead: every volume lands at
 #
-#     /var/nfs/shared/KUBERNETES/<namespace>/<pvc-name>
+#     /KUBERNETES/<namespace>/<pvc-name>
+#
+# That path is NFSv4-relative, not the absolute path on the NAS. These mounts
+# pin nfsvers=4.2, and under NFSv4 the export path is resolved against the
+# server's pseudo-root rather than its filesystem root -- so the share the NAS
+# calls /var/nfs/shared/KUBERNETES is /KUBERNETES to a v4 client. Using the
+# absolute path mounts nothing and reports
+#
+#   reason given by server: No such file or directory
+#
+# which reads as a missing directory rather than a path resolved against a
+# different root.
+#
+# The media volumes elsewhere use the absolute path and work, which is not a
+# contradiction: they pin no version, negotiate v3, and v3 does resolve
+# absolute paths.
 #
 # which is self-organising, readable on the NAS, and unique without anyone
 # choosing a path. Note that subDir is settable only on the class — a PVC
 # cannot pick its own — so this templating is the mechanism that replaces
 # per-consumer classes rather than a convenience on top of them.
+# Every node needs export access on the NAS, not just the ones running
+# workloads. Provisioning and mounting happen in different places: the CSI
+# controller creates the subdirectory from whichever node it is scheduled on --
+# in practice the control plane, which runs nothing else that touches this --
+# and the node plugin then mounts the volume on whichever worker the pod lands.
+# A control plane missing from the allow-list fails every claim with
+# "access denied by server" while the share looks correctly exported.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -22,7 +44,7 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: mimir.internal
-  share: /var/nfs/shared/KUBERNETES
+  share: /KUBERNETES
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
@@ -56,7 +78,7 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: mimir.internal
-  share: /var/nfs/shared/KUBERNETES
+  share: /KUBERNETES
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
   onDelete: retain
 reclaimPolicy: Retain
