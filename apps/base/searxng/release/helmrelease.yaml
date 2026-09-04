@@ -1,81 +1,134 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: searxng
+  name: &app searxng
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: app-template
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: ctrl-research
+        namespace: flux-system
+      version: 0.3.0
   dependsOn: []
   interval: 15m
   values:
-    controllers:
-      searxng:
+    deployments:
+      app:
+        image:
+          registry: ghcr.io
+          repository: searxng/searxng
+          # Digest as well as tag, carried over from the previous pin: the
+          # tag says which release this is meant to be and the digest is what
+          # actually gets pulled, so a retagged image cannot quietly change
+          # what runs.
+          tag: 2025.11.18-576c8ca99@sha256:91da34403fc1d2c7ac23d1459af87870d87810b7d50b0c6a4585ab78846cb534
+          pullPolicy: IfNotPresent
+
+        # 0.3.0 dropped the built-in reloader annotation, and both the
+        # settings configmap and the secret carrying SEARXNG_SECRET are
+        # mounted rather than read at request time -- so a change to either
+        # only takes effect on restart.
         annotations:
           reloader.stakater.com/auto: "true"
+
+        containerName: *app
+
+        # Stateless: the only writable path is an emptyDir and every request
+        # is independent, so there is nothing for two pods to contend over.
         replicas: 2
-        strategy: RollingUpdate
-        containers:
-          main:
-            image:
-              repository: ghcr.io/searxng/searxng
-              tag: 2025.11.18-576c8ca99@sha256:91da34403fc1d2c7ac23d1459af87870d87810b7d50b0c6a4585ab78846cb534
-            env:
-              SEARXNG_PORT: &port 8080
-              SEARXNG_REDIS_URL: "redis://{{ .Release.Name }}-dragonfly:6379"
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}"
-            probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /stats
-                    port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
-            resources:
-              requests:
-                cpu: 10m
-                memory: 215Mi
-              limits:
-                memory: 4Gi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-                add:
-                  - CHOWN
-                  - SETGID
-                  - SETUID
-                  - DAC_OVERRIDE
-    service:
-      app:
+        # An object, not the bare string app-template accepted -- the generic
+        # chart passes this straight into the Deployment spec, where a string
+        # is not a valid strategy.
+        strategy:
+          type: RollingUpdate
+
+        env:
+          - name: SEARXNG_PORT
+            value: "8080"
+          # The dragonfly instance the component provisions. Used for the
+          # limiter and for caching; searxng runs without it but re-fetches
+          # far more.
+          - name: SEARXNG_REDIS_URL
+            value: redis://searxng-dragonfly:6379
+
+        envFrom:
+          # SEARXNG_SECRET. settings.yml leaves secret_key empty and searxng
+          # reads it from the environment.
+          - secretRef:
+              name: *app
+
         ports:
-          http:
-            port: *port
-    persistence:
-      config:
-        type: configMap
-        name: "{{ .Release.Name }}-configmap"
-        globalMounts:
-          - path: /etc/searxng/settings.yml
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+
+        livenessProbe:
+          httpGet:
+            path: &health /stats
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: *health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+        resources:
+          requests:
+            cpu: 10m
+            memory: 256Mi
+          limits:
+            # Engine responses are parsed in memory and a broad query fans out
+            # to dozens of them at once, so the ceiling is set by the widest
+            # search rather than by steady state.
+            memory: 1Gi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+
+        podSecurityContext:
+          # 977 is the uid baked into the searxng image.
+          runAsUser: 977
+          runAsGroup: 977
+          runAsNonRoot: true
+
+        volumes:
+          - name: config
+            configMap:
+              name: searxng-configmap
+          # Required by readOnlyRootFilesystem: searxng writes its compiled
+          # settings and engine caches under /tmp and fails to start without
+          # a writable path rather than degrading.
+          - name: tmp
+            emptyDir: {}
+
+        volumeMounts:
+          - name: config
+            mountPath: /etc/searxng/settings.yml
             subPath: settings.yml
             readOnly: true
-          - path: /etc/searxng/limiter.toml
+          - name: config
+            mountPath: /etc/searxng/limiter.toml
             subPath: limiter.toml
             readOnly: true
-      tmpfs:
-        enabled: true
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
+          - name: tmp
+            mountPath: /tmp
+
+    services:
+      app:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: http
+            protocol: TCP
+            name: http
