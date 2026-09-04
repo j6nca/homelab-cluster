@@ -63,6 +63,14 @@ spec:
               # which has no TLS listener. Turn it on the same day this moves
               # to envoy-external, or session cookies will not be sent.
               - "--log-json"
+              # TEMPORARY, for diagnosing logins failing with "could not enter
+              # the world". A refused entry is returned to the client and never
+              # logged above debug: acceptEnter puts the reason in the reply,
+              # placeAndJoin returns it untouched, and the gateway drops it in
+              # session.go's `s.log.Debug("session ended", ...)`. This is the
+              # only way to read it without a new image. Revert once the cause
+              # is known.
+              - "--log-level=debug"
             env:
               TZ: America/Toronto
               PUBLIC_URL: http://mmo.j6n.internal
