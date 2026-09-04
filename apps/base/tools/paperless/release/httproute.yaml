@@ -26,5 +26,7 @@ spec:
   - paperless.j6n.internal
   rules:
   - backendRefs:
-    - name: paperless
+    # generic names resources <release>-<key>, so the service backing
+    # deployments.app is paperless-app rather than paperless
+    - name: paperless-app
       port: 8000

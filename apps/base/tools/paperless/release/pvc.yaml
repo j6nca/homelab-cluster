@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/persistentvolumeclaim_v1.json
+# Declared here rather than by the chart: generic mounts volumes but does not
+# provision them, so the claims are ordinary manifests.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      # The Tantivy search index. Documents and thumbnails are not here --
+      # they live in media/ -- and the database is in postgres, so this holds
+      # the index and logs and little else.
+      #
+      # The index scales with extracted text, not file size: a 5 MB scan may
+      # hold 10 KB of text. A few hundred documents is tens of megabytes and
+      # 10k is roughly 500 MB to 1 GB at the high end.
+      #
+      # Unlike the NFS claims below this one is real -- 1Gi requested is 2Gi
+      # of Longhorn pool at two replicas -- so it is deliberately not
+      # oversized. Worth watching past ~5k documents: Longhorn can expand it,
+      # but only while the volume is healthy, and a full index volume fails
+      # writes rather than degrading.
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-media
+spec:
+  accessModes:
+    - ReadWriteMany
+  # Retains the directory when the claim goes away and derives its path from
+  # namespace and PVC name, so a redeployed paperless reattaches to the same
+  # archive rather than coming up empty. For the one volume here whose loss is
+  # unrecoverable that is worth more than tidy cleanup.
+  storageClassName: nfs-unas-retain
+  resources:
+    requests:
+      # Advisory rather than enforced: the NFS CSI driver creates a directory
+      # and NFS applies no quota, so this reserves nothing and caps nothing.
+      # The real limit is free space on mimir.
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-consume
+spec:
+  accessModes:
+    # ReadWriteMany and on the NAS so a scanner can write here directly,
+    # rather than everything having to go through the web UI.
+    - ReadWriteMany
+  storageClassName: nfs-unas-retain
+  resources:
+    requests:
+      # Transient: paperless moves files out of here as it ingests them.
+      storage: 10Gi

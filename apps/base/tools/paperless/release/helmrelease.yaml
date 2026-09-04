@@ -1,140 +1,143 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app paperless
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: app-template
-    namespace: flux-system
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: ctrl-research
+        namespace: flux-system
+      version: 0.3.0
   # The postgres and dragonfly components append cnpg and dragonfly-operator
   # here, so this has to exist for their patch to have somewhere to add to.
   dependsOn: []
   interval: 15m
   values:
-    controllers:
-      paperless:
-        # The data volume is ReadWriteOnce, so the default RollingUpdate
-        # deadlocks: the incoming pod waits for a volume the outgoing pod will
-        # not release until the incoming pod is ready.
-        strategy: Recreate
+    deployments:
+      app:
+        image:
+          registry: ghcr.io
+          repository: paperless-ngx/paperless-ngx
+          tag: 2.20.1
+          pullPolicy: IfNotPresent
+
+        # 0.3.0 dropped the built-in reloader annotation, and the whole
+        # configuration arrives through envFrom -- database, secret key and
+        # the Authentik client -- so a rotation only takes effect on restart.
         annotations:
           reloader.stakater.com/auto: "true"
-        containers:
-          app:
-            image:
-              repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.20.1
-            env:
-              PAPERLESS_TIME_ZONE: America/Toronto
-              PAPERLESS_OCR_LANGUAGE: eng
-              # Required behind a proxy. Django validates Host and the CSRF
-              # origin against this, and without it every form POST fails with
-              # a CSRF error while GETs work -- which reads as the app being
-              # broken rather than as a missing setting.
-              PAPERLESS_URL: http://paperless.j6n.internal
-              # OCR only what has no text layer. Most scanners and every
-              # digital PDF already carry one, so the default of redoing it
-              # wholesale is the single biggest waste of CPU at ingest.
-              PAPERLESS_OCR_MODE: skip
-              # The product of these two must not exceed the node's core
-              # count. Above it, paperless is not merely slower -- workers
-              # contend and ingest falls off a cliff.
-              PAPERLESS_TASK_WORKERS: "2"
-              PAPERLESS_THREADS_PER_WORKER: "2"
-            envFrom:
-              - secretRef:
-                  name: *app
-            ports:
-              - containerPort: &port 8000
-                name: http
-                protocol: TCP
-            probes:
-              # Generous, because a restart rebuilds nothing but a cold start
-              # still runs migrations and opens the search index.
-              liveness: &probe
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /accounts/login/
-                    port: *port
-                  initialDelaySeconds: 60
-                  periodSeconds: 30
-                  timeoutSeconds: 10
-                  failureThreshold: 5
-              readiness: *probe
-            resources:
-              requests:
-                cpu: 250m
-                memory: 1Gi
-              limits:
-                # OCR is the memory-hungry part, and it scales with workers
-                # times threads rather than with library size.
-                memory: 4Gi
 
-    defaultPodOptions:
-      securityContext:
-        # The image starts as root to fix ownership on its volumes, then drops
-        # to this uid itself. Forcing runAsNonRoot crashloops it before
-        # paperless starts.
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
+        containerName: *app
 
-    service:
-      app:
+        # One, and not negotiable while the data volume is ReadWriteOnce: a
+        # second pod would sit unschedulable waiting for a volume the outgoing
+        # one still holds. Recreate for the same reason.
+        replicas: 1
+        strategy:
+          type: Recreate
+
+        podSecurityContext:
+          # The image starts as root to fix ownership on its volumes and drops
+          # to this uid itself, so runAsNonRoot is deliberately absent --
+          # forcing it crashloops the container before paperless starts. The
+          # fsGroup is what lets it write to the NFS claims.
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+
+        env:
+          - name: PAPERLESS_TIME_ZONE
+            value: America/Toronto
+          - name: PAPERLESS_OCR_LANGUAGE
+            value: eng
+          # Required behind a proxy. Django validates Host and the CSRF origin
+          # against this, and without it every form POST fails with a CSRF
+          # error while GETs work -- which reads as the app being broken
+          # rather than as a missing setting.
+          - name: PAPERLESS_URL
+            value: http://paperless.j6n.internal
+          # OCR only what has no text layer. Most scanners and every digital
+          # PDF already carry one, so the default of redoing it wholesale is
+          # the single biggest waste of CPU at ingest.
+          - name: PAPERLESS_OCR_MODE
+            value: skip
+          # The product of these two must not exceed the node's core count.
+          # Above it, paperless is not merely slower -- workers contend and
+          # ingest falls off a cliff.
+          - name: PAPERLESS_TASK_WORKERS
+            value: "2"
+          - name: PAPERLESS_THREADS_PER_WORKER
+            value: "2"
+
+        envFrom:
+          # Database, secret key, and the Authentik OIDC provider block
+          - secretRef:
+              name: *app
+
         ports:
-          http:
-            port: *port
+          - containerPort: 8000
+            name: http
+            protocol: TCP
 
-    persistence:
-      # The Tantivy search index. On Longhorn rather than NFS: this is the
-      # latency-sensitive half, and it is small. Documents and thumbnails are
-      # not here -- they live in media/ on the NAS -- and the database is in
-      # postgres, so this holds the index and logs and little else.
-      #
-      # The index scales with extracted text, not file size: a 5 MB scan may
-      # hold 10 KB of text. A few hundred documents is tens of megabytes, and
-      # 10k is roughly 500 MB to 1 GB at the high end.
-      #
-      # 1Gi is therefore ample now and close to the ceiling later. Unlike the
-      # NFS claims this one is real -- 1Gi requested is 2Gi of Longhorn pool at
-      # two replicas -- so it is deliberately not oversized. Worth watching
-      # past ~5k documents: Longhorn can expand it, but only while the volume
-      # is healthy, and a full index volume fails writes rather than degrading.
-      data:
-        globalMounts:
-          - path: /usr/src/paperless/data
-        type: persistentVolumeClaim
-        storageClass: longhorn
-        size: 1Gi
-        accessMode: ReadWriteOnce
-      # The documents themselves. nfs-unas-retain keeps the directory when the
-      # claim goes away and derives its path from namespace and PVC name, so a
-      # redeployed paperless reattaches to the same archive rather than coming
-      # up empty. For the one volume here whose loss is unrecoverable, that is
-      # worth more than the convenience of it being cleaned up.
-      media:
-        globalMounts:
-          - path: /usr/src/paperless/media
-        type: persistentVolumeClaim
-        storageClass: nfs-unas-retain
-        # Advisory rather than enforced: the NFS CSI driver creates a
-        # directory and NFS applies no quota, so this number reserves nothing
-        # and caps nothing. The real limit is free space on mimir. Kept honest
-        # at 10Gi rather than aspirational.
-        size: 10Gi
-        accessMode: ReadWriteMany
-      # Drop files here and paperless ingests them. ReadWriteMany and on the
-      # NAS so a scanner can write to it directly, rather than everything
-      # having to go through the web UI.
-      consume:
-        globalMounts:
-          - path: /usr/src/paperless/consume
-        type: persistentVolumeClaim
-        storageClass: nfs-unas-retain
-        size: 10Gi
-        accessMode: ReadWriteMany
-      tmp:
-        type: emptyDir
+        # Generous, because a cold start runs migrations and opens the search
+        # index before it answers.
+        livenessProbe:
+          httpGet:
+            path: &health /accounts/login/
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: *health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 10
+
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+          limits:
+            # OCR is the memory-hungry part, and it scales with workers times
+            # threads rather than with library size.
+            memory: 4Gi
+
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: paperless-data
+          - name: media
+            persistentVolumeClaim:
+              claimName: paperless-media
+          - name: consume
+            persistentVolumeClaim:
+              claimName: paperless-consume
+          - name: tmp
+            emptyDir: {}
+
+        volumeMounts:
+          - name: data
+            mountPath: /usr/src/paperless/data
+          - name: media
+            mountPath: /usr/src/paperless/media
+          - name: consume
+            mountPath: /usr/src/paperless/consume
+          - name: tmp
+            mountPath: /tmp
+
+    services:
+      app:
+        type: ClusterIP
+        ports:
+          - port: 8000
+            targetPort: http
+            protocol: TCP
+            name: http
