@@ -17,13 +17,13 @@ metadata:
     # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
     gatus.home-operations.com/endpoint: |
       group: Tools
-      url: http://searxng.j6n.internal
+      url: http://search.j6n.internal
 spec:
   parentRefs:
   - name: envoy-internal
     namespace: network
   hostnames:
-  - searxng.j6n.internal
+  - search.j6n.internal
   rules:
   - backendRefs:
     # generic names resources <release>-<key>, so the service backing
