@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app paperless
+  namespace: flux-system
+spec:
+  components:
+    - ../../../../../components/postgres
+    - ../../../../../components/dragonfly
+  postBuild:
+    substitute:
+      APP: *app
+      POSTGRES_REPLICAS: "1"
+      # Documents live on NFS; this is metadata, the Tantivy search index and
+      # the task queue's history. 5Gi is generous for that at the scale this
+      # is being built for, and Longhorn can grow it but never shrink it.
+      POSTGRES_SIZE: 5Gi
+      DRAGONFLY_REPLICAS: "1"
+      DRAGONFLY_MAX_MEMORY: 512Mi
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/tools/paperless/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
