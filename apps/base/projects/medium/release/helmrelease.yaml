@@ -25,7 +25,7 @@ spec:
           # publishes it alongside :latest — bump this deliberately rather
           # than following a moving tag, so what is running here is a thing
           # anyone can go and read the diff for.
-          tag: 0.0.3
+          tag: 0.0.7
           pullPolicy: IfNotPresent
 
         # 0.3.0 dropped the built-in reloader annotation; the app reads its
