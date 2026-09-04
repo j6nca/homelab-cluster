@@ -11,20 +11,12 @@
 #
 #     /var/nfs/shared/KUBERNETES/<namespace>/<pvc-name>
 #
-# The absolute path, matching the media volumes, because these mounts no
-# longer force NFSv4 -- see mountOptions below.
+# The same friendly path the media volumes use, which `showmount -e` does not
+# list -- it reports the underlying export as
+# /volume/<uuid>/.srv/.unifi-drive/KUBERNETES/.data. The friendly form
+# resolves anyway, and the media volumes have been mounting theirs that way
+# all along, so the UUID path is a fallback rather than the answer.
 #
-# which is self-organising, readable on the NAS, and unique without anyone
-# choosing a path. Note that subDir is settable only on the class — a PVC
-# cannot pick its own — so this templating is the mechanism that replaces
-# per-consumer classes rather than a convenience on top of them.
-# Every node needs export access on the NAS, not just the ones running
-# workloads. Provisioning and mounting happen in different places: the CSI
-# controller creates the subdirectory from whichever node it is scheduled on --
-# in practice the control plane, which runs nothing else that touches this --
-# and the node plugin then mounts the volume on whichever worker the pod lands.
-# A control plane missing from the allow-list fails every claim with
-# "access denied by server" while the share looks correctly exported.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -37,20 +29,21 @@ parameters:
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
-  # No version pinned, deliberately. The media volumes mount this same server
-  # with no version option and have always worked; these classes forced
-  # nfsvers=4.2 and never mounted once. Two paths were tried under v4 -- the
-  # absolute one and the pseudo-root-relative /KUBERNETES -- and the server
-  # answered "No such file or directory" to both, which is what a server with
-  # no v4 namespace to resolve against says.
+  # Copied from a mount that demonstrably works. Inside a running media pod:
   #
-  # Letting the client negotiate is what the working mounts already do, so
-  # this stops being a different configuration that has to be reasoned about
-  # separately.
+  #   mimir.internal:/var/nfs/shared/MEDIA/data on /data type nfs
+  #     (ro,relatime,vers=3,...,hard,nolock,proto=tcp,...)
   #
-  # nconnect went with it: it is a v4-only option, so pinning multiple
-  # connections while negotiating down to v3 would be asking for something the
-  # protocol cannot give.
+  # vers=3, not 4. These classes forced 4.2 from the day they were written and
+  # never mounted once, while the media volumes have been on v3 throughout.
+  #
+  # nolock is the half that was missing rather than an extra. Talos runs no
+  # rpc.statd and NFSv3 wants it for remote locking, so without it the mount
+  # fails locally -- and mount.nfs then appends "reason given by server: No
+  # such file or directory", which points at the path and sent this down a
+  # long detour. The working media mount carries nolock too.
+  - nfsvers=3
+  - nolock
   - hard
   - noatime
 ---
@@ -84,19 +77,20 @@ parameters:
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 mountOptions:
-  # No version pinned, deliberately. The media volumes mount this same server
-  # with no version option and have always worked; these classes forced
-  # nfsvers=4.2 and never mounted once. Two paths were tried under v4 -- the
-  # absolute one and the pseudo-root-relative /KUBERNETES -- and the server
-  # answered "No such file or directory" to both, which is what a server with
-  # no v4 namespace to resolve against says.
+  # Copied from a mount that demonstrably works. Inside a running media pod:
   #
-  # Letting the client negotiate is what the working mounts already do, so
-  # this stops being a different configuration that has to be reasoned about
-  # separately.
+  #   mimir.internal:/var/nfs/shared/MEDIA/data on /data type nfs
+  #     (ro,relatime,vers=3,...,hard,nolock,proto=tcp,...)
   #
-  # nconnect went with it: it is a v4-only option, so pinning multiple
-  # connections while negotiating down to v3 would be asking for something the
-  # protocol cannot give.
+  # vers=3, not 4. These classes forced 4.2 from the day they were written and
+  # never mounted once, while the media volumes have been on v3 throughout.
+  #
+  # nolock is the half that was missing rather than an extra. Talos runs no
+  # rpc.statd and NFSv3 wants it for remote locking, so without it the mount
+  # fails locally -- and mount.nfs then appends "reason given by server: No
+  # such file or directory", which points at the path and sent this down a
+  # long detour. The working media mount carries nolock too.
+  - nfsvers=3
+  - nolock
   - hard
   - noatime

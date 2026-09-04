@@ -11,7 +11,20 @@ parameters:
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
-  - nfsvers=4.2
-  - nconnect=16
+  # Same as the other classes, and for the same reason: this server serves v3.
+  # A media pod's working mount reads
+  #
+  #   mimir.internal:/var/nfs/shared/MEDIA/data on /data type nfs
+  #     (ro,relatime,vers=3,...,hard,nolock,proto=tcp,...)
+  #
+  # nolock because Talos runs no rpc.statd and NFSv3 wants it for remote
+  # locking. nconnect is gone with the version -- it is v4-only.
+  #
+  # Nothing uses this class: the media apps mount NFS directly rather than
+  # through a claim. It carried the same never-exercised 4.2 options as the
+  # others, which is exactly how the next person to reach for it would have
+  # lost an afternoon.
+  - nfsvers=3
+  - nolock
   - hard
   - noatime
