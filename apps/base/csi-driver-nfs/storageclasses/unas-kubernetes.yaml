@@ -9,22 +9,10 @@
 # new manifest every time something wanted a directory. Layout is handled by
 # subDir templating instead: every volume lands at
 #
-#     /KUBERNETES/<namespace>/<pvc-name>
+#     /var/nfs/shared/KUBERNETES/<namespace>/<pvc-name>
 #
-# That path is NFSv4-relative, not the absolute path on the NAS. These mounts
-# pin nfsvers=4.2, and under NFSv4 the export path is resolved against the
-# server's pseudo-root rather than its filesystem root -- so the share the NAS
-# calls /var/nfs/shared/KUBERNETES is /KUBERNETES to a v4 client. Using the
-# absolute path mounts nothing and reports
-#
-#   reason given by server: No such file or directory
-#
-# which reads as a missing directory rather than a path resolved against a
-# different root.
-#
-# The media volumes elsewhere use the absolute path and work, which is not a
-# contradiction: they pin no version, negotiate v3, and v3 does resolve
-# absolute paths.
+# The absolute path, matching the media volumes, because these mounts no
+# longer force NFSv4 -- see mountOptions below.
 #
 # which is self-organising, readable on the NAS, and unique without anyone
 # choosing a path. Note that subDir is settable only on the class — a PVC
@@ -44,13 +32,25 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: mimir.internal
-  share: /KUBERNETES
+  share: /var/nfs/shared/KUBERNETES
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
-  - nfsvers=4.2
-  - nconnect=16
+  # No version pinned, deliberately. The media volumes mount this same server
+  # with no version option and have always worked; these classes forced
+  # nfsvers=4.2 and never mounted once. Two paths were tried under v4 -- the
+  # absolute one and the pseudo-root-relative /KUBERNETES -- and the server
+  # answered "No such file or directory" to both, which is what a server with
+  # no v4 namespace to resolve against says.
+  #
+  # Letting the client negotiate is what the working mounts already do, so
+  # this stops being a different configuration that has to be reasoned about
+  # separately.
+  #
+  # nconnect went with it: it is a v4-only option, so pinning multiple
+  # connections while negotiating down to v3 would be asking for something the
+  # protocol cannot give.
   - hard
   - noatime
 ---
@@ -78,13 +78,25 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: mimir.internal
-  share: /KUBERNETES
+  share: /var/nfs/shared/KUBERNETES
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
   onDelete: retain
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 mountOptions:
-  - nfsvers=4.2
-  - nconnect=16
+  # No version pinned, deliberately. The media volumes mount this same server
+  # with no version option and have always worked; these classes forced
+  # nfsvers=4.2 and never mounted once. Two paths were tried under v4 -- the
+  # absolute one and the pseudo-root-relative /KUBERNETES -- and the server
+  # answered "No such file or directory" to both, which is what a server with
+  # no v4 namespace to resolve against says.
+  #
+  # Letting the client negotiate is what the working mounts already do, so
+  # this stops being a different configuration that has to be reasoned about
+  # separately.
+  #
+  # nconnect went with it: it is a v4-only option, so pinning multiple
+  # connections while negotiating down to v3 would be asking for something the
+  # protocol cannot give.
   - hard
   - noatime
