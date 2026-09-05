@@ -60,6 +60,18 @@ spec:
           # rather than as a missing setting.
           - name: PAPERLESS_URL
             value: http://paperless.j6n.internal
+          # Set explicitly even though it defaults to PAPERLESS_URL above.
+          # Paperless builds the OIDC redirect as https regardless of that
+          # default (paperless-ngx#8550), and Authentik then rejects the
+          # request as a mismatch -- while configuring Authentik to expect
+          # https would be worse, since envoy-internal has no TLS listener and
+          # the browser would be handed a dead endpoint.
+          #
+          # This is the documented override for the callback specifically. If
+          # it does not take, the bug is upstream of it and the options are
+          # local auth, which works, or terminating TLS for this host.
+          - name: PAPERLESS_OAUTH_CALLBACK_BASE_URL
+            value: http://paperless.j6n.internal
           # OCR only what has no text layer. Most scanners and every digital
           # PDF already carry one, so the default of redoing it wholesale is
           # the single biggest waste of CPU at ingest.
