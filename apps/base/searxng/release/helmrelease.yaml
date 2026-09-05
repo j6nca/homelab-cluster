@@ -37,9 +37,12 @@ spec:
 
         containerName: *app
 
-        # Stateless: the only writable path is an emptyDir and every request
-        # is independent, so there is nothing for two pods to contend over.
-        replicas: 2
+        # One. Nothing here needs two -- the only writable path is an emptyDir
+        # and every request is independent -- and with k-worker-1 down the
+        # cluster has two schedulable workers rather than three. A second
+        # replica of a service nobody notices restarting is not what that
+        # capacity is for.
+        replicas: 1
         # An object, not the bare string app-template accepted -- the generic
         # chart passes this straight into the Deployment spec, where a string
         # is not a valid strategy.
