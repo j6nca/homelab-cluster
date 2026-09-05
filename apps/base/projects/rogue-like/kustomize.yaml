@@ -1,4 +1,13 @@
 # yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Not deployed. clusters/homelab/apps/projects/rogue-like was removed to free
+# scheduling capacity while k-worker-1 is down -- the server alone requested
+# 250m, the largest single claim outside the AI stack.
+#
+# These files are kept rather than deleted so redeploying is restoring one
+# directory under clusters/, not rebuilding the app. An unreferenced base is
+# otherwise indistinguishable from one nobody got round to wiring up, which is
+# how recyclarr and jellyseerr sat unnoticed, so this comment is the
+# difference.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
