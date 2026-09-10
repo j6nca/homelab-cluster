@@ -71,20 +71,43 @@ spec:
             value: America/Toronto
           - name: MEDIUM_ADDR
             value: ":8080"
-          # The external hostname, not the internal one, and that is forced
-          # rather than chosen: Google builds the OAuth redirect from this, and
-          # it refuses a redirect that is not https on a public domain — which
-          # http://medium.j6n.internal fails on both counts. Jellyfin is
-          # exposed the same way through the tunnel.
+          # The internal hostname now. This was https://medium.j6n.dev because
+          # Google builds the OAuth redirect from it and refuses a redirect
+          # that is neither https nor on a public domain -- so the sign-in
+          # provider was what forced this service onto the internet, not
+          # anything about the service. Authentik has no such requirement, so
+          # dropping Google is what lets the external route go.
           - name: MEDIUM_BASE_URL
-            value: https://medium.j6n.dev
-          # Google sign-in only. Local accounts exist for development and for a
+            value: http://medium.j6n.internal
+          # Authentik sign-in only. Local accounts exist for development and for a
           # break-glass administrator, and they cannot coexist with the
           # bootstrap admin being absent: the server refuses MEDIUM_ADMIN_EMAIL
           # unless local sign-in is on, because a password account nobody can
           # sign into is not a fallback.
           - name: MEDIUM_LOCAL_AUTH
             value: "false"
+
+          # Authentik. The issuer is the discovery document's parent -- the
+          # client appends /.well-known/openid-configuration itself.
+          - name: MEDIUM_OIDC_ISSUER_URL
+            value: https://auth.j6n.dev/application/o/medium/
+          # The sign-in button's label, nothing more.
+          - name: MEDIUM_OIDC_NAME
+            value: Authentik
+          # Roles come from Authentik group membership rather than being set
+          # per-user here. A sign-in carrying a groups claim replaces the
+          # user's roles with what these map to, so removing somebody from
+          # medium_admin demotes them on their next sign-in rather than
+          # needing anything changed in medium.
+          #
+          # admin and user are the only roles medium defines.
+          - name: MEDIUM_OIDC_GROUP_ROLES
+            value: medium_admin=admin,medium_user=user
+          # Anyone who authenticates but matches no mapped group. Deliberately
+          # the lesser role: being known to Authentik should not by itself
+          # confer administration.
+          - name: MEDIUM_OIDC_DEFAULT_ROLE
+            value: user
           - name: MEDIUM_CACHE_DIR
             value: /cache
 
@@ -111,7 +134,7 @@ spec:
             value: "12884901888"
 
         envFrom:
-          # MEDIUM_DATABASE_URL, the Google credentials, and the allowlist
+          # MEDIUM_DATABASE_URL, the Authentik client, and the allowlist
           - secretRef:
               name: *app
 
