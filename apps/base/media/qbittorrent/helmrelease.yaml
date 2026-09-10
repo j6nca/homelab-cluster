@@ -41,11 +41,42 @@ spec:
                 name: http
                 protocol: TCP
             probes:
-              # The WebUI answers on / once the session is up. Restarting on
-              # failure is the point: if gluetun rebuilds the tunnel under it,
-              # qbittorrent keeps its old listen socket bound to the dead
-              # interface and never re-announces to trackers.
-              liveness: &probes
+              # Liveness tests egress, readiness tests the WebUI. They are
+              # deliberately different questions.
+              #
+              # The old probe asked only whether / answered on 8080, which it
+              # does whether or not the tunnel exists -- so a pod with no
+              # connectivity looked perfectly healthy and downloads sat at 0
+              # until someone restarted it by hand. The comment here used to
+              # claim it caught exactly that; it could not.
+              #
+              # An IP literal, so a broken DNS resolver inside the tunnel does
+              # not read as a dead tunnel. 1.1.1.1/cdn-cgi/trace answers over
+              # https and returns the egress address, so a reply proves the
+              # request left through the tunnel rather than merely reaching
+              # something.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /bin/sh
+                      - -c
+                      - wget -qO- -T5 https://1.1.1.1/cdn-cgi/trace >/dev/null
+                  initialDelaySeconds: 60
+                  # Five minutes of failure before a restart. gluetun rebuilds
+                  # a dropped tunnel on its own and that takes tens of seconds
+                  # -- restarting into the middle of it would interrupt
+                  # downloads that were about to recover anyway.
+                  periodSeconds: 60
+                  timeoutSeconds: 10
+                  failureThreshold: 5
+              # Still the WebUI, and on purpose: readiness failing removes the
+              # pod from the Service, which takes away the interface you would
+              # use to see what is wrong. Losing egress should restart the pod,
+              # not hide it.
+              readiness:
                 enabled: true
                 custom: true
                 spec:
@@ -56,7 +87,6 @@ spec:
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 4
-              readiness: *probes
             resources:
               # Was unset, which made the pod BestEffort and the first thing
               # evicted under node pressure -- and with strategy: Recreate on
