@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/apps/daemonset_v1.json
+# Intel GPU device plugin, vendored from
+# intel/intel-device-plugins-for-kubernetes v0.36.0
+# (deployments/gpu_plugin/base/intel-gpu-plugin.yaml).
+#
+# Vendored rather than pulled through the Helm chart because that chart
+# installs a custom resource that needs the operator, and the operator's
+# nodeSelector wants a label only Node Feature Discovery produces. Three
+# components to advertise one device on one node is not a trade worth making;
+# this is the same DaemonSet those three would eventually create.
+#
+# It advertises /dev/dri as the extended resource gpu.intel.com/i915, which a
+# pod then requests like memory. That is the point: home-assistant reaches its
+# USB dongle by being privileged, and its own comment names a device plugin as
+# the hardening path for exactly this reason. Nothing here is privileged — it
+# drops every capability, runs with a read-only root, and mounts the device
+# read-only.
+#
+# Harmless on a node with no Intel GPU: it finds no devices and advertises
+# none. It is adding the matching resource *request* to an app that is not
+# harmless, since a request nothing can satisfy leaves the pod unschedulable.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: intel-gpu-plugin
+  labels:
+    app: intel-gpu-plugin
+spec:
+  selector:
+    matchLabels:
+      app: intel-gpu-plugin
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: intel-gpu-plugin
+    spec:
+      containers:
+      - name: intel-gpu-plugin
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: HOST_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+        image: intel/intel-gpu-plugin:0.36.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          seLinuxOptions:
+            type: "container_device_plugin_t"
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        resources:
+          requests:
+            memory: "45Mi"
+            cpu: 40m
+          limits:
+            memory: "90Mi"
+            cpu: 100m
+        volumeMounts:
+        - name: devfs
+          mountPath: /dev/dri
+          readOnly: true
+        - name: sysfsdrm
+          mountPath: /sys/class/drm
+          readOnly: true
+        - name: kubeletsockets
+          mountPath: /var/lib/kubelet/device-plugins
+        - name: cdipath
+          mountPath: /var/run/cdi
+      volumes:
+      - name: devfs
+        hostPath:
+          path: /dev/dri
+      - name: sysfsdrm
+        hostPath:
+          path: /sys/class/drm
+      - name: kubeletsockets
+        hostPath:
+          path: /var/lib/kubelet/device-plugins
+      - name: cdipath
+        hostPath:
+          path: /var/run/cdi
+          type: DirectoryOrCreate
+      nodeSelector:
+        kubernetes.io/arch: amd64
