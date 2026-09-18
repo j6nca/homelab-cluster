@@ -28,3 +28,8 @@ spec:
   - backendRefs:
     - name: litellm
       port: 4000
+    # LiteLLM streams SSE responses that routinely run longer than Envoy's
+    # 15s default route timeout, which truncates the stream and surfaces in
+    # clients as "socket connection was closed". 0s disables the timeout.
+    timeouts:
+      request: 0s
