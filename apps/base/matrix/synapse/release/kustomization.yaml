@@ -2,18 +2,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./pvc.yaml
   - ./helmrelease.yaml
   - ./externalsecrets.yaml
   - ./httproute.yaml
   - ./monitors.yaml
-configMapGenerator:
-  - name: synapse-config
-    files:
-      - homeserver.yaml=./config/homeserver.yaml
-      - log.yaml=./config/log.yaml
-generatorOptions:
-  disableNameSuffixHash: true
 patches:
   # Synapse refuses to start against a database whose collation is not C:
   # non-C locales sort differently across glibc versions and have corrupted
