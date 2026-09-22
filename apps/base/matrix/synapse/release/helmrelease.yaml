@@ -136,13 +136,15 @@ spec:
     persistentVolumeClaims:
       # Rendered as synapse-data. Uploaded media plus the signing key;
       # everything else is in postgres. Media is whatever gets pasted into a
-      # chat with the agent -- screenshots and the odd file -- so this is
-      # generous rather than tight. Sized up front because Longhorn can't
-      # expand it while the pool is two nodes against a three-replica class.
+      # chat with the agent -- screenshots and the odd file -- and 2Gi is
+      # months of that. Deliberately small: it is real Longhorn pool at two
+      # replicas, and the pool can't expand a volume while it is two nodes
+      # against a three-replica class, so growing it later means a new claim
+      # and a copy rather than a resize.
       data:
         storageClass: longhorn
         accessMode: ReadWriteOnce
-        size: 10Gi
+        size: 2Gi
         annotations:
           # Helm deletes the PVCs it owns on uninstall. This one holds the
           # server's signing key and every uploaded file, so it outlives the
