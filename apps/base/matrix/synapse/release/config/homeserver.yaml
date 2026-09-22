@@ -4,10 +4,12 @@
 # secrets.yaml rendered by the ExternalSecret, and must not be repeated here
 # or one file silently overrides the other.
 
-# The domain in every user ID (@jonathan:j6n.dev) and room ID. This cannot be
-# changed later without wiping the database and re-creating every account, so
-# it is the bare domain rather than the hostname the API happens to live on.
-server_name: j6n.dev
+# The domain in every user ID (@jonathan:matrix.j6n.dev) and room ID. This
+# cannot be changed later without wiping the database and re-creating every
+# account. Deliberately the API hostname rather than the bare domain: the
+# names say which service they belong to, and with server_name equal to the
+# URL clients need no .well-known lookup on the apex to find the server.
+server_name: matrix.j6n.dev
 # Where clients actually reach the API. Baked into media URLs and login
 # responses, hence https and the public hostname, not the internal one.
 public_baseurl: https://matrix.j6n.dev/
