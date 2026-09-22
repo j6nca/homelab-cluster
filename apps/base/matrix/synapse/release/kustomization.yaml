@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.config.k8s.io/kustomization_v1beta1.json
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./helmrelease.yaml
+  - ./externalsecrets.yaml
+  - ./httproute.yaml
+  - ./monitors.yaml
+# The config stays as files rather than inline chart values so it reads as
+# the config file it is. The chart could render this ConfigMap itself, but
+# only from strings embedded in the HelmRelease.
+configMapGenerator:
+  - name: synapse-config
+    files:
+      - homeserver.yaml=./config/homeserver.yaml
+      - log.yaml=./config/log.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+patches:
+  # Synapse refuses to start against a database whose collation is not C:
+  # non-C locales sort differently across glibc versions and have corrupted
+  # indexes on upgrade. The postgres component creates the Database with the
+  # cluster's template1 defaults, so pin the locale here. template0 is
+  # required by postgres whenever the locale differs from template1's.
+  - target:
+      group: postgresql.cnpg.io
+      kind: Database
+    patch: |-
+      - op: add
+        path: /spec/template
+        value: template0
+      - op: add
+        path: /spec/encoding
+        value: UTF8
+      - op: add
+        path: /spec/localeCollate
+        value: C
+      - op: add
+        path: /spec/localeCType
+        value: C
