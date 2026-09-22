@@ -82,7 +82,12 @@ spec:
 
         resources:
           requests:
-            cpu: 100m
+            # A scheduling reservation, not a ceiling: there is no CPU limit,
+            # so Synapse bursts to whatever the node has free. 10m because
+            # both schedulable workers sit at 97-99% of allocatable CPU
+            # requests and 100m fit on neither; an idle personal homeserver
+            # uses less than that anyway.
+            cpu: 10m
             memory: 512Mi
           limits:
             # Synapse caches aggressively and Python never gives memory back;
