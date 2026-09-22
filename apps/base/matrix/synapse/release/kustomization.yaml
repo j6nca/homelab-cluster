@@ -6,6 +6,16 @@ resources:
   - ./externalsecrets.yaml
   - ./httproute.yaml
   - ./monitors.yaml
+# The config stays as files rather than inline chart values so it reads as
+# the config file it is. The chart could render this ConfigMap itself, but
+# only from strings embedded in the HelmRelease.
+configMapGenerator:
+  - name: synapse-config
+    files:
+      - homeserver.yaml=./config/homeserver.yaml
+      - log.yaml=./config/log.yaml
+generatorOptions:
+  disableNameSuffixHash: true
 patches:
   # Synapse refuses to start against a database whose collation is not C:
   # non-C locales sort differently across glibc versions and have corrupted
