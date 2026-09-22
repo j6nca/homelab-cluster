@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: synapse-external
+  annotations:
+    # group: External inherited from the envoy-external gateway
+    gatus.home-operations.com/enabled: "true"
+    gatus.home-operations.com/endpoint: |
+      url: https://matrix.j6n.dev/health
+spec:
+  parentRefs:
+  - name: envoy-external
+    namespace: network
+  hostnames:
+  - matrix.j6n.dev
+  rules:
+  - backendRefs:
+    # generic names resources <release>-<key>, so the service backing
+    # deployments.app is synapse-app.
+    - name: synapse-app
+      port: 8008
+    # Clients long-poll /sync for 30s by default, longer than Envoy's 15s
+    # default route timeout, which would return 504s to every idle client.
+    # 0s disables the timeout.
+    timeouts:
+      request: 0s
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: synapse-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Matrix
+    gethomepage.dev/group: Tools
+    gethomepage.dev/icon: matrix.png
+    # Without this homepage looks for app.kubernetes.io/name=<the
+    # display name above> and renders 'not found' when it misses.
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=synapse
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Tools
+      url: http://matrix.j6n.internal/health
+spec:
+  parentRefs:
+  - name: envoy-internal
+    namespace: network
+  hostnames:
+  - matrix.j6n.internal
+  rules:
+  - backendRefs:
+    - name: synapse-app
+      port: 8008
+    timeouts:
+      request: 0s

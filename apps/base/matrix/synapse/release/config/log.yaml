@@ -1,0 +1,18 @@
+# Stdout only. Victoria Logs collects container output, so a file handler
+# would just duplicate it onto the PVC.
+version: 1
+formatters:
+  precise:
+    format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: precise
+loggers:
+  # SQL statement logging at INFO is a firehose; keep it at WARNING.
+  synapse.storage.SQL:
+    level: WARNING
+root:
+  level: INFO
+  handlers: [console]
+disable_existing_loggers: false

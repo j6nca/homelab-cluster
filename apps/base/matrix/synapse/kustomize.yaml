@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app synapse
+  namespace: flux-system
+spec:
+  components:
+    - ../../../../../components/postgres
+  postBuild:
+    substitute:
+      APP: *app
+      POSTGRES_REPLICAS: "1"
+      # Room state and events for one person and one bot. Synapse's tables
+      # grow with message volume, not media (that is on the data PVC), and a
+      # personal server measures in tens of megabytes a year. Sized with the
+      # current Longhorn constraint in mind: the volume can't be expanded
+      # while the pool is two nodes against a three-replica class.
+      POSTGRES_SIZE: 5Gi
+  targetNamespace: *app
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/matrix/synapse/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
