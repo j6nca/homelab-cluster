@@ -26,12 +26,14 @@ spec:
         data:
           overwatch.yaml: |
             sources:
-              - name: github
+              - name: ctrl-research
                 type: github
-                # TODO: the GitHub org to sync. Every repository in it is
-                # synced; use `repos: [owner/name, ...]` instead to pick some.
+                # Every repository in the org the token can see: with the
+                # jarvisctl token, that is all of its public repositories plus
+                # the private ones the token was granted. Use
+                # `repos: [owner/name, ...]` instead to sync only some.
                 config:
-                  org: CHANGE-ME
+                  org: ctrl-research
             oidc:
               # An Authentik user gets the highest role among these groups.
               # Anyone in none of them is refused (no default role is set).
