@@ -13,8 +13,9 @@ spec:
       APP: *app
       POSTGRES_REPLICAS: "1"
       # Issues, pull requests, labels and agent task history for one GitHub
-      # org: text and timestamps, no attachments. Small even for a busy org.
-      POSTGRES_SIZE: 2Gi
+      # org: text and timestamps, no attachments. Small even for a busy org,
+      # and a Longhorn volume can be grown later (never shrunk), so start low.
+      POSTGRES_SIZE: 1Gi
   targetNamespace: *app
   commonMetadata:
     labels:
