@@ -93,10 +93,14 @@ spec:
           - name: OVERWATCH_LOG_LEVEL
             value: info
 
-          # Authentik for people, plus the bootstrap admin as a break-glass
-          # password account. Agents use API tokens, made in the UI.
+          # Authentik only. Admins come from the overwatch_admin group, re-read
+          # at every sign-in. With no password mode there is no bootstrap
+          # "admin" account, so no break-glass login either: if Authentik is
+          # unavailable, recover by declaring an account with a password_hash
+          # in the provisioning file and switching this to password,oidc.
+          # Agents use API tokens, made in the UI, either way.
           - name: OVERWATCH_AUTH_MODE
-            value: password,oidc
+            value: oidc
           # The discovery document's parent; the client appends
           # /.well-known/openid-configuration itself.
           - name: OVERWATCH_OIDC_ISSUER
@@ -113,8 +117,7 @@ spec:
             value: 5m
 
         envFrom:
-          # The database URL, GitHub token, encryption key, bootstrap admin
-          # password and Authentik client
+          # The database URL, GitHub token, encryption key and Authentik client
           - secretRef:
               name: *app
 
