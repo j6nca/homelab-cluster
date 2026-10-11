@@ -58,24 +58,27 @@ spec:
           # against this, and without it every form POST fails with a CSRF
           # error while GETs work -- which reads as the app being broken
           # rather than as a missing setting.
+          #
+          # https even though the tunnel hands envoy-external plain http:
+          # Cloudflare terminates TLS at docs.j6n.dev, and this is the only
+          # name left after paperless moved off envoy-internal.
           - name: PAPERLESS_URL
-            value: http://paperless.j6n.internal
+            value: https://docs.j6n.dev
           # What actually decides the scheme of the OIDC redirect_uri.
           # Paperless defaults this to https (settings.py), and allauth's
           # build_absolute_uri() rewrites the scheme of every URL it builds
           # whenever the value is https -- ignoring the scheme of the request
-          # that came in. So the callback went to Authentik as
-          # https://paperless.j6n.internal/... and was rejected as a mismatch.
-          #
-          # http here because envoy-internal has no TLS listener. Teaching
-          # Authentik to expect https instead would hand the browser a dead
-          # endpoint, so the scheme has to come down rather than up.
+          # that came in. That was wrong while paperless sat on
+          # envoy-internal (no TLS listener): the callback went to Authentik
+          # as https://paperless.j6n.internal/... and was rejected. With the
+          # external cutover the default is correct again, but it stays
+          # explicit because the value is load-bearing.
           #
           # Not PAPERLESS_OAUTH_CALLBACK_BASE_URL, which was tried here first
           # and does nothing for SSO: it is read only by paperless_mail/oauth.py
           # for the Gmail and Outlook mail-ingest flows.
           - name: PAPERLESS_ACCOUNT_DEFAULT_HTTP_PROTOCOL
-            value: http
+            value: https
           # OCR only what has no text layer. Most scanners and every digital
           # PDF already carry one, so the default of redoing it wholesale is
           # the single biggest waste of CPU at ingest.
