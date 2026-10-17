@@ -52,7 +52,7 @@ spec:
               # Base URL for desktop-app redirect service (e.g. https://redirect.example.com)
               # When set, adds "Open in App" field linking to this redirect server which
               # forwards to the desktop app (steam://, com.epicgames.launcher://, etc.)
-              REDIRECT_BASE_URL: https://freebies.j6n.dev
+              REDIRECT_BASE_URL: https://freebies.thanoslabs.org
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

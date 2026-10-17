@@ -25,6 +25,7 @@ A personal homelab Kubernetes cluster managed via GitOps. Used for learning and 
 - `dashboards/` — Grafana dashboards organized by domain (kubernetes, observability, storage, fitness, system)
 - `apps/base/flux-system/` — Flux operator + instance + monitoring bootstrap
 - `talos/` — node machine configuration: `patches/` applied with `talosctl`, `secrets/` SOPS-encrypted. Never reconciled by Flux; the cluster syncs only `clusters/homelab`
+- `terraform/` — OpenTofu roots (e.g. `github-pages`: GitHub Pages custom domains; their DNS records stay with external-dns as DNSEndpoints). Not Kustomize: each root is planned/applied in-cluster by a tofu-controller `Terraform` CR in `apps/base/tofu-controller/workspaces/`, with credentials from 1Password via ExternalSecret
 
 ## Conventions
 
