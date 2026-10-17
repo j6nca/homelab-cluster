@@ -33,6 +33,8 @@ spec:
     # external-dns/public=true gets a public record -> tunnel
     sources:
       - gateway-httproute
+      # DNSEndpoints in apps/base/external-dns/records (GitHub Pages etc.)
+      - crd
     domainFilters:
       - j6n.dev
     # upsert-only until all existing dashboard-managed records are migrated

@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/externaldns.k8s.io/dnsendpoint_v1alpha1.json
+# GitHub Pages custom domains; each repo's Pages custom domain must match dnsName
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: github-pages-nebula-md
+  # Pages source: thanoslabs/nebula-md
+spec:
+  endpoints:
+    - dnsName: nebula-md.j6n.dev
+      recordType: CNAME
+      targets:
+        - thanoslabs.github.io
+      providerSpecific:
+        # DNS-only: GitHub Pages can't issue its cert behind the proxy
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: github-pages-keyboards
+  # Pages source: thanoslabs/keyboards
+spec:
+  endpoints:
+    - dnsName: keyboards.j6n.dev
+      recordType: CNAME
+      targets:
+        - thanoslabs.github.io
+      providerSpecific:
+        # DNS-only: GitHub Pages can't issue its cert behind the proxy
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: github-pages-waypoint
+  # Pages source: thanoslabs/waypoint
+spec:
+  endpoints:
+    - dnsName: waypoint.j6n.dev
+      recordType: CNAME
+      targets:
+        - thanoslabs.github.io
+      providerSpecific:
+        # DNS-only: GitHub Pages can't issue its cert behind the proxy
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: github-pages-getbud
+  # Pages source: thanoslabs/getbud
+spec:
+  endpoints:
+    - dnsName: getbud.j6n.dev
+      recordType: CNAME
+      targets:
+        - thanoslabs.github.io
+      providerSpecific:
+        # DNS-only: GitHub Pages can't issue its cert behind the proxy
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: github-pages-fruitless-sessions
+  # Pages source: thanoslabs/fruitless-sessions
+spec:
+  endpoints:
+    - dnsName: fruitless-sessions.j6n.dev
+      recordType: CNAME
+      targets:
+        - thanoslabs.github.io
+      providerSpecific:
+        # DNS-only: GitHub Pages can't issue its cert behind the proxy
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: github-pages-charts
+  # Pages source: j6nca/helm-charts
+spec:
+  endpoints:
+    - dnsName: charts.j6n.dev
+      recordType: CNAME
+      targets:
+        - j6nca.github.io
+      providerSpecific:
+        # DNS-only: GitHub Pages can't issue its cert behind the proxy
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
