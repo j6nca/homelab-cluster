@@ -37,6 +37,7 @@ spec:
       - crd
     domainFilters:
       - j6n.dev
+      - thanoslabs.org
     # upsert-only until all existing dashboard-managed records are migrated
     # to HTTPRoutes, then flip to sync so deleted routes clean up records
     policy: upsert-only

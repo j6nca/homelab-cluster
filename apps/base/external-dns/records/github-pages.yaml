@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/externaldns.k8s.io/dnsendpoint_v1alpha1.json
-# GitHub Pages custom domains; each repo's Pages custom domain must match dnsName
+# GitHub Pages custom domains. external-dns owns the record; the repo's Pages
+# domain is set by terraform/github-pages/sites.tf, which refuses to apply until
+# the dnsName below resolves. Keep the two lists in step.
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
@@ -7,7 +9,7 @@ metadata:
   # Pages source: thanoslabs/nebula-md
 spec:
   endpoints:
-    - dnsName: nebula-md.j6n.dev
+    - dnsName: nebula-md.thanoslabs.org
       recordType: CNAME
       targets:
         - thanoslabs.github.io
@@ -23,7 +25,7 @@ metadata:
   # Pages source: thanoslabs/keyboards
 spec:
   endpoints:
-    - dnsName: keyboards.j6n.dev
+    - dnsName: keyboards.thanoslabs.org
       recordType: CNAME
       targets:
         - thanoslabs.github.io
@@ -39,7 +41,7 @@ metadata:
   # Pages source: thanoslabs/waypoint
 spec:
   endpoints:
-    - dnsName: waypoint.j6n.dev
+    - dnsName: waypoint.thanoslabs.org
       recordType: CNAME
       targets:
         - thanoslabs.github.io
@@ -55,7 +57,7 @@ metadata:
   # Pages source: thanoslabs/getbud
 spec:
   endpoints:
-    - dnsName: getbud.j6n.dev
+    - dnsName: getbud.thanoslabs.org
       recordType: CNAME
       targets:
         - thanoslabs.github.io
@@ -71,7 +73,7 @@ metadata:
   # Pages source: thanoslabs/fruitless-sessions
 spec:
   endpoints:
-    - dnsName: fruitless-sessions.j6n.dev
+    - dnsName: fruitless-sessions.thanoslabs.org
       recordType: CNAME
       targets:
         - thanoslabs.github.io

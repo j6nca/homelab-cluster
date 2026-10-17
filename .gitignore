@@ -9,3 +9,6 @@ age.key
 keys.txt
 talos/clusterconfig/
 talos/secrets/*.decrypted.yaml
+
+# OpenTofu working dirs (lock files are committed)
+.terraform/
