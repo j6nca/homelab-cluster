@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -10,7 +10,7 @@ spec:
       chart: generic
       sourceRef:
         kind: HelmRepository
-        name: ctrl-research
+        name: thanoslabs
         namespace: flux-system
       version: 0.3.0
   dependsOn: []
@@ -26,14 +26,14 @@ spec:
         data:
           overwatch.yaml: |
             sources:
-              - name: ctrl-research
+              - name: thanoslabs
                 type: github
                 # Every repository in the org the token can see: with the
                 # jarvisctl token, that is all of its public repositories plus
                 # the private ones the token was granted. Use
                 # `repos: [owner/name, ...]` instead to sync only some.
                 config:
-                  org: ctrl-research
+                  org: thanoslabs
             oidc:
               # An Authentik user gets the highest role among these groups.
               # Anyone in none of them is refused (no default role is set).
@@ -49,8 +49,8 @@ spec:
       app:
         image:
           registry: ghcr.io
-          repository: ctrl-research/overwatch
-          # The first release (ctrl-research/overwatch#9). Pinned: bump it
+          repository: thanoslabs/overwatch
+          # The first release (thanoslabs/overwatch#9). Pinned: bump it
           # deliberately rather than following :latest.
           tag: 0.1.0
           pullPolicy: IfNotPresent

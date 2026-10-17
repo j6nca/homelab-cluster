@@ -11,7 +11,7 @@ spec:
   dependsOn: []
   interval: 15m
   values:
-    # WebRTC signaling broker for Abyssal Salvage (ctrl-research/rogue-like).
+    # WebRTC signaling broker for Abyssal Salvage (thanoslabs/rogue-like).
     # Brokers the offer/answer/ICE handshake only; game traffic is P2P, so
     # this idles at near-zero. Stateless: no persistence, no secrets.
     controllers:
@@ -19,13 +19,13 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/ctrl-research/rogue-like/signaling
+              repository: ghcr.io/thanoslabs/rogue-like/signaling
               tag: sha-a0ae8e7
             env:
               PORT: &port 9080
               # CSWSH guard: browser clients must come from the Pages site.
               # Native (desktop) game clients send no Origin and are allowed.
-              ALLOWED_ORIGINS: "https://ctrl-research.github.io"
+              ALLOWED_ORIGINS: "https://thanoslabs.github.io"
             probes:
               liveness: &probe
                 enabled: true

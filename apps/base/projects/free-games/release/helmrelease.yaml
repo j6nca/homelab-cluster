@@ -18,7 +18,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/gravityctl/free-games
+              repository: ghcr.io/thanoslabs/free-games
               tag: v0.0.4
             env:
               TZ: "America/Toronto"

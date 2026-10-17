@@ -1,8 +1,8 @@
-# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/source.toolkit.fluxcd.io/helmrepository_v1.json
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/source.toolkit.fluxcd.io/helmrepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: ctrl-research
+  name: thanoslabs
   namespace: flux-system
 spec:
   interval: 30m

@@ -38,7 +38,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/ctrl-research/mmo/server
+              repository: ghcr.io/thanoslabs/mmo/server
               # Same tag as the gateway and the client: the client predicts
               # with a WASM build of internal/world/sim and this simulates with
               # the Go build of it, so a mismatched pair is silent prediction

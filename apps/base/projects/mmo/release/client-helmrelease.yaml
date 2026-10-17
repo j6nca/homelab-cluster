@@ -21,7 +21,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/ctrl-research/mmo/client
+              repository: ghcr.io/thanoslabs/mmo/client
               # Keep on the SAME tag as mmo-server. See the note there.
               tag: 0.2.23
             env:
