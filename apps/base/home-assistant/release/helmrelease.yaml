@@ -77,6 +77,16 @@ spec:
         # replica health before letting it get close to full.
         size: 1Gi
         accessMode: ReadWriteOnce
+      # Static dashboards (see kustomization.yaml's configMapGenerator):
+      # mounted read-only where HA serves them as /local/dashboards/floorplan.
+      # The mount shadows any same-named files previously copied onto the
+      # config PVC, so those were removed once this went live.
+      floorplan:
+        type: configMap
+        name: home-assistant-dashboards-floorplan
+        globalMounts:
+          - path: /config/www/dashboards/floorplan
+            readOnly: true
       # The Zigbee coordinator: the /dev/zigbee symlink created by the udev
       # rule in talos/patches/global/zigbee-usb.yaml, mounted at /dev/ttyUSB0.
       #
