@@ -17,6 +17,8 @@ spec:
     image:
       # Override version here as latest chart is not yet caught up
       tag: v5.34.0
+      # pinned by digest (chart renders repository:tag@sha256:<sha>)
+      sha: 3fff895e77d35ee62e898860f4613755bc2344127d93e3f326429d40270e2115
     service:
       annotations:
         k8s.grafana.com/scrape: "true"
@@ -33,7 +35,7 @@ spec:
       GATUS_CONFIG_PATH: /dynamic-config
     sidecarContainers:
       gatus-sidecar:
-        image: ghcr.io/home-operations/gatus-sidecar:0.4.0
+        image: ghcr.io/home-operations/gatus-sidecar:0.4.0@sha256:4a4bf52c7b8c292f08b0bd42cf93a6deaccfdf43531a0f082bb9504774c914de
         args:
           # annotation-gated: only Services/HTTPRoutes carrying
           # gatus.home-operations.com/enabled: "true" get endpoints;
@@ -111,3 +113,38 @@ spec:
           interval: 24h
           conditions:
             - "[DOMAIN_EXPIRATION] >= 7d"
+
+        # Frontier AI providers litellm/hermes depend on. Two checks each:
+        # "API" proves the endpoint is reachable from the cluster (no key is
+        # sent, so a healthy API answers 401 with its own error body), and
+        # "Status" mirrors what the provider itself reports (indicator is
+        # none/minor/major/critical; anything but none is an open incident).
+        - name: OpenAI API
+          group: AI Providers
+          url: https://api.openai.com/v1/models
+          interval: 5m
+          conditions:
+            - "[STATUS] == 401"
+            - "[BODY].error.type == invalid_request_error"
+        - name: OpenAI Status
+          group: AI Providers
+          url: https://status.openai.com/api/v2/status.json
+          interval: 5m
+          conditions:
+            - "[STATUS] == 200"
+            - "[BODY].status.indicator == none"
+        - name: Anthropic API
+          group: AI Providers
+          url: https://api.anthropic.com/v1/models
+          interval: 5m
+          conditions:
+            - "[STATUS] == 401"
+            - "[BODY].error.type == authentication_error"
+        - name: Anthropic Status
+          group: AI Providers
+          # status.anthropic.com 301s here
+          url: https://status.claude.com/api/v2/status.json
+          interval: 5m
+          conditions:
+            - "[STATUS] == 200"
+            - "[BODY].status.indicator == none"

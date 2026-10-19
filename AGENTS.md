@@ -32,6 +32,7 @@ A personal homelab Kubernetes cluster managed via GitOps. Used for learning and 
 - Each app base has `kustomize.yaml` defining Flux `Kustomization`(s) with explicit `dependsOn` chains; the cluster overlay only adds namespace + common labels
 - Helm charts are pulled via Flux `HelmRepository`/`OCIRepository` defined in `clusters/homelab/repos/`, then referenced by `HelmRelease` in `apps/base/<app>/release/`
 - Secrets never committed: managed through ExternalSecret resources pulling from 1Password Connect
+- Third-party container images are pinned by digest as well as tag (`tag@sha256:<digest>`, or the chart's separate digest/sha value), so a retagged or re-pushed upstream image cannot change what runs. Use the multi-arch index digest (`docker buildx imagetools inspect <image>:<tag>`), not a single-platform manifest. OCI chart sources are pinned the same way with `spec.ref.digest`
 - Renovate + a scheduled GitHub Action (`.github/workflows/update_flux.yaml`) keep Flux components current via PRs
 - New user-facing services are registered on homepage and gatus by annotating their `HTTPRoute`, never by editing either app's config — see Dashboard registration below
 

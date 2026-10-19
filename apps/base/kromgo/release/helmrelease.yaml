@@ -1,0 +1,114 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app kromgo
+spec:
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: thanoslabs
+        namespace: flux-system
+      version: 0.4.0
+  dependsOn: []
+  interval: 15m
+  values:
+    # The generic chart names every resource <release>-<key>, so these keys
+    # produce kromgo-app; the HTTPRoutes reference that name directly.
+    deployments:
+      app:
+        metadata:
+          labels: &labels
+            app.kubernetes.io/name: kromgo
+            app.kubernetes.io/instance: kromgo
+          annotations:
+            # config is a kustomize-generated ConfigMap with no hash suffix
+            reloader.stakater.com/auto: "true"
+        spec:
+          replicas: 1
+          selector:
+            matchLabels: *labels
+          template:
+            metadata:
+              labels: *labels
+            spec:
+              automountServiceAccountToken: false
+              containers:
+                - name: kromgo
+                  # pinned by digest: the tag says which release, the digest
+                  # is what actually gets pulled
+                  image: ghcr.io/home-operations/kromgo:0.16.2@sha256:d85259f5276a64038572c70dbd0f4d9cb62d7b8fff6ce146ea8239d2c0a7f2e2
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: KROMGO_LOG_FORMAT
+                      value: json
+
+                  ports:
+                    - name: http
+                      containerPort: 8080
+                      protocol: TCP
+                    - name: metrics
+                      containerPort: 8081
+                      protocol: TCP
+
+                  livenessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: http
+                    initialDelaySeconds: 10
+                    periodSeconds: 20
+                  readinessProbe:
+                    httpGet:
+                      path: /readyz
+                      port: http
+                    initialDelaySeconds: 5
+                    periodSeconds: 10
+
+                  # workers sit at ~98% of allocatable CPU *requests*; keep this tiny
+                  resources:
+                    requests:
+                      cpu: 5m
+                      memory: 32Mi
+                    limits:
+                      memory: 128Mi
+
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    readOnlyRootFilesystem: true
+
+                  # read from /config/config.yaml by default
+                  volumeMounts:
+                    - name: config
+                      mountPath: /config
+                      readOnly: true
+
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65532
+                runAsGroup: 65532
+                fsGroup: 65532
+                seccompProfile:
+                  type: RuntimeDefault
+
+              volumes:
+                - name: config
+                  configMap:
+                    name: kromgo-config
+
+    services:
+      app:
+        metadata:
+          labels: *labels
+        spec:
+          type: ClusterIP
+          selector: *labels
+          ports:
+            - name: http
+              port: 8080
+              targetPort: http
+              protocol: TCP

@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/kustomize.config.k8s.io/kustomization_v1beta1.json
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./helmrelease.yaml
+  - ./httproute.yaml
+configMapGenerator:
+  - name: kromgo-config
+    files:
+      - config.yaml=./config/kromgo.yaml
+generatorOptions:
+  # referenced by name from the HelmRelease values, which kustomize does not
+  # rewrite; Reloader rolls the pod on change instead of a hash suffix
+  disableNameSuffixHash: true

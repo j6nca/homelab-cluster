@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kromgo-external
+  annotations:
+    # group: External inherited from the envoy-external gateway
+    gatus.home-operations.com/enabled: "true"
+spec:
+  parentRefs:
+  - name: envoy-external
+    namespace: network
+  hostnames:
+  - kromgo.j6n.dev
+  rules:
+  - backendRefs:
+    - name: kromgo-app
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kromgo-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Kromgo
+    gethomepage.dev/group: Observability
+    gethomepage.dev/icon: mdi-badge-account-horizontal-outline
+    # Without this homepage looks for app.kubernetes.io/name=<the
+    # display name above> and renders 'not found' when it misses.
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=kromgo
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Observability
+      url: http://kromgo.j6n.internal/healthz
+spec:
+  parentRefs:
+  - name: envoy-internal
+    namespace: network
+  hostnames:
+  - kromgo.j6n.internal
+  rules:
+  - backendRefs:
+    - name: kromgo-app
+      port: 8080
