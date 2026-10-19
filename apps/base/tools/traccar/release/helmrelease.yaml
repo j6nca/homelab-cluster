@@ -1,0 +1,136 @@
+---
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app traccar
+spec:
+  chart:
+    spec:
+      chart: generic
+      sourceRef:
+        kind: HelmRepository
+        name: thanoslabs
+        namespace: flux-system
+      version: 0.3.0
+  # The postgres component appends cnpg here, so this has to exist for its
+  # patch to have somewhere to add to.
+  dependsOn: []
+  interval: 15m
+  values:
+    deployments:
+      app:
+        image:
+          registry: docker.io
+          repository: traccar/traccar
+          tag: 6.16.0-alpine
+          pullPolicy: IfNotPresent
+
+        # The database credentials arrive through secretKeyRef, so a rotation
+        # only takes effect on restart.
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        containerName: *app
+
+        # Traccar keeps device sessions and its event pipeline in memory and
+        # has no clustering, so a second replica would split devices between
+        # two servers that each think they are the only one.
+        replicas: 1
+        strategy:
+          type: Recreate
+
+        env:
+          # Without this every key below is ignored and traccar boots on the
+          # bundled H2 file database in the container's writable layer --
+          # which works, and then loses everything on the first restart.
+          # Keys map dots to underscores: database.url is DATABASE_URL.
+          - name: CONFIG_USE_ENVIRONMENT_VARIABLES
+            value: "true"
+          - name: DATABASE_DRIVER
+            value: org.postgresql.Driver
+          - name: DATABASE_URL
+            value: jdbc:postgresql://traccar-postgres-rw:5432/traccar
+          # Straight from the secret the postgres component already renders
+          # for the CNPG managed role, so the role and the client cannot drift
+          # and no second ExternalSecret is needed.
+          - name: DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: traccar-postgres
+                key: username
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: traccar-postgres
+                key: password
+          # Defaults to logs/tracker-server.log inside the container, which
+          # leaves kubectl logs and victoria-logs with nothing to read.
+          - name: LOGGER_CONSOLE
+            value: "true"
+          # Left unset, traccar opens a listener for every one of its ~250
+          # protocols on ports 5001-5250. Only the phone app's protocol is
+          # wanted; add hardware tracker protocols here (and a port below)
+          # when there is a device that speaks one.
+          - name: PROTOCOLS_ENABLE
+            value: osmand
+          - name: OSMAND_PORT
+            value: "5055"
+          # Used to build links in notifications and as the OIDC redirect base.
+          - name: WEB_URL
+            value: http://traccar.j6n.internal
+          # The image sets no -Xmx, so the JVM takes its default 25% of the
+          # limit below. Half is more useful for a single-purpose container.
+          - name: JAVA_TOOL_OPTIONS
+            value: -XX:MaxRAMPercentage=50
+
+        ports:
+          - containerPort: 8082
+            name: http
+            protocol: TCP
+          - containerPort: 5055
+            name: osmand
+            protocol: TCP
+
+        # /api/health checks the database too, which is right for readiness
+        # but would restart the pod over a postgres failover, so liveness
+        # only asks whether the web server is up at all.
+        startupProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 10
+          # First boot runs the full Liquibase changelog against an empty
+          # database before the web server binds.
+          failureThreshold: 30
+        livenessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          periodSeconds: 15
+          timeoutSeconds: 5
+
+        resources:
+          requests:
+            # Idle use; the workers have almost no CPU requests left to give.
+            cpu: 20m
+            memory: 384Mi
+          limits:
+            memory: 1Gi
+
+    services:
+      app:
+        type: ClusterIP
+        ports:
+          - port: 8082
+            targetPort: http
+            protocol: TCP
+            name: http
+          - port: 5055
+            targetPort: osmand
+            protocol: TCP
+            name: osmand
