@@ -25,5 +25,15 @@ A small home cluster to help me familiarize and navigate Kubernetes.
 
 ## Goals
 
-- [] Support backup and recovery of PVs for full DR
-- [] Flushing out observability stack
+- [x] Set up GitOps (FluxCD)
+- [x] Set up secret management (External Secrets Operator)
+- [x] Set up persistent storage
+- [x] Migrate and run Home Assistant
+- [x] Migrate and run media stack
+- [ ] Set up PV backups
+- [ ] Alert routing
+- [ ] Observability stack (metrics, logs, profiles, traces)
+- [ ] AI stack
+- [ ] Iron out Kubernetes upgrade process
+- [ ] Iron out Talos upgrade process
+- [ ] Iron out Flux upgrade process
