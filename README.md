@@ -7,7 +7,7 @@
 
 [![Talos](https://kromgo.j6n.dev/badges/talos_version)](https://www.talos.dev/)&nbsp;
 [![Kubernetes](https://kromgo.j6n.dev/badges/kubernetes_version)](https://kubernetes.io/)&nbsp;
-[![Flux](https://img.shields.io/badge/GitOps-Flux-blue?style=for-the-badge&logo=flux&logoColor=white)](https://fluxcd.io/)
+[![Flux](https://kromgo.j6n.dev/badges/flux_version)](https://fluxcd.io/)
 
 [![Age](https://kromgo.j6n.dev/badges/cluster_age_days)](https://kromgo.j6n.dev/)&nbsp;
 [![Uptime](https://kromgo.j6n.dev/badges/cluster_uptime)](https://kromgo.j6n.dev/)&nbsp;

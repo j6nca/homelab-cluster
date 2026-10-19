@@ -23,6 +23,14 @@ badges:
     query: topk(1, count by (kubelet_version) (kube_node_info))
     valueExpr: labels[?"kubelet_version"].orValue("unknown")
     colorExpr: '"blue"'
+  - id: flux_version
+    title: Flux
+    icon: si:flux
+    # revision is "v2.7.5@sha256:..."; scraped from flux-operator by the
+    # flux-operator PodMonitor in apps/base/flux-system/monitoring
+    query: 'label_replace(flux_instance_info{kind="FluxInstance"}, "version", "$1", "revision", "(v[^@]+)@.*")'
+    valueExpr: labels[?"version"].orValue("unknown")
+    colorExpr: 'labels[?"ready"].orValue("") == "True" ? "blue" : "orange"'
   - id: cluster_age_days
     title: Age
     icon: mdi:calendar-clock
