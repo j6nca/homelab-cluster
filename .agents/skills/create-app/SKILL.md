@@ -26,7 +26,7 @@ Use the `question` tool to gather:
 2. Namespace/category, such as `downloads`, `media`, or `self-hosted`
 3. Target cluster or clusters: `main`, `utility`, and/or `test`
 4. Image repository
-5. Image tag or digest
+5. Image tag **and** digest (always both: third-party images are pinned as `tag@sha256:<index digest>`)
 6. Primary service port
 7. Whether the app needs `ExternalSecret`
 8. Whether the app needs persistence
@@ -96,7 +96,8 @@ spec:
           app:
             image:
               repository: <image-repository>
-              tag: <image-tag-or-digest>
+              # tag says which release; the digest is what actually gets pulled
+              tag: <image-tag>@sha256:<multi-arch index digest>
             probes:
               liveness:
                 enabled: true
