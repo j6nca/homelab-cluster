@@ -11,7 +11,7 @@ spec:
   dependsOn: []
   interval: 15m
   values:
-    # Dedicated game server for Abyssal Salvage (ctrl-research/rogue-like).
+    # Dedicated game server for Abyssal Salvage (thanoslabs/rogue-like).
     #
     # NOT hardened with a NetworkPolicy, deliberately: no CNI in this repo declares
     # policy support and no NetworkPolicy exists anywhere in the cluster, so one
@@ -38,7 +38,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/ctrl-research/rogue-like/server
+              repository: ghcr.io/thanoslabs/rogue-like/server
               # Pinned rather than :latest, so a client and a server of known
               # compatible versions stay together. Renovate tracks it from here.
               tag: 0.1.151

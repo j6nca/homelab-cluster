@@ -38,7 +38,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/ctrl-research/mmo/server
+              repository: ghcr.io/thanoslabs/mmo/server
               # Same tag as the world nodes and the client. See the note there.
               tag: 0.2.23
             args:

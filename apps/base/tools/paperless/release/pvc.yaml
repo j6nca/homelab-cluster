@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/core/persistentvolumeclaim_v1.json
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/core/persistentvolumeclaim_v1.json
 # Declared here rather than by the chart: generic mounts volumes but does not
 # provision them, so the claims are ordinary manifests.
 apiVersion: v1

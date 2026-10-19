@@ -26,7 +26,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/ctrl-research/waypoint
+              repository: ghcr.io/thanoslabs/waypoint
               tag: 0.0.16
             env:
               TZ: America/Toronto

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/batch/job_v1.json
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/batch/job_v1.json
 ---
 # Garage's first-time setup is imperative — a fresh node has no cluster
 # layout, no bucket and no keys, and serves no S3 traffic until all three
