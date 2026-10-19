@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tofu-controller
+spec:
+  chart:
+    spec:
+      chart: *app
+      sourceRef:
+        kind: HelmRepository
+        name: *app
+        namespace: flux-system
+      version: 0.16.5
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+  interval: 15m
+  # values.yaml
+  values:
+    # workers sit at ~98% of allocatable CPU *requests*; the chart's 200m
+    # default would leave this Pending. Real use is a few millicores idle.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    # only needed for the AWS primitive modules, which nothing here uses
+    awsPackage:
+      install: false
+    # runner pods (one per plan/apply) are scheduled in flux-system, where the
+    # Terraform CRs live; their resources are set per CR in runnerPodTemplate
+    runner:
+      serviceAccount:
+        allowedNamespaces:
+          - flux-system

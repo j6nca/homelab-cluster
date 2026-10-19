@@ -11,6 +11,9 @@ when the question comes up.
 | `k-worker-1` | — | |
 | `k-worker-2` | `zigbee=true` | Zigbee coordinator; home-assistant pins here |
 | `k-worker-3` | — | |
+| `k-worker-4` | — | |
+| `k-worker-5` | — | |
+| `k-worker-ai-1` | `ai=true` | AI workloads (GPU/NPU) pin here |
 
 Keep the table current when a label is declared. A stub whose comments claim
 nothing and a table row that says `—` are both easy to trust; a table that has

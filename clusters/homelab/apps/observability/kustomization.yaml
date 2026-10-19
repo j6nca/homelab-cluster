@@ -7,6 +7,7 @@ resources:
   - ../../../../apps/base/prometheus-json-exporter/kustomize.yaml
   - ../../../../apps/base/prometheus-snmp-exporter/kustomize.yaml
   - ../../../../apps/base/karma/kustomize.yaml
+  - ../../../../apps/base/kromgo/kustomize.yaml
   # - ../../../../apps/base/karpor/kustomize.yaml
   - ./namespace.yaml
 commonLabels:

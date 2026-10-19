@@ -5,3 +5,22 @@ resources:
   - ./helmrelease.yaml
   - ./matter-server.yaml
   - ./httproute.yaml
+
+# Static HA dashboards, one ConfigMap per dashboard folder. Generated straight
+# from the files under dashboards/ so there is a single source of truth in Git
+# and no pasted blobs to drift. Keys are flat file names (ConfigMap keys
+# cannot contain '/'), so each dashboard keeps all of its files in one
+# directory and index.html references them without subpaths.
+# Size guard: one dashboard must stay under the 1 MiB ConfigMap limit -- the
+# floorplan is ~775 KB, mostly the vendored three.js.
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: home-assistant-dashboards-floorplan
+    files:
+      - dashboards/floorplan/index.html
+      - dashboards/floorplan/data.js
+      - dashboards/floorplan/build.js
+      - dashboards/floorplan/ha.js
+      - dashboards/floorplan/app.js
+      - dashboards/floorplan/three.min.js

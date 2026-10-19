@@ -33,8 +33,11 @@ spec:
     # external-dns/public=true gets a public record -> tunnel
     sources:
       - gateway-httproute
+      # DNSEndpoints in apps/base/external-dns/records (GitHub Pages etc.)
+      - crd
     domainFilters:
       - j6n.dev
+      - thanoslabs.org
     # upsert-only until all existing dashboard-managed records are migrated
     # to HTTPRoutes, then flip to sync so deleted routes clean up records
     policy: upsert-only

@@ -6,6 +6,64 @@ metadata:
 data:
   config.yaml: |
     model_list:
+      # --- ChatGPT subscription (https://chatgpt.com/backend-api/codex) ---
+      # The Plus/Pro subscription, not the API: this route reuses the Codex
+      # backend under a ChatGPT login instead of a platform.openai.com key.
+      # Auth is the shared OAuth token file on the chatgpt-tokens PVC, seeded
+      # once from 1Password -- see helmrelease.yaml. There is no api_key here
+      # on purpose; a client-supplied ChatGPT token is ignored.
+      #
+      # mode: responses is required, not cosmetic. The subscription backend
+      # speaks only the Responses API, and litellm uses this to route and to
+      # bridge /v1/chat/completions to /v1/responses for the models that
+      # support it. The backend also rejects token-limit fields and metadata;
+      # litellm strips them for this provider (drop_params is on below too).
+      #
+      # The chatgpt/ prefix is deliberate: it namespaces these by provider and
+      # matches the provider/cost-map naming. Bare names would be free to
+      # collide with an API-backed model of the same id later, and two entries
+      # sharing a model_name do not conflict in litellm -- they silently
+      # become one least-busy pool.
+      #
+      # This is the set listed in the litellm provider docs and present in its
+      # cost map. The cost map carries more (gpt-5.2, gpt-5.1-codex-*,
+      # gpt-5.5/5.6/6.x) but not all are live on every subscription, so treat
+      # this as provisional and confirm with a real call before relying on it:
+      #   curl -s http://litellm.j6n.internal/v1/responses \
+      #     -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
+      #     -H 'content-type: application/json' \
+      #     -d '{"model":"chatgpt/gpt-5.3-codex","input":"hi"}'
+      - model_name: chatgpt/gpt-5.4
+        model_info:
+          mode: responses
+        litellm_params:
+          model: chatgpt/gpt-5.4
+      - model_name: chatgpt/gpt-5.4-pro
+        model_info:
+          mode: responses
+        litellm_params:
+          model: chatgpt/gpt-5.4-pro
+      - model_name: chatgpt/gpt-5.3-codex
+        model_info:
+          mode: responses
+        litellm_params:
+          model: chatgpt/gpt-5.3-codex
+      - model_name: chatgpt/gpt-5.3-codex-spark
+        model_info:
+          mode: responses
+        litellm_params:
+          model: chatgpt/gpt-5.3-codex-spark
+      - model_name: chatgpt/gpt-5.3-instant
+        model_info:
+          mode: responses
+        litellm_params:
+          model: chatgpt/gpt-5.3-instant
+      - model_name: chatgpt/gpt-5.3-chat-latest
+        model_info:
+          mode: responses
+        litellm_params:
+          model: chatgpt/gpt-5.3-chat-latest
+
       # --- standalone providers (parity with Bifrost) ---
       # Subscription lapses 2026-09-30. Kept until then; when it goes, drop
       # these two entries, the fast-pool member below, and MINIMAX_API_KEY
@@ -41,94 +99,21 @@ data:
       #     provider, openclaw's `lemonade` provider), which also means they
       #     keep working when this proxy is down.
 
-      # --- opencode-go models (https://opencode.ai/zen/go/v1) ---
-      # Subscription lapses 2026-09-30, same as MiniMax above. When it goes,
-      # drop this block, the fast-pool member below, and OPENCODE_GO_API_KEY.
-      #
-      # x-opencode-session is mandatory, not telemetry: without it the
-      # provider refuses the request outright with 400 MissingSessionID. The
-      # value is never validated -- any stable non-empty string is accepted --
-      # so it is a constant here rather than anything derived.
-      #
-      # That constant does mean every caller through this proxy shares one
-      # session, which costs whatever routing locality the header is meant to
-      # buy. The alternative is per-request state litellm has nowhere to keep,
-      # so the locality is what gets given up.
-      - model_name: glm-5.1
-        litellm_params:
-          model: openai/glm-5.1
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: glm-5
-        litellm_params:
-          model: openai/glm-5
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: kimi-k2.5
-        litellm_params:
-          model: openai/kimi-k2.5
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: kimi-k2.6
-        litellm_params:
-          model: openai/kimi-k2.6
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: deepseek-v4-pro
-        litellm_params:
-          model: openai/deepseek-v4-pro
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: deepseek-v4-flash
-        litellm_params:
-          model: openai/deepseek-v4-flash
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: mimo-v2.5
-        litellm_params:
-          model: openai/mimo-v2.5
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-      - model_name: mimo-v2.5-pro
-        litellm_params:
-          model: openai/mimo-v2.5-pro
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
-
       # --- hypercharm (https://hyper.charm.land/v1) ---
       # Plain OpenAI-compatible: bearer key, no extra headers. The catalog is
       # public at GET /v1/models -- consult it rather than this list when
       # something looks missing, since it carries 34 models and only the
       # current-generation ones are wired up here.
       #
-      # Every name is prefixed hypercharm/ because seven of the upstream ids
-      # (glm-5, glm-5.1, kimi-k2.5, kimi-k2.6, deepseek-v4-flash,
-      # deepseek-v4-pro, minimax-m3) are names already served above by the two
-      # expiring providers. Two entries sharing a model_name do not conflict in
-      # litellm -- they silently become one least-busy pool, exactly as
-      # fast-pool below is built -- so bare names here would have quietly
-      # spread traffic across two providers of different cost and quality.
-      # The prefix keeps the caller's choice of provider explicit.
+      # Every name is prefixed hypercharm/ to keep the caller's choice of
+      # provider explicit. Two entries sharing a model_name do not conflict in
+      # litellm -- they silently become one least-busy pool -- so a bare name
+      # here could quietly pool with a different provider's model of the same
+      # id, at a different cost and quality.
       #
       # This is also the landing place for 2026-09-30: hypercharm covers what
-      # MiniMax and opencode-go serve today, so retiring them is a matter of
-      # repointing callers at these names.
+      # MiniMax serves today, so retiring it is a matter of repointing callers
+      # at these names.
       - model_name: hypercharm/qwen3.8-max
         litellm_params:
           model: openai/qwen3.8-max
@@ -225,19 +210,16 @@ data:
           api_base: https://hyper.charm.land/v1
           api_key: os.environ/HYPERCHARM_API_KEY
 
-      # --- load-balanced pool (least-busy across MiniMax-M3 + deepseek-v4-flash) ---
+      # --- stable alias for MiniMax-M3 ---
+      # Was a least-busy pool across MiniMax-M3 + opencode-go's
+      # deepseek-v4-flash. opencode-go was cancelled, leaving one member, so
+      # this is now an alias rather than a pool. Retires with MiniMax on
+      # 2026-09-30.
       - model_name: fast-pool
         litellm_params:
           model: openai/MiniMax-M3
           api_base: https://api.minimaxi.chat/v1
           api_key: os.environ/MINIMAX_API_KEY
-      - model_name: fast-pool
-        litellm_params:
-          model: openai/deepseek-v4-flash
-          api_base: https://opencode.ai/zen/go/v1
-          api_key: os.environ/OPENCODE_GO_API_KEY
-          extra_headers:
-            x-opencode-session: litellm-homelab
 
     router_settings:
       routing_strategy: least-busy

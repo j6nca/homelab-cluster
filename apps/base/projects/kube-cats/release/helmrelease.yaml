@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: thanoslabs
         namespace: flux-system
-      version: 0.3.0
+      version: 0.4.0
   dependsOn: []
   interval: 15m
   commonMetadata:
@@ -27,140 +27,175 @@ spec:
     # names directly.
     deployments:
       web:
-        image:
-          registry: ghcr.io
-          repository: j6nca/kube-cats
-          tag: 43429b8
-          pullPolicy: IfNotPresent
+        metadata:
+          labels: &weblabels
+            app.kubernetes.io/name: kube-cats-web
+            app.kubernetes.io/instance: kube-cats
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: kube-cats-web
+          template:
+            metadata:
+              labels: *weblabels
+            spec:
+              containers:
+                - name: web
+                  image: ghcr.io/j6nca/kube-cats:43429b8
+                  imagePullPolicy: IfNotPresent
 
-        containerName: web
+                  env:
+                    # Resolved by the browser, not in-cluster, so this has to
+                    # be the external hostname. A Service DNS name does not
+                    # resolve for a client outside the cluster.
+                    - name: API_URL
+                      value: https://kube-cats-api.j6n.dev
+                    # Ratio, not a percentage. Nothing in the cluster reaches
+                    # the 0.8 default; at 0.6 exactly one pod (kube-ops-view,
+                    # ~70% of its memory limit) burns, so the sprite is visible
+                    # without implying the cluster is in trouble.
+                    - name: HEAT_THRESHOLD
+                      value: "0.6"
 
-        env:
-          # Resolved by the browser, not in-cluster, so this has to be the
-          # external hostname. A Service DNS name does not resolve for a client
-          # outside the cluster.
-          - name: API_URL
-            value: https://kube-cats-api.j6n.dev
-          # Ratio, not a percentage. Nothing in the cluster reaches the 0.8
-          # default; at 0.6 exactly one pod (kube-ops-view, ~70% of its memory
-          # limit) burns, so the sprite is visible without implying the cluster
-          # is in trouble.
-          - name: HEAT_THRESHOLD
-            value: "0.6"
+                  ports:
+                    - name: http
+                      containerPort: 3000
+                      protocol: TCP
 
-        ports:
-          - containerPort: 3000
-            name: http
-            protocol: TCP
+                  livenessProbe: &webprobe
+                    httpGet:
+                      path: /
+                      port: http
+                  readinessProbe: *webprobe
 
-        livenessProbe: &webprobe
-          httpGet:
-            path: /
-            port: http
-        readinessProbe: *webprobe
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 50Mi
+                    limits:
+                      memory: 100Mi
 
-        resources:
-          requests:
-            cpu: 50m
-            memory: 50Mi
-          limits:
-            memory: 100Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    readOnlyRootFilesystem: true
 
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
+                  # The entrypoint writes the runtime config here on every
+                  # start, which is the only write the container makes.
+                  # Keeping it on a volume is what lets readOnlyRootFilesystem
+                  # stay true.
+                  volumeMounts:
+                    - name: config
+                      mountPath: /app/build/config
 
-        podSecurityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          runAsGroup: 1000
-          # Makes the emptyDir below group-writable for the runtime uid.
-          fsGroup: 1000
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+                # Makes the emptyDir below group-writable for the runtime uid.
+                fsGroup: 1000
 
-        # The entrypoint writes the runtime config here on every start, which
-        # is the only write the container makes. Keeping it on a volume is what
-        # lets readOnlyRootFilesystem stay true.
-        volumes:
-          - name: config
-            emptyDir: {}
-        volumeMounts:
-          - name: config
-            mountPath: /app/build/config
+              volumes:
+                - name: config
+                  emptyDir: {}
 
       api:
-        image:
-          registry: ghcr.io
-          repository: j6nca/kube-cats-api
-          tag: 33de378
-          pullPolicy: IfNotPresent
+        metadata:
+          labels: &apilabels
+            app.kubernetes.io/name: kube-cats-api
+            app.kubernetes.io/instance: kube-cats
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: kube-cats-api
+          template:
+            metadata:
+              labels: *apilabels
+            spec:
+              # Needs the ClusterRole in rbac.yaml to list nodes and pods. The
+              # generic chart has no RBAC templates, so that is a plain manifest.
+              serviceAccountName: kube-cats-api
 
-        containerName: api
+              containers:
+                - name: api
+                  image: ghcr.io/j6nca/kube-cats-api:33de378
+                  imagePullPolicy: IfNotPresent
 
-        # Needs the ClusterRole in rbac.yaml to list nodes and pods. The
-        # generic chart has no RBAC templates, so that is a plain manifest.
-        serviceAccountName: api
+                  env:
+                    - name: API_PORT
+                      value: "8080"
+                    - name: ENVIRONMENT
+                      value: production
+                    # Every origin the UI is served from. A matching Origin is
+                    # echoed back, so the internal route works as well as the
+                    # external one — the old fixed header only ever satisfied
+                    # meow.j6n.dev. Append http://localhost:3000 to develop
+                    # against this API; that lets any page on any machine's
+                    # localhost read it, so it is left off.
+                    - name: CORS_ALLOW_ORIGINS
+                      value: https://meow.j6n.dev,http://kube-cats.j6n.internal
 
-        env:
-          - name: API_PORT
-            value: "8080"
-          - name: ENVIRONMENT
-            value: production
-          # Every origin the UI is served from. A matching Origin is echoed
-          # back, so the internal route works as well as the external one —
-          # the old fixed header only ever satisfied meow.j6n.dev.
-          # Append http://localhost:3000 to develop against this API; that
-          # lets any page on any machine's localhost read it, so it is left off.
-          - name: CORS_ALLOW_ORIGINS
-            value: https://meow.j6n.dev,http://kube-cats.j6n.internal
+                  ports:
+                    - name: http
+                      containerPort: 8080
+                      protocol: TCP
 
-        ports:
-          - containerPort: 8080
-            name: http
-            protocol: TCP
+                  livenessProbe: &apiprobe
+                    httpGet:
+                      path: /health
+                      port: http
+                  readinessProbe: *apiprobe
 
-        livenessProbe: &apiprobe
-          httpGet:
-            path: /health
-            port: http
-        readinessProbe: *apiprobe
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 50Mi
+                    limits:
+                      memory: 100Mi
 
-        resources:
-          requests:
-            cpu: 50m
-            memory: 50Mi
-          limits:
-            memory: 100Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    readOnlyRootFilesystem: true
 
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-
-        podSecurityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          runAsGroup: 1000
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
 
     services:
       web:
-        type: ClusterIP
-        ports:
-          - port: 80
-            targetPort: http
-            protocol: TCP
-            name: http
+        metadata:
+          labels: *weblabels
+        spec:
+          type: ClusterIP
+          selector:
+            app.kubernetes.io/name: kube-cats-web
+          ports:
+            - name: http
+              port: 80
+              targetPort: http
+              protocol: TCP
       api:
-        type: ClusterIP
-        ports:
-          - port: 80
-            targetPort: http
-            protocol: TCP
-            name: http
+        metadata:
+          labels: *apilabels
+        spec:
+          type: ClusterIP
+          selector:
+            app.kubernetes.io/name: kube-cats-api
+          ports:
+            - name: http
+              port: 80
+              targetPort: http
+              protocol: TCP
 
     serviceAccounts:
-      api: {}
+      api:
+        metadata:
+          labels: *apilabels

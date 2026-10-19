@@ -30,7 +30,12 @@ spec:
     vmcluster:
       enabled: true
       spec:
-        retentionPeriod: "1"
+        # Down from "1" (one month), which filled the 2Gi volume below and left
+        # vmstorage read-only from 2026-10-17. Samples live in monthly
+        # partitions and a partition is only dropped once all of it is past
+        # retention, so disk peaks at about retention + one month of data;
+        # at 14d that is ~1.5 months rather than ~2.
+        retentionPeriod: "14d"
         # RF must not exceed the vmstorage node count — vminsert refuses to
         # start otherwise. It was 2 against 2 nodes, which is not sharding:
         # every node held the whole dataset, so dropping to a single node
@@ -54,10 +59,17 @@ spec:
                     # the existing pair has to be deleted and recreated by the
                     # StatefulSet.
                     #
-                    # Sized against the one month retentionPeriod above. If a
-                    # month of samples outgrows 2Gi, vmstorage does not crash:
+                    # If the data outgrows the volume, vmstorage does not crash:
                     # it trips its own free-space guard and goes read-only,
-                    # dropping writes quietly rather than loudly.
+                    # dropping writes quietly rather than loudly. Queries then
+                    # come back empty with no error (Grafana, kromgo, vmalert).
+                    #
+                    # Tight even at 14d retention: ingest is ~1.3G of samples a
+                    # month, so the mid-month peak (last month's partition plus
+                    # half of this one, plus ~0.35G of index per generation)
+                    # runs ~2.4G. Check `df -h /vm-data` mid-November; raising
+                    # this is safe in place (operator grows the PVC, longhorn
+                    # expands online).
                     storage: 2Gi
         vmselect:
           # The chart defaults this to a 2Gi longhorn PVC per replica, so the

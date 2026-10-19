@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/source.toolkit.fluxcd.io/helmrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: tofu-controller
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://flux-iac.github.io/tofu-controller

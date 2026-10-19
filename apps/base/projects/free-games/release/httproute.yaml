@@ -11,6 +11,8 @@ spec:
   - name: envoy-external
     namespace: network
   hostnames:
+  - freebies.thanoslabs.org
+  # j6n.dev kept as an alias so links already shared keep working
   - freebies.j6n.dev
   rules:
   - backendRefs:

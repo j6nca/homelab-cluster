@@ -10,6 +10,8 @@ metadata:
     gatus.home-operations.com/enabled: "true"
 spec:
   hostnames:
+    - budget.thanoslabs.org
+    # j6n.dev kept as an alias so links already shared keep working
     - budget.j6n.dev
   parentRefs:
     - name: envoy-external

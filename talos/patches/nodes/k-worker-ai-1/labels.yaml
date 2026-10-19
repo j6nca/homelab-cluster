@@ -1,0 +1,19 @@
+# Node labels for k-worker-ai-1.
+#
+# `ai: "true"` marks this as the AI node -- the BOSGAME box with the Ryzen AI
+# Max+ 395. Workloads that need the NPU/iGPU carry a matching nodeSelector so
+# they land here and nowhere else.
+#
+# Node-scoped on purpose. Applying it everywhere would let the scheduler place
+# GPU/NPU workloads on machines with no such hardware.
+#
+#   talosctl -n <ip-of-k-worker-ai-1> patch mc --patch @talos/patches/nodes/k-worker-ai-1/labels.yaml
+#   kubectl get nodes -l ai=true            # expect exactly one
+#
+# Talos owns a label once it is declared here -- one added with
+# `kubectl label` outside this config gets reconciled away. NodeRestriction
+# rejects the node-restriction.kubernetes.io/ and node-role.kubernetes.io/
+# prefixes, since Talos writes these using the node's own kubelet identity.
+machine:
+  nodeLabels:
+    ai: "true"

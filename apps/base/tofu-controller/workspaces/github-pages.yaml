@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/infra.contrib.fluxcd.io/terraform_v1alpha2.json
+apiVersion: infra.contrib.fluxcd.io/v1alpha2
+kind: Terraform
+metadata:
+  name: github-pages
+spec:
+  path: ./terraform/github-pages
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  # also the drift check: a Pages domain changed in the GitHub UI is put back
+  interval: 1h
+  # Plan only until approved. To apply, read the plan:
+  #   kubectl -n flux-system get configmap tfplan-default-github-pages -o jsonpath='{.data.tfplan}'
+  # then commit its ID (status.plan.pending, e.g. plan-main-abc1234) here.
+  # Switch to "auto" once the import has landed and plans look boring.
+  approvePlan: ""
+  storeReadablePlan: human
+  # state lives in a Secret (tfstate-default-github-pages); everything in this
+  # root is importable, so losing it means re-importing, not losing resources
+  destroyResourcesOnDeletion: false
+  varsFrom:
+    - kind: Secret
+      name: github-pages-terraform
+  runnerPodTemplate:
+    spec:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 128Mi
+        limits:
+          memory: 512Mi

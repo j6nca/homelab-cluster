@@ -15,6 +15,36 @@ spec:
       litellm:
         annotations:
           reloader.stakater.com/auto: "true"
+        # The proxy cannot run the ChatGPT device-code flow: it executes in
+        # worker processes with no terminal, so with no auth.json on disk the
+        # chatgpt/ deployments either hold startup waiting for a code nobody
+        # can enter or fail with "ChatGPT device-code login needs a human",
+        # and every request then returns "There are no healthy deployments for
+        # this model". Sign in once from a terminal outside the cluster:
+        #   python -c "from litellm.llms.chatgpt.authenticator import\
+        #     Authenticator; Authenticator().get_access_token()"
+        # store ~/.config/litellm/chatgpt/auth.json in the openai-auth.json
+        # 1Password Secure Note, and let this seed it into the writable volume
+        # below on the first start.
+        #
+        # Copies only into an empty volume, so a token refreshed in place is
+        # never clobbered by the (stale) copy in 1Password. No chown: the
+        # main-stable image runs as root, unlike the non_root variant's 65534.
+        #
+        # The `[ -f /seed/auth.json ]` guard is load-bearing: the seed volume
+        # is optional (see chatgpt-seed below), so on a cluster where the
+        # 1Password item has not been created yet the file is simply absent.
+        # A bare `cp` there would fail the init container and take the whole
+        # proxy down over a model family nobody can call anyway.
+        initContainers:
+          chatgpt-token-seed:
+            image:
+              repository: busybox
+              tag: "1.37"
+            command:
+              - sh
+              - -c
+              - "if [ ! -f /tokens/chatgpt/auth.json ] && [ -f /seed/auth.json ]; then cp /seed/auth.json /tokens/chatgpt/auth.json; fi"
         containers:
           app:
             image:
@@ -32,6 +62,11 @@ spec:
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
+            env:
+              # Directory, not file: the provider reads and rewrites
+              # ${CHATGPT_TOKEN_DIR}/auth.json (default is
+              # ~/.config/litellm/chatgpt, which is not writable here).
+              CHATGPT_TOKEN_DIR: /tokens/chatgpt
             probes:
               liveness:
                 enabled: true
@@ -106,6 +141,46 @@ spec:
         globalMounts:
           - path: /etc/litellm/config.yaml
             subPath: config.yaml
+            readOnly: true
+      # Writable, persistent home for the ChatGPT OAuth token file. This
+      # cannot be a Secret mount (read-only) or a per-pod emptyDir (re-seeded
+      # from the stale Secret on every restart): the access token lasts ~10
+      # days, the proxy trades the single-use refresh token for a new pair and
+      # writes it back here, and a read-only copy stops working at the first
+      # refresh. Longhorn RWO is enough at the current single replica; a second
+      # replica would need an RWX class (nfs-unas-retain) and would race on
+      # concurrent refreshes, with the loser failing one request.
+      chatgpt-tokens:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        # The file is ~1KiB; this is sized to satisfy the provisioner, not
+        # the data.
+        size: 16Mi
+        accessMode: ReadWriteOnce
+        # Survives a helm uninstall / release rename, so a redeploy does not
+        # cost a fresh device-code login.
+        retain: true
+        globalMounts:
+          - path: /tokens/chatgpt
+      # Read-only seed, consumed by the init container above.
+      #
+      # `type: custom` rather than the idiomatic `type: secret` for one
+      # reason: this chart (app-template 4.5.0, common 4.5.0) exposes no
+      # `optional` on a secret persistence item, and a plain secret mount is a
+      # hard dependency of the pod. If the 1Password item does not exist yet
+      # (or is later deleted), ESO never creates the Secret and the entire
+      # proxy sits in ContainerCreating over a model family nobody can call.
+      # `custom` takes a raw volume source, which does support `optional`, so
+      # the blast radius stays at the chatgpt/ models.
+      chatgpt-seed:
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: litellm-chatgpt-auth
+            optional: true
+            defaultMode: 0400
+        globalMounts:
+          - path: /seed
             readOnly: true
       tmp:
         type: emptyDir

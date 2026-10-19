@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app tofu-controller
+  namespace: flux-system
+spec:
+  targetNamespace: flux-system
+  commonMetadata:
+    labels:
+      service: *app
+  interval: 5m
+  path: ./apps/base/tofu-controller/release
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# Terraform CRs, one per root under ./terraform. Suspended until the GitHub App
+# and its 1Password item exist; the ExternalSecret would otherwise sit in
+# SecretSyncedError and every plan would fail on auth.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tofu-workspaces
+  namespace: flux-system
+spec:
+  suspend: true
+  targetNamespace: flux-system
+  commonMetadata:
+    labels:
+      service: tofu-controller
+  dependsOn:
+    - name: tofu-controller
+    - name: external-secrets-resources
+  interval: 5m
+  path: ./apps/base/tofu-controller/workspaces
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

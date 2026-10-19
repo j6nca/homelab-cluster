@@ -23,3 +23,23 @@ spec:
           - image-reflector-controller
   podMetricsEndpoints:
     - port: http-prom
+---
+# flux-operator's own metrics: flux_instance_info carries the running Flux
+# distribution (revision="v2.7.5@sha256:..."), which the kromgo flux_version
+# badge reads, plus flux_resource_info for every Flux object it tracks.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flux-operator
+  labels:
+    app.kubernetes.io/part-of: flux
+    app.kubernetes.io/component: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - flux-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: flux-operator
+  podMetricsEndpoints:
+    - port: http-metrics

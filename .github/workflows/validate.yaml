@@ -9,6 +9,7 @@ on:
       - "components/**"
       - "dashboards/**"
       - "scripts/**"
+      - "terraform/**"
       - ".github/workflows/validate.yaml"
       - ".yamllint.yaml"
 
@@ -96,3 +97,23 @@ jobs:
         with:
           message-id: rendered-diff
           message-path: comment.md
+
+  tofu:
+    name: tofu fmt + validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          # match the tofu-controller runner image (tofu-controller v0.16.5)
+          tofu_version: 1.12.1
+      - name: Format
+        run: tofu fmt -check -recursive terraform/
+      - name: Validate
+        run: |
+          for root in terraform/*/; do
+            echo "::group::$root"
+            tofu -chdir="$root" init -backend=false -input=false
+            tofu -chdir="$root" validate
+            echo "::endgroup::"
+          done
