@@ -1,0 +1,37 @@
+name: ai-pr-review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, labeled]
+
+# labeled runs get their own group so an auto-applied label (e.g. Renovate)
+# can't cancel the in-flight review of the same push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}${{ github.event.action == 'labeled' && format('-label-{0}', github.run_id) || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: read
+
+jobs:
+  review:
+    # the action also skips drafts and non-matching labels; this just saves a runner
+    if: >-
+      !github.event.pull_request.draft &&
+      (github.event.action != 'labeled' || github.event.label.name == 'ai-review')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # v3.7.0; AGENTS.md is auto-discovered as the review standards
+      - uses: misospace/pr-reviewer-action@5b1839535748f3afd1bd3ef04e8009302cba9aa6
+        with:
+          ai-base-url: ${{ vars.AI_BASE_URL }}
+          ai-api-format: ${{ vars.AI_API_FORMAT || 'openai' }}
+          ai-api-key: ${{ secrets.AI_API_KEY }}
+          ai-model: ${{ vars.AI_MODEL }}
