@@ -56,6 +56,14 @@ log_config: /config/log.yaml
 # shared secret (see the PR description); nobody signs up through the API.
 enable_registration: false
 
+# Humans sign in through Authentik; the `oidc_providers` block is in
+# secrets.yaml with the rest of the secret-bearing config. Password login
+# stays on for the two things SSO cannot cover: the hermes bot, which holds
+# a password rather than a browser session, and the admin account as the
+# way back in when Authentik or its provider is misconfigured.
+password_config:
+  enabled: true
+
 # The defaults (0.2 msg/s, burst 10) are tuned for humans on matrix.org. An
 # agent that reacts while it works, edits its reply as it streams, and posts
 # tool output in several messages trips them within a single answer.
