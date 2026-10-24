@@ -1,0 +1,192 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app paseo
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  dependsOn: []
+  interval: 15m
+  values:
+    controllers:
+      paseo:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # home and workspace are RWO longhorn volumes
+        strategy: Recreate
+        initContainers:
+          # The base image ships no agent CLIs. Installing them onto the home
+          # volume keeps the upstream image (and its digest pin) untouched;
+          # bump the versions here to upgrade.
+          agents:
+            image: &image
+              repository: ghcr.io/getpaseo/paseo
+              # tag says which release; the digest is what actually gets pulled
+              tag: 0.12.0@sha256:0d17dd75a51c591907a4bbcd505013102048246a0cd6e824de3b38a6057ff862
+            command:
+              - sh
+              - -c
+              - >-
+                mkdir -p /home/paseo/workspace &&
+                npm install --global --prefix /home/paseo/.local --no-fund --no-audit
+                @earendil-works/pi-coding-agent@1.4.0
+                @openai/codex@0.163.0
+            env:
+              npm_config_cache: /tmp/npm-cache
+            resources:
+              limits:
+                memory: 1Gi
+        containers:
+          app:
+            image: *image
+            env:
+              TZ: America/Toronto
+              # agent CLIs installed by the init container
+              PATH: /home/paseo/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              PASEO_HOSTNAMES: paseo.j6n.internal
+              # End-to-end encrypted relay for the phone app, run by the relay
+              # controller below. The daemon dials it in-cluster over plain ws;
+              # pairing offers hand devices the public wss endpoint behind the
+              # tunnel.
+              PASEO_RELAY_ENABLED: "true"
+              PASEO_RELAY_ENDPOINT: paseo-relay:4000
+              PASEO_RELAY_USE_TLS: "false"
+              PASEO_RELAY_PUBLIC_ENDPOINT: paseo-relay.j6n.dev:443
+              PASEO_RELAY_PUBLIC_USE_TLS: "true"
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  # the only endpoint exempt from password auth
+                  httpGet:
+                    path: /api/health
+                    port: &port 6767
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: *port
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+      relay:
+        # stateless, so roll without the daemon's Recreate downtime
+        strategy: RollingUpdate
+        containers:
+          app:
+            image:
+              # built from getpaseo/paseo-relay in thanoslabs/containers, which
+              # also bakes in the non-root user and read-only-root settings
+              repository: ghcr.io/thanoslabs/paseo-relay
+              tag: 0.0.1@sha256:9ea47b1be1774cb2f1e5eb253161d8b068e337a1983d7134e110ad2489acd4ce
+            env:
+              # Sized for one daemon and a handful of devices, not the
+              # 20k-socket upstream default: 10 acceptors x 20 = 200 sockets.
+              PASEO_RELAY_ACCEPTORS: "10"
+              PASEO_RELAY_CONNECTIONS_PER_ACCEPTOR: "20"
+              # must still admit one 32 MiB message at the default weight of 4
+              PASEO_RELAY_INGRESS_BUDGET_BYTES: "268435456"
+              # shed load at 768Mi, below the 1Gi limit, instead of OOMing
+              PASEO_RELAY_MEMORY_WATERMARK_BYTES: "805306368"
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &relay_port 4000
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ready
+                    port: *relay_port
+                  periodSeconds: 10
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+              readOnlyRootFilesystem: true
+        pod:
+          # the image's own user; the paseo defaults below are for the daemon
+          securityContext:
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+    defaultPodOptions:
+      # agents run arbitrary shell commands; give them no cluster API identity
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+    service:
+      app:
+        controller: paseo
+        # keep the plain release name the internal route points at
+        forceRename: "{{ .Release.Name }}"
+        ports:
+          http:
+            port: *port
+      # rendered as paseo-relay
+      relay:
+        controller: relay
+        ports:
+          http:
+            port: *relay_port
+    persistence:
+      # daemon state plus agent logins/config (.codex, .pi) and CLIs
+      # One volume for both paths, so code and worktrees (which Paseo keeps
+      # under ~/.paseo/worktrees) draw on a single 10Gi budget.
+      home:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        size: 10Gi
+        accessMode: ReadWriteOnce
+        advancedMounts:
+          paseo:
+            agents:
+              - path: /home/paseo
+            app:
+              - path: /home/paseo
+              # the init container creates this dir, so it is owned by the
+              # paseo user rather than by kubelet as root
+              - path: /workspace
+                subPath: workspace
+      # /tmp in every container; the relay writes its runtime config there
+      tmp:
+        type: emptyDir

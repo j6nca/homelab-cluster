@@ -45,6 +45,23 @@ spec:
                 - group: overwatch_reader
                   role: reader
 
+          # One service token per agent, each in its own file (the directory's
+          # files are merged). The token name becomes the agent's name on its
+          # tasks. items:read and agent:work let it search, claim and report
+          # on work, over the API or /mcp, and nothing else. The value comes
+          # from 1Password through the ExternalSecret; the agent is configured
+          # with the same one.
+          token-codex.yaml: |
+            tokens:
+              - name: codex
+                scopes: [items:read, agent:work]
+                token: ${AGENT_TOKEN_CODEX}
+          token-pi.yaml: |
+            tokens:
+              - name: pi
+                scopes: [items:read, agent:work]
+                token: ${AGENT_TOKEN_PI}
+
     deployments:
       app:
         image:
