@@ -1,19 +1,38 @@
-# Node labels for k-worker-ai-1.
+# Node scheduling policy for k-worker-ai-1.
 #
-# `ai: "true"` marks this as the AI node -- the BOSGAME box with the Ryzen AI
-# Max+ 395. Workloads that need the NPU/iGPU carry a matching nodeSelector so
-# they land here and nowhere else.
+# This is the AI node (BOSGAME, Ryzen AI Max+ 395). Two coupled settings:
 #
-# Node-scoped on purpose. Applying it everywhere would let the scheduler place
-# GPU/NPU workloads on machines with no such hardware.
+#   - label  ai=true               -> how AI workloads SELECT this node
+#   - taint  ai=true:NoSchedule   -> what REPELS everything else
+#
+# AI workloads must carry BOTH a matching toleration (to survive the taint)
+# and a nodeSelector/affinity on ai=true (to land here and nowhere else).
+#
+# Both are declared here so the desired state is explicit, but they do NOT
+# behave the same:
+#
+#   - nodeLabels: Talos applies it. Done.
+#   - nodeTaints:  Talos CANNOT apply it. NodeRestriction forbids the node's
+#     own kubelet identity from modifying taints, so machined's
+#     NodeApplyController logs "is not allowed to modify taints" on every
+#     reconcile (upstream https://github.com/siderolabs/talos/issues/13443).
+#     The taint is therefore applied by an operator with admin credentials:
+#
+#       kubectl taint node k-worker-ai-1 ai=true:NoSchedule
+#
+#     It is still declared here so the config matches the real node and the
+#     controller has nothing to reconcile (otherwise it tries to strip the
+#     manually-applied taint, fails the same way, and the error loop never
+#     stops). Re-apply that kubectl command after any rebuild -- it is the
+#     one thing Talos will not do for you.
 #
 #   talosctl -n <ip-of-k-worker-ai-1> patch mc --patch @talos/patches/nodes/k-worker-ai-1/labels.yaml
-#   kubectl get nodes -l ai=true            # expect exactly one
+#   kubectl get nodes -l ai=true               # expect exactly one
+#   kubectl get node k-worker-ai-1 -o jsonpath='{.spec.taints}'   # expect ai=true:NoSchedule
 #
-# Talos owns a label once it is declared here -- one added with
-# `kubectl label` outside this config gets reconciled away. NodeRestriction
-# rejects the node-restriction.kubernetes.io/ and node-role.kubernetes.io/
-# prefixes, since Talos writes these using the node's own kubelet identity.
+# Talos owns the label -- added with `kubectl label` it gets reconciled away.
 machine:
   nodeLabels:
     ai: "true"
+  nodeTaints:
+    ai: "true:NoSchedule"

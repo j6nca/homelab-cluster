@@ -13,7 +13,7 @@ when the question comes up.
 | `k-worker-3` | — | |
 | `k-worker-4` | — | |
 | `k-worker-5` | — | |
-| `k-worker-ai-1` | `ai=true` | AI workloads (GPU/NPU) pin here |
+| `k-worker-ai-1` | `ai=true` | Taint `ai=true:NoSchedule`; AI workloads tolerate + pin here |
 
 Keep the table current when a label is declared. A stub whose comments claim
 nothing and a table row that says `—` are both easy to trust; a table that has
