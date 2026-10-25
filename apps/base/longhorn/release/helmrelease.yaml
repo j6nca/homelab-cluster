@@ -42,3 +42,18 @@ spec:
       # outside the default class — from the UI, or restored from a backup —
       # land on the same policy rather than silently reverting to three.
       defaultReplicaCount: 2
+      # k-worker-ai-1 carries ai=true:NoSchedule to keep ordinary workloads
+      # off. This toleration covers the components Longhorn deploys itself at
+      # runtime — the engine-image daemonset, instance managers and the CSI
+      # plugin — so storage keeps working on that node. kubectl taint syntax,
+      # semicolon-separated (key=value:effect).
+      taintToleration: ai=true:NoSchedule
+    # longhorn-manager is a chart-managed DaemonSet, so it is not covered by
+    # defaultSettings.taintToleration; give it the same toleration explicitly
+    # so it still runs on the tainted AI node.
+    longhornManager:
+      tolerations:
+        - key: ai
+          operator: Equal
+          value: "true"
+          effect: NoSchedule

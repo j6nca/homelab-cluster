@@ -15,3 +15,10 @@ spec:
   interval: 15m
   # values.yaml
   values:
+    # Runs as a DaemonSet on every node; tolerate the AI node's taint so it
+    # keeps pinging from there.
+    tolerations:
+      - key: ai
+        operator: Equal
+        value: "true"
+        effect: NoSchedule

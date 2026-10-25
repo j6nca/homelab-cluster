@@ -18,4 +18,20 @@ spec:
     crds: CreateReplace
     cleanupOnFail: true
   interval: 15m
-  values: {}
+  values:
+    # k-worker-ai-1 carries ai=true:NoSchedule. Both the speaker and the
+    # frr-k8s backend run as DaemonSets across every node, so they need the
+    # toleration to keep announcing services from that node.
+    speaker:
+      tolerations:
+        - key: ai
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
+    frr-k8s:
+      frrk8s:
+        tolerations:
+          - key: ai
+            operator: Equal
+            value: "true"
+            effect: NoSchedule
