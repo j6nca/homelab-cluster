@@ -10,3 +10,14 @@ alertmanager:
 annotations:
   strip:
     - ".*"
+
+# Hide suppressed alerts by default without removing them from Alertmanager.
+filters:
+  default:
+    - "@state!=suppressed"
+
+# Split the dashboard into severity grids without changing notification routing.
+ui:
+  multiGridLabel: severity
+  collapseGroups: collapsedOnMobile
+  alertsPerGroup: 5
