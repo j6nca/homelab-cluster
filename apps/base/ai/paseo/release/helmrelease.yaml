@@ -88,6 +88,7 @@ spec:
                 memory: 4Gi
             securityContext:
               allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
@@ -154,6 +155,8 @@ spec:
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
     service:
       app:
         controller: paseo
@@ -187,6 +190,15 @@ spec:
               # paseo user rather than by kubelet as root
               - path: /workspace
                 subPath: workspace
-      # /tmp in every container; the relay writes its runtime config there
+      # Writable scratch space for npm, agent processes, and the relay.
       tmp:
         type: emptyDir
+        advancedMounts:
+          paseo:
+            agents:
+              - path: /tmp
+            app:
+              - path: /tmp
+          relay:
+            app:
+              - path: /tmp
