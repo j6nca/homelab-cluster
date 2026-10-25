@@ -5,3 +5,8 @@ alertmanager:
       uri: http://vmalertmanager-vmks-victoria-metrics-k8s-stack.observability:9093
       timeout: 10s
       readonly: true
+
+# Do not expose alert annotations in Karma's UI or API responses.
+annotations:
+  strip:
+    - ".*"
