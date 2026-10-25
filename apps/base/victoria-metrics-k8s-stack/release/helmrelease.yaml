@@ -54,23 +54,7 @@ spec:
                 storageClassName: longhorn
                 resources:
                   requests:
-                    # 2Gi per replica, down from 15Gi. Kubernetes cannot shrink
-                    # a PVC, so this applies only to volumes created after it —
-                    # the existing pair has to be deleted and recreated by the
-                    # StatefulSet.
-                    #
-                    # If the data outgrows the volume, vmstorage does not crash:
-                    # it trips its own free-space guard and goes read-only,
-                    # dropping writes quietly rather than loudly. Queries then
-                    # come back empty with no error (Grafana, kromgo, vmalert).
-                    #
-                    # Tight even at 14d retention: ingest is ~1.3G of samples a
-                    # month, so the mid-month peak (last month's partition plus
-                    # half of this one, plus ~0.35G of index per generation)
-                    # runs ~2.4G. Check `df -h /vm-data` mid-November; raising
-                    # this is safe in place (operator grows the PVC, longhorn
-                    # expands online).
-                    storage: 2Gi
+                    storage: 6Gi
         vmselect:
           # The chart defaults this to a 2Gi longhorn PVC per replica, so the
           # query cache was claiming 4Gi — as much as the metrics it serves.
