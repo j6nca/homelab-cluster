@@ -18,34 +18,26 @@ spec:
         # home and workspace are RWO longhorn volumes
         strategy: Recreate
         initContainers:
-          # The base image ships no agent CLIs. Installing them onto the home
-          # volume keeps the upstream image (and its digest pin) untouched;
-          # bump the versions here to upgrade.
-          agents:
+          # Preserve the workspace subPath directory on the existing home PVC.
+          # Agent CLIs are now baked into the daemon image.
+          workspace:
             image: &image
-              repository: ghcr.io/getpaseo/paseo
-              # tag says which release; the digest is what actually gets pulled
-              tag: 0.12.0@sha256:0d17dd75a51c591907a4bbcd505013102048246a0cd6e824de3b38a6057ff862
+              repository: ghcr.io/thanoslabs/paseo
+              tag: 0.0.1@sha256:fb699df8a089fdf6360ef90f2a5a365472c08db585b68b7a7a9abcfe333ae44a
             command:
               - sh
               - -c
-              - >-
-                mkdir -p /home/paseo/workspace &&
-                npm install --global --prefix /home/paseo/.local --no-fund --no-audit
-                @earendil-works/pi-coding-agent@1.4.0
-                @openai/codex@0.163.0
-            env:
-              npm_config_cache: /tmp/npm-cache
+              - mkdir -p /home/paseo/workspace
             resources:
               limits:
-                memory: 1Gi
+                memory: 256Mi
         containers:
           app:
             image: *image
             env:
               TZ: America/Toronto
-              # agent CLIs installed by the init container
-              PATH: /home/paseo/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              # Keep existing PVC-installed CLIs available; prefer baked tools.
+              PATH: /opt/mise/shims:/usr/local/bin:/home/paseo/.local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
               PASEO_HOSTNAMES: paseo.j6n.internal
               # End-to-end encrypted relay for the phone app, run by the relay
               # controller below. The daemon dials it in-cluster over plain ws;
@@ -172,7 +164,7 @@ spec:
           http:
             port: *relay_port
     persistence:
-      # daemon state plus agent logins/config (.codex, .pi) and CLIs
+      # daemon state plus agent logins/config (.codex, .pi)
       # One volume for both paths, so code and worktrees (which Paseo keeps
       # under ~/.paseo/worktrees) draw on a single 10Gi budget.
       home:
@@ -186,11 +178,11 @@ spec:
               - path: /home/paseo
             app:
               - path: /home/paseo
-              # the init container creates this dir, so it is owned by the
+              # the workspace init container creates this dir, so it is owned by the
               # paseo user rather than by kubelet as root
               - path: /workspace
                 subPath: workspace
-      # Writable scratch space for npm, agent processes, and the relay.
+      # Writable scratch space for agent processes and the relay.
       tmp:
         type: emptyDir
         advancedMounts:
