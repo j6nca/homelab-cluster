@@ -87,6 +87,12 @@ spec:
       config:
         route:
           receiver: blackhole
+          # Group related alerts without combining unrelated alert names or namespaces.
+          # This also changes webhook batching for Dossier.
+          group_by:
+            - alertname
+            - namespace
+            - severity
           routes:
             # continue: true is the whole point. Dossier gets a copy of every
             # alert and no alert's delivery depends on it - if it is down, or
