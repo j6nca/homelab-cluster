@@ -13,7 +13,32 @@ spec:
         namespace: flux-system
       version: 0.3.2
   interval: 15m
+  # The chart has no env/extraArgs values, so pin the edge to IPv4 here.
+  # cloudflared 2026.4.0 changed --edge-ip-version's default from 4 to auto
+  # (whichever family the resolver returns first); pods in this cluster have
+  # no IPv6 route, so an AAAA-first answer would leave the tunnel unable to
+  # reach the edge, and with one replica that takes every public route down.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: cloudflare-tunnel
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/env
+                value:
+                  - name: TUNNEL_EDGE_IP_VERSION
+                    value: "4"
   values:
+    # The chart is unmaintained: 0.3.2 is its newest release and still
+    # defaults to cloudflared 2024.8.3, so the image is overridden here.
+    # Pinned by digest: the tag says which release, the digest is what
+    # actually gets pulled. Release notes live in RELEASE_NOTES and
+    # CHANGES.md in cloudflare/cloudflared, not on the GitHub release.
+    image:
+      repository: cloudflare/cloudflared
+      tag: 2026.10.4@sha256:c6c7ae1d5dfdcb094ad344ed68ccffc26635c9c6be80965664c33baf064b0515
     cloudflare:
       tunnelName: "k8s-lab"
       # If defined, no secret is created for the credentials, and instead, the secret referenced is used
