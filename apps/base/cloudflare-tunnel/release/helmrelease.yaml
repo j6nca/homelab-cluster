@@ -21,6 +21,7 @@ spec:
           config.yaml: |
             tunnel: k8s-lab
             credentials-file: /etc/cloudflared/credentials/credentials.json
+            metrics: 0.0.0.0:2000
             warp-routing:
               enabled: true
             ingress:
@@ -57,6 +58,22 @@ spec:
                     - --config
                     - /etc/cloudflared/config/config.yaml
                     - run
+                  ports:
+                    - name: metrics
+                      containerPort: 2000
+                      protocol: TCP
+                  readinessProbe:
+                    httpGet:
+                      path: /ready
+                      port: metrics
+                    initialDelaySeconds: 10
+                    periodSeconds: 10
+                  livenessProbe:
+                    httpGet:
+                      path: /ready
+                      port: metrics
+                    initialDelaySeconds: 10
+                    periodSeconds: 20
                   resources:
                     requests:
                       cpu: 10m
@@ -89,3 +106,19 @@ spec:
                 - name: credentials
                   secret:
                     secretName: cloudflare-tunnel-credentials
+    services:
+      metrics:
+        metadata:
+          labels:
+            app.kubernetes.io/name: cloudflare-tunnel
+            app.kubernetes.io/instance: cloudflare-tunnel
+        spec:
+          type: ClusterIP
+          selector:
+            app.kubernetes.io/name: cloudflare-tunnel
+            app.kubernetes.io/instance: cloudflare-tunnel
+          ports:
+            - name: metrics
+              port: 2000
+              targetPort: metrics
+              protocol: TCP
