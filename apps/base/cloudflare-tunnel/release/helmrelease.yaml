@@ -1,41 +1,91 @@
+---
 # yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app cloudflare-tunnel
+  name: cloudflare-tunnel
 spec:
   chart:
     spec:
-      chart: *app
+      chart: generic
       sourceRef:
         kind: HelmRepository
-        name: cloudflare
+        name: thanoslabs
         namespace: flux-system
-      version: 0.3.2
+      version: 0.4.1
   interval: 15m
   values:
-    cloudflare:
-      tunnelName: "k8s-lab"
-      # If defined, no secret is created for the credentials, and instead, the secret referenced is used
-      secretName: cloudflare-tunnel-credentials
-      # If true, turn on WARP routing for TCP
-      enableWarp: true
-      # Define ingress rules for the tunnel. See
-      # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
-      ingress:
-        # Everything public goes to the external gateway, which routes by hostname
-        # from the 28 HTTPRoutes across this repo. The service name is pinned in
-        # envoy-gateway/network/envoyproxies.yaml precisely so this can target it.
-        #
-        # This replaces two per-hostname rules that had stopped reflecting reality:
-        # the gatus one never worked (it was added, found to do nothing, and left),
-        # and the grafana one was redundant since grafana has its own HTTPRoute. A
-        # committed list that does not match the running config is worse than no
-        # list — a Flux reconcile would have replaced the wildcard with those two
-        # rules and taken every other public hostname down with it, lobby.j6n.dev
-        # included.
-        - hostname: "*.j6n.dev"
-          service: http://envoy-external.network.svc.cluster.local:80
-        - hostname: "*.thanoslabs.org"
-          service: http://envoy-external.network.svc.cluster.local:80
-    replicaCount: 1
+    configmaps:
+      config:
+        data:
+          config.yaml: |
+            tunnel: k8s-lab
+            credentials-file: /etc/cloudflared/credentials/credentials.json
+            warp-routing:
+              enabled: true
+            ingress:
+              - hostname: "*.j6n.dev"
+                service: http://envoy-external.network.svc.cluster.local:80
+              - hostname: "*.thanoslabs.org"
+                service: http://envoy-external.network.svc.cluster.local:80
+              - service: http_status:404
+    deployments:
+      app:
+        metadata:
+          labels: &labels
+            app.kubernetes.io/name: cloudflare-tunnel
+            app.kubernetes.io/instance: cloudflare-tunnel
+          annotations:
+            reloader.stakater.com/auto: "true"
+        spec:
+          replicas: 1
+          strategy:
+            type: Recreate
+          selector:
+            matchLabels: *labels
+          template:
+            metadata:
+              labels: *labels
+            spec:
+              automountServiceAccountToken: false
+              containers:
+                - name: cloudflared
+                  image: cloudflare/cloudflared:2025.10.0
+                  args:
+                    - tunnel
+                    - --no-autoupdate
+                    - --config
+                    - /etc/cloudflared/config/config.yaml
+                    - run
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 64Mi
+                    limits:
+                      memory: 256Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    readOnlyRootFilesystem: true
+                  volumeMounts:
+                    - name: config
+                      mountPath: /etc/cloudflared/config
+                      readOnly: true
+                    - name: credentials
+                      mountPath: /etc/cloudflared/credentials
+                      readOnly: true
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65532
+                runAsGroup: 65532
+                seccompProfile:
+                  type: RuntimeDefault
+              volumes:
+                - name: config
+                  configMap:
+                    name: cloudflare-tunnel-config
+                - name: credentials
+                  secret:
+                    secretName: cloudflare-tunnel-credentials
