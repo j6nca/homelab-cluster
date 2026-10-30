@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudflare
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: network
+  datasources:
+    - datasourceName: VictoriaMetrics
+      inputName: __expr__Prometheus
+  grafanaCom:
+    id: 23115
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cloudflare-tunnel-overview
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: network
+  url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboards/network/cloudflare-tunnel.json
