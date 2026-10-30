@@ -30,6 +30,14 @@ jobs:
       - name: Lint
         run: yamllint .
 
+  dashboards:
+    name: Grafana dashboard validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate dashboard JSON and structure
+        run: python3 scripts/validate-dashboards.py
+
   validate:
     name: render + kubeconform
     runs-on: ubuntu-latest
