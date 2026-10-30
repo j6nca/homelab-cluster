@@ -14,3 +14,15 @@ spec:
       inputName: DS_PROMETHEUS
   grafanaCom:
     id: 16888
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: longhorn-health-capacity
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: storage
+  url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboards/storage/longhorn-health.json

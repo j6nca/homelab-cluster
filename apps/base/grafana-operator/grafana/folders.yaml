@@ -95,3 +95,15 @@ spec:
       dashboards: homelab
   title: Projects
   uid: projects
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: media
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  title: Media
+  uid: media

@@ -262,3 +262,23 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: jellyfin-monitoring
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      service: jellyfin
+  dependsOn:
+    - name: grafana-operator
+  interval: 5m
+  path: ./apps/base/media/jellyfin/monitoring
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
