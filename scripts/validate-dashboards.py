@@ -16,8 +16,12 @@ for path in files:
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         errors.append(f"{rel}: invalid JSON: {exc}")
         continue
+    if isinstance(doc, list):
+        # Dependency-graph JSON assets live beside dashboard models.
+        # Parse them as JSON, but do not require Grafana dashboard fields.
+        continue
     if not isinstance(doc, dict):
-        errors.append(f"{rel}: dashboard root must be an object")
+        errors.append(f"{rel}: expected a dashboard object or data array")
         continue
     # Community/exported dashboards sometimes wrap the model in a dashboard key.
     model = doc.get("dashboard", doc)
