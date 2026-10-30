@@ -1,0 +1,11 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: jellyfin-operations
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: homelab
+  folderRef: observability
+  url: https://raw.githubusercontent.com/j6nca/homelab-cluster/main/dashboards/media/jellyfin-operations.json
