@@ -2,16 +2,18 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: grafana-external
+  name: grafana-internal
   annotations:
-    # group: External inherited from the envoy-external gateway
     gatus.home-operations.com/enabled: "true"
+    gatus.home-operations.com/endpoint: |
+      group: Observability
+      url: http://grafana.j6n.internal
 spec:
   parentRefs:
   - name: envoy-external
     namespace: network
   hostnames:
-  - grafana.j6n.dev
+  - grafana.j6n.internal
   rules:
   - backendRefs:
     - name: grafana-service
