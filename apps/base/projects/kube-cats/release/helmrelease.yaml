@@ -42,7 +42,7 @@ spec:
             spec:
               containers:
                 - name: web
-                  image: ghcr.io/j6nca/kube-cats:43429b8
+                  image: ghcr.io/j6nca/kube-cats:1c877ed
                   imagePullPolicy: IfNotPresent
 
                   env:
