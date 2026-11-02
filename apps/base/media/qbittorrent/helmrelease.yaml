@@ -41,41 +41,23 @@ spec:
                 name: http
                 protocol: TCP
             probes:
-              # Liveness tests egress, readiness tests the WebUI. They are
-              # deliberately different questions.
-              #
-              # The old probe asked only whether / answered on 8080, which it
-              # does whether or not the tunnel exists -- so a pod with no
-              # connectivity looked perfectly healthy and downloads sat at 0
-              # until someone restarted it by hand. The comment here used to
-              # claim it caught exactly that; it could not.
-              #
-              # An IP literal, so a broken DNS resolver inside the tunnel does
-              # not read as a dead tunnel. 1.1.1.1/cdn-cgi/trace answers over
-              # https and returns the egress address, so a reply proves the
-              # request left through the tunnel rather than merely reaching
-              # something.
+              # Liveness only checks that qBittorrent itself is responsive.
+              # Gluetun owns VPN recovery; restarting qBittorrent cannot repair
+              # a missing tunnel and was repeatedly interrupting active work.
               liveness:
                 enabled: true
                 custom: true
                 spec:
-                  exec:
-                    command:
-                      - /bin/sh
-                      - -c
-                      - wget -qO- -T5 https://1.1.1.1/cdn-cgi/trace >/dev/null
+                  httpGet:
+                    path: /
+                    port: *port
                   initialDelaySeconds: 60
-                  # Five minutes of failure before a restart. gluetun rebuilds
-                  # a dropped tunnel on its own and that takes tens of seconds
-                  # -- restarting into the middle of it would interrupt
-                  # downloads that were about to recover anyway.
-                  periodSeconds: 60
-                  timeoutSeconds: 10
-                  failureThreshold: 5
-              # Still the WebUI, and on purpose: readiness failing removes the
-              # pod from the Service, which takes away the interface you would
-              # use to see what is wrong. Losing egress should restart the pod,
-              # not hide it.
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 4
+              # Readiness also checks the WebUI. Keeping it independent of VPN
+              # health leaves the interface available for diagnosing a tunnel
+              # outage.
               readiness:
                 enabled: true
                 custom: true
@@ -109,6 +91,17 @@ spec:
               capabilities:
                 add: ["NET_ADMIN"]
                 # privileged: true
+            # Kubernetes shares policy routing rules across a pod's network
+            # namespace. Clear stale WireGuard rules left by an abrupt previous
+            # Gluetun exit so the tunnel can initialize instead of looping on
+            # "adding IPv6 rule ... table 51820: file exists".
+            lifecycle:
+              postStart:
+                exec:
+                  command:
+                    - /bin/sh
+                    - -c
+                    - (ip rule del table 51820; ip -6 rule del table 51820) || true
             # Keep gluetun running for the duration of the pod
             restartPolicy: Always
             resources:
