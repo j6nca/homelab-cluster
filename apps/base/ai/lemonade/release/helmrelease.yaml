@@ -47,8 +47,8 @@ spec:
                     - sh
                     - -ec
                     - |
-                      mkdir -p /data/.config/lemonade
-                      if [ ! -f /data/.config/lemonade/config.json ]; then
+                      mkdir -p /data/config /data/huggingface /data/llama /data/cache
+                      if [ ! -f /data/config/config.json ]; then
                         cp /seed/config.json /data/.config/lemonade/config.json
                       fi
                       chown -R 10001:10001 /data
@@ -97,7 +97,17 @@ spec:
                     # share the node's 128 GiB unified memory.
                   volumeMounts:
                     - name: data
-                      mountPath: /opt/lemonade
+                      mountPath: /opt/lemonade/.config/lemonade
+                      subPath: config
+                    - name: data
+                      mountPath: /opt/lemonade/.cache/huggingface
+                      subPath: huggingface
+                    - name: data
+                      mountPath: /opt/lemonade/llama
+                      subPath: llama
+                    - name: data
+                      mountPath: /opt/lemonade/.cache/lemonade
+                      subPath: cache
                     - name: kfd
                       mountPath: /dev/kfd
                     - name: dri
