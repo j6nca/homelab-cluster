@@ -8,7 +8,7 @@ metadata:
 spec:
   config:
     server:
-      root_url: "https://grafana.j6n.dev"
+      root_url: "http://grafana.j6n.internal"
     # OIDC
     auth:
       signout_redirect_url: "https://auth.j6n.ca/application/o/grafana/end-session/"
