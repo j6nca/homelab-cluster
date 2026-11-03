@@ -35,3 +35,167 @@ spec:
             description: >-
               Less than 15% of the volume remains. Longhorn supports online
               expansion — raise the size in the owning HelmRelease or PVC.
+---
+# yaml-language-server: $schema=https://ctrl-research.github.io/k8s-schemas/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: cluster-capacity
+spec:
+  groups:
+    - name: cluster-capacity
+      rules:
+        # Every ratio below is over the nodes the scheduler can actually
+        # place a pod on: Ready, not cordoned, and carrying neither the
+        # control-plane taint nor the unreachable one. Dividing by all four
+        # nodes' capacity while one is dead and one is tainted would report
+        # the cluster half empty at the moment nothing can schedule.
+        #
+        # Requests, not usage, are what the scheduler checks. synapse sat
+        # Pending on "Insufficient cpu" with both workers at 50% real CPU
+        # use, because reservations had reached 99% of allocatable. These
+        # two fire on the number that blocks scheduling.
+        - alert: ClusterCPURequestsHigh
+          expr: |
+            sum(
+              sum by (node) (
+                kube_pod_container_resource_requests{resource="cpu"}
+                  * on (namespace, pod) group_left()
+                    max by (namespace, pod) (kube_pod_status_phase{phase="Running"} == 1)
+              )
+              * on (node) group_left() (
+                kube_node_status_condition{condition="Ready", status="true"} == 1
+                  unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                  unless on (node) (kube_node_spec_unschedulable == 1)
+              )
+            )
+            /
+            sum(
+              kube_node_status_allocatable{resource="cpu"}
+              * on (node) group_left() (
+                kube_node_status_condition{condition="Ready", status="true"} == 1
+                  unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                  unless on (node) (kube_node_spec_unschedulable == 1)
+              )
+            ) > 0.90
+          for: 15m
+          labels:
+            severity: high
+          annotations:
+            summary: >-
+              CPU requests are at {{ $value | humanizePercentage }} of
+              schedulable allocatable
+            description: >-
+              Pods requesting more CPU than what is left will sit Pending
+              with "Insufficient cpu" regardless of real load. Trim
+              requests (hermes-agent and the Longhorn instance managers are
+              the largest) or bring a worker back.
+        - alert: ClusterMemoryRequestsHigh
+          expr: |
+            sum(
+              sum by (node) (
+                kube_pod_container_resource_requests{resource="memory"}
+                  * on (namespace, pod) group_left()
+                    max by (namespace, pod) (kube_pod_status_phase{phase="Running"} == 1)
+              )
+              * on (node) group_left() (
+                kube_node_status_condition{condition="Ready", status="true"} == 1
+                  unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                  unless on (node) (kube_node_spec_unschedulable == 1)
+              )
+            )
+            /
+            sum(
+              kube_node_status_allocatable{resource="memory"}
+              * on (node) group_left() (
+                kube_node_status_condition{condition="Ready", status="true"} == 1
+                  unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                  unless on (node) (kube_node_spec_unschedulable == 1)
+              )
+            ) > 0.90
+          for: 15m
+          labels:
+            severity: high
+          annotations:
+            summary: >-
+              Memory requests are at {{ $value | humanizePercentage }} of
+              schedulable allocatable
+            description: >-
+              Pods requesting more memory than what is left will sit Pending
+              with "Insufficient memory" regardless of real load. Trim
+              requests or bring a worker back.
+
+        # Real utilisation, same node set. node-exporter labels by instance
+        # rather than node, so node_uname_info bridges the two. Sustained
+        # high real use means the requests above are honest and the fix is
+        # capacity, not accounting; it is also the earlier warning for
+        # memory, where the kernel OOM-kills long before the scheduler
+        # notices anything.
+        - alert: ClusterCPUUsageHigh
+          expr: |
+            1 - (
+              sum(
+                rate(node_cpu_seconds_total{mode="idle"}[5m])
+                  * on (instance) group_left(node) label_replace(node_uname_info, "node", "$1", "nodename", "(.*)")
+                  * on (node) group_left() (
+                    kube_node_status_condition{condition="Ready", status="true"} == 1
+                      unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                      unless on (node) (kube_node_spec_unschedulable == 1)
+                  )
+              )
+              /
+              sum(
+                count without (cpu, mode) (node_cpu_seconds_total{mode="idle"})
+                  * on (instance) group_left(node) label_replace(node_uname_info, "node", "$1", "nodename", "(.*)")
+                  * on (node) group_left() (
+                    kube_node_status_condition{condition="Ready", status="true"} == 1
+                      unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                      unless on (node) (kube_node_spec_unschedulable == 1)
+                  )
+              )
+            ) > 0.85
+          for: 30m
+          labels:
+            severity: medium
+          annotations:
+            summary: >-
+              Schedulable workers are at {{ $value | humanizePercentage }}
+              real CPU use
+            description: >-
+              Sustained across the workers the scheduler can use, not a
+              single busy node. Latency-sensitive services will start to
+              notice; find what is burning it before adding more.
+        - alert: ClusterMemoryUsageHigh
+          expr: |
+            1 - (
+              sum(
+                node_memory_MemAvailable_bytes
+                  * on (instance) group_left(node) label_replace(node_uname_info, "node", "$1", "nodename", "(.*)")
+                  * on (node) group_left() (
+                    kube_node_status_condition{condition="Ready", status="true"} == 1
+                      unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                      unless on (node) (kube_node_spec_unschedulable == 1)
+                  )
+              )
+              /
+              sum(
+                node_memory_MemTotal_bytes
+                  * on (instance) group_left(node) label_replace(node_uname_info, "node", "$1", "nodename", "(.*)")
+                  * on (node) group_left() (
+                    kube_node_status_condition{condition="Ready", status="true"} == 1
+                      unless on (node) kube_node_spec_taint{key=~"node-role.kubernetes.io/control-plane|node.kubernetes.io/unreachable"}
+                      unless on (node) (kube_node_spec_unschedulable == 1)
+                  )
+              )
+            ) > 0.85
+          for: 15m
+          labels:
+            severity: high
+          annotations:
+            summary: >-
+              Schedulable workers are at {{ $value | humanizePercentage }}
+              real memory use
+            description: >-
+              MemAvailable across the usable workers is under 15%. The next
+              spike is an OOM kill, and with limits summing to well over
+              allocatable the kernel picks the victim, not you.
