@@ -56,9 +56,11 @@ spec:
     # external-dns/internal=true gets a LAN record on the UDM Pro -> envoy-internal
     sources:
       - gateway-httproute
+      # LAN-only LoadBalancer services with an explicit internal hostname.
+      - service
     domainFilters:
       - j6n.internal
-    # nothing else manages j6n.internal, so deleted routes clean up records
+    # nothing else manages j6n.internal, so deleted routes/services clean up records
     policy: sync
     txtOwnerId: homelab
     txtPrefix: k8s.

@@ -38,8 +38,12 @@ spec:
               storage: 500Mi
     services:
       minecraft:
+        metadata:
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: smp.j6n.internal
+            metallb.io/address-pool: lan
         spec:
-          type: NodePort
+          type: LoadBalancer
           selector:
             app.kubernetes.io/name: horizon
             app.kubernetes.io/instance: horizon
@@ -47,7 +51,6 @@ spec:
             - name: minecraft
               port: 25565
               targetPort: minecraft
-              nodePort: 30001
               protocol: TCP
       headless:
         spec:
