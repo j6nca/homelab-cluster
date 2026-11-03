@@ -1,0 +1,145 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: horizon
+spec:
+  # Enable only after containers PR #3 has released the image, its digest is
+  # pinned below, and the prepared Minecraft 26.3 resources PVC is populated.
+  suspend: true
+  interval: 15m
+  chart:
+    spec:
+      chart: generic
+      version: 0.4.1
+      sourceRef:
+        kind: HelmRepository
+        name: thanoslabs
+        namespace: flux-system
+  values:
+    metadata:
+      labels:
+        app.kubernetes.io/name: horizon
+        app.kubernetes.io/instance: horizon
+    persistentVolumeClaims:
+      data:
+        spec:
+          accessModes: [ReadWriteOnce]
+          storageClassName: longhorn
+          resources:
+            requests:
+              storage: 2Gi
+      resources:
+        spec:
+          accessModes: [ReadWriteOnce]
+          storageClassName: longhorn
+          resources:
+            requests:
+              storage: 500Mi
+    services:
+      minecraft:
+        spec:
+          type: NodePort
+          selector:
+            app.kubernetes.io/name: horizon
+            app.kubernetes.io/instance: horizon
+          ports:
+            - name: minecraft
+              port: 25565
+              targetPort: minecraft
+              nodePort: 30001
+              protocol: TCP
+      headless:
+        spec:
+          clusterIP: None
+          selector:
+            app.kubernetes.io/name: horizon
+            app.kubernetes.io/instance: horizon
+          ports:
+            - name: minecraft
+              port: 25565
+              targetPort: minecraft
+              protocol: TCP
+    statefulSets:
+      server:
+        spec:
+          replicas: 1
+          serviceName: horizon-headless
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: horizon
+              app.kubernetes.io/instance: horizon
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/name: horizon
+                app.kubernetes.io/instance: horizon
+            spec:
+              terminationGracePeriodSeconds: 180
+              automountServiceAccountToken: false
+              # The dedicated AI node has ai=true; never schedule Minecraft there.
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                      - matchExpressions:
+                          - key: ai
+                            operator: DoesNotExist
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 10001
+                runAsGroup: 10001
+                fsGroup: 10001
+                seccompProfile:
+                  type: RuntimeDefault
+              containers:
+                - name: horizon
+                  # Replace with released ghcr.io/thanoslabs/horizon-server:0.0.1@sha256:<digest>.
+                  # Do not unsuspend until the image digest is known.
+                  image: ghcr.io/thanoslabs/horizon-server:0.0.1
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: HORIZON_EULA
+                      value: "true"
+                    - name: HORIZON_WHITELIST
+                      value: "true"
+                    - name: HORIZON_NO_AUDIO
+                      value: "1"
+                  ports:
+                    - name: minecraft
+                      containerPort: 25565
+                      protocol: TCP
+                  startupProbe:
+                    tcpSocket:
+                      port: minecraft
+                    failureThreshold: 60
+                    periodSeconds: 5
+                  readinessProbe:
+                    tcpSocket:
+                      port: minecraft
+                    periodSeconds: 10
+                  resources:
+                    requests:
+                      cpu: 250m
+                      memory: 512Mi
+                    limits:
+                      cpu: "2"
+                      memory: 4Gi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop: [ALL]
+                  volumeMounts:
+                    - name: data
+                      mountPath: /data
+                    - name: resources
+                      mountPath: /opt/horizon/.local/horizon-client/26.3
+                      readOnly: true
+              volumes:
+                - name: data
+                  persistentVolumeClaim:
+                    claimName: horizon-data
+                - name: resources
+                  persistentVolumeClaim:
+                    claimName: horizon-resources
