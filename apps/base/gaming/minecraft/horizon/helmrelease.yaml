@@ -93,6 +93,71 @@ spec:
                 fsGroup: 10001
                 seccompProfile:
                   type: RuntimeDefault
+              initContainers:
+                - name: download-minecraft-server
+                  image: python:3.13-alpine
+                  imagePullPolicy: IfNotPresent
+                  command:
+                    - python
+                    - -c
+                    - |
+                      import hashlib
+                      import json
+                      import os
+                      import pathlib
+                      import urllib.request
+
+                      version = "26.3"
+                      destination = pathlib.Path("/data/minecraft") / f"server_{version}.jar"
+                      destination.parent.mkdir(parents=True, exist_ok=True)
+
+                      def get_json(url):
+                          with urllib.request.urlopen(url, timeout=30) as response:
+                              return json.load(response)
+
+                      manifest = get_json("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json")
+                      entry = next((v for v in manifest["versions"] if v["id"] == version), None)
+                      if entry is None:
+                          raise SystemExit(f"Minecraft version {version} not found in Mojang manifest")
+                      metadata = get_json(entry["url"])
+                      server = metadata["downloads"]["server"]
+                      expected = server["sha1"]
+
+                      if destination.exists():
+                          current = hashlib.sha1(destination.read_bytes()).hexdigest()
+                          if current == expected:
+                              print(f"Verified existing {destination}")
+                              raise SystemExit(0)
+                          print("Existing server JAR has an invalid checksum; replacing it")
+
+                      temporary = destination.with_suffix(".jar.tmp")
+                      try:
+                          with urllib.request.urlopen(server["url"], timeout=120) as response, temporary.open("wb") as output:
+                              digest = hashlib.sha1()
+                              while chunk := response.read(1024 * 1024):
+                                  output.write(chunk)
+                                  digest.update(chunk)
+                          if digest.hexdigest() != expected:
+                              raise ValueError("Downloaded server JAR SHA-1 mismatch")
+                          os.replace(temporary, destination)
+                      finally:
+                          temporary.unlink(missing_ok=True)
+                      print(f"Downloaded and verified {destination}")
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 64Mi
+                    limits:
+                      cpu: 500m
+                      memory: 256Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop: [ALL]
+                  volumeMounts:
+                    - name: data
+                      mountPath: /data
               containers:
                 - name: horizon
                   image: ghcr.io/thanoslabs/horizon-server:0.0.1
