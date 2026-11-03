@@ -1,0 +1,152 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: lemonade
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: generic
+      version: 0.4.1
+      sourceRef:
+        kind: HelmRepository
+        name: thanoslabs
+        namespace: flux-system
+  values:
+    deployments:
+      app:
+        spec:
+          replicas: 1
+          strategy:
+            type: Recreate
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: lemonade
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/name: lemonade
+            spec:
+              nodeSelector:
+                ai: "true"
+              tolerations:
+                - key: ai
+                  operator: Equal
+                  value: "true"
+                  effect: NoSchedule
+              # Verify these numeric video/render GIDs against the Talos node
+              # before merging; the image runs as unprivileged UID 10001.
+              securityContext:
+                runAsUser: 10001
+                runAsNonRoot: true
+                supplementalGroups: [44, 992]
+              initContainers:
+                - name: seed-config
+                  image: busybox:1.37
+                  command:
+                    - sh
+                    - -ec
+                    - |
+                      mkdir -p /data/config /data/huggingface /data/llama /data/cache
+                      if [ ! -f /data/config/config.json ]; then
+                        cp /seed/config.json /data/.config/lemonade/config.json
+                      fi
+                      chown -R 10001:10001 /data
+                  securityContext:
+                    runAsUser: 0
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop: [ALL]
+                  volumeMounts:
+                    - name: data
+                      mountPath: /data
+                    - name: seed
+                      mountPath: /seed
+                      readOnly: true
+              containers:
+                - name: lemonade
+                  image: ghcr.io/lemonade-sdk/lemonade-server:v10.10.1
+                  imagePullPolicy: IfNotPresent
+                  ports:
+                    - name: http
+                      containerPort: 13305
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop: [ALL]
+                  startupProbe:
+                    httpGet:
+                      path: /api/v1/models
+                      port: http
+                    periodSeconds: 10
+                    failureThreshold: 60
+                  readinessProbe:
+                    httpGet:
+                      path: /api/v1/models
+                      port: http
+                    periodSeconds: 15
+                  livenessProbe:
+                    tcpSocket:
+                      port: http
+                    periodSeconds: 30
+                  resources:
+                    requests:
+                      cpu: "2"
+                      memory: 4Gi
+                    # Intentionally no memory limit: large GGUF + KV cache
+                    # share the node's 128 GiB unified memory.
+                  volumeMounts:
+                    - name: data
+                      mountPath: /opt/lemonade/.config/lemonade
+                      subPath: config
+                    - name: data
+                      mountPath: /opt/lemonade/.cache/huggingface
+                      subPath: huggingface
+                    - name: data
+                      mountPath: /opt/lemonade/llama
+                      subPath: llama
+                    - name: data
+                      mountPath: /opt/lemonade/.cache/lemonade
+                      subPath: cache
+                    - name: kfd
+                      mountPath: /dev/kfd
+                    - name: dri
+                      mountPath: /dev/dri
+              volumes:
+                - name: data
+                  persistentVolumeClaim:
+                    claimName: lemonade-data
+                - name: seed
+                  configMap:
+                    name: lemonade-config
+                - name: kfd
+                  hostPath:
+                    path: /dev/kfd
+                    type: CharDevice
+                - name: dri
+                  hostPath:
+                    path: /dev/dri
+                    type: Directory
+    configmaps:
+      config:
+        data:
+          config.json: |
+            {
+              "llamacpp": {
+                "backend": "rocm"
+              },
+              "telemetry": {
+                "enabled": false
+              }
+            }
+    services:
+      app:
+        spec:
+          type: ClusterIP
+          selector:
+            app.kubernetes.io/name: lemonade
+          ports:
+            - name: http
+              port: 13305
+              targetPort: http
+              protocol: TCP
