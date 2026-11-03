@@ -12,7 +12,7 @@ The HelmRelease is intentionally **suspended** until these dependencies are sati
 4. Confirm that NodePort 30001 is unused and reachable only from intended clients. Do not expose Horizon's admin panel/API.
 5. Unsuspend the HelmRelease after verification.
 
-The `horizon-data` PVC stores world data and `server.toml`. The server initializes this configuration only on first start; later changes should preserve the existing file. The whitelist is enabled by default with no pre-authorized users; add Minecraft account names using Horizon's documented whitelist commands.
+The `horizon-data` PVC starts at **5Gi** and stores world data and `server.toml`. The server initializes this configuration only on first start; later changes should preserve the existing file. The whitelist is enabled by default with no pre-authorized users; add Minecraft account names using Horizon's documented whitelist commands.
 
 The AI node `k-worker-ai-1` has the `ai=true` label. Required node affinity excludes every node with that label, independently of whether the AI taint is present. Regular workers remain eligible.
 
