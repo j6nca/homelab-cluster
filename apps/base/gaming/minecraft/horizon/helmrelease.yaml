@@ -4,9 +4,7 @@ kind: HelmRelease
 metadata:
   name: horizon
 spec:
-  # Enable only after containers PR #3 has released the image, its digest is
-  # pinned below, and the prepared Minecraft 26.3 resources PVC is populated.
-  suspend: true
+  suspend: false
   interval: 15m
   chart:
     spec:
@@ -97,8 +95,6 @@ spec:
                   type: RuntimeDefault
               containers:
                 - name: horizon
-                  # Replace with released ghcr.io/thanoslabs/horizon-server:0.0.1@sha256:<digest>.
-                  # Do not unsuspend until the image digest is known.
                   image: ghcr.io/thanoslabs/horizon-server:0.0.1
                   imagePullPolicy: IfNotPresent
                   env:
