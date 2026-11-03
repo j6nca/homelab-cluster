@@ -124,8 +124,11 @@ spec:
                       expected = server["sha1"]
 
                       if destination.exists():
-                          current = hashlib.sha1(destination.read_bytes()).hexdigest()
-                          if current == expected:
+                          digest = hashlib.sha1()
+                          with destination.open("rb") as existing:
+                              while chunk := existing.read(1024 * 1024):
+                                  digest.update(chunk)
+                          if digest.hexdigest() == expected:
                               print(f"Verified existing {destination}")
                               raise SystemExit(0)
                           print("Existing server JAR has an invalid checksum; replacing it")
