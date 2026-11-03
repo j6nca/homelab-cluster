@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: traccar-internal
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # Discovered by homepage from this route; group mirrors the gatus
+    # endpoint below, so the two dashboards stay in step.
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Traccar
+    gethomepage.dev/group: Tools
+    gethomepage.dev/icon: traccar.png
+    # Without this homepage looks for app.kubernetes.io/name=<the
+    # display name above> and renders 'not found' when it misses.
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=traccar
+    # sidecar defaults HTTPRoutes to https; envoy-internal is http-only
+    gatus.home-operations.com/endpoint: |
+      group: Tools
+      url: http://traccar.j6n.internal
+spec:
+  parentRefs:
+  - name: envoy-internal
+    namespace: network
+  hostnames:
+  - traccar.j6n.internal
+  rules:
+  - backendRefs:
+    # generic names resources <release>-<key>, so the service backing
+    # deployments.app is traccar-app rather than traccar
+    - name: traccar-app
+      port: 8082
+---
+# Where phones report from off the LAN. Only the OsmAnd listener is
+# published -- the web UI and its API stay internal-only -- and OsmAnd is
+# plain HTTP, so it rides the tunnel like any other route and the Traccar
+# Client app gets https for free.
+#
+# Not registered with gatus: the endpoint answers 400 to anything that is not
+# a position report, so a probe would only ever read it as down.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: traccar-external
+spec:
+  parentRefs:
+  - name: envoy-external
+    namespace: network
+  hostnames:
+  - gps.j6n.dev
+  rules:
+  - backendRefs:
+    - name: traccar-app
+      port: 5055
