@@ -164,8 +164,8 @@ spec:
                 - name: prepare-minecraft-resources
                   image: ghcr.io/thanoslabs/horizon-prepare:0.0.1
                   imagePullPolicy: IfNotPresent
-                  # Check before preparing: preparing requires the matching client
-                  # installation files in /data/minecraft/client.
+                  # The matching Minecraft client installation is read-only on the NAS.
+                  # The Longhorn data PVC only stores the downloaded server JAR.
                   command:
                     - /bin/sh
                     - -ec
@@ -174,14 +174,14 @@ spec:
                         echo "Horizon resources already prepared"
                         exit 0
                       fi
-                      if [ ! -f /data/minecraft/client/versions/26.3/26.3.jar ]; then
-                        echo "Missing Minecraft 26.3 client files at /data/minecraft/client."
+                      if [ ! -f /minecraft-client/versions/26.3/26.3.jar ]; then
+                        echo "Missing Minecraft 26.3 client files at /minecraft-client."
                         echo "Populate the client JAR, version JSON, libraries and assets before preparing."
                         exit 1
                       fi
                       horizon-prepare --prepare \
                         --root /opt/horizon \
-                        --minecraft-dir /data/minecraft/client \
+                        --minecraft-dir /minecraft-client \
                         --server-jar /data/minecraft/server_26.3.jar \
                         --output /resources
                       horizon-prepare --check --root /opt/horizon --output /resources
@@ -201,6 +201,9 @@ spec:
                       mountPath: /data
                     - name: resources
                       mountPath: /resources
+                    - name: minecraft-client
+                      mountPath: /minecraft-client
+                      readOnly: true
                     - name: prepare-work
                       mountPath: /opt/horizon/.local
               containers:
@@ -246,6 +249,12 @@ spec:
                       mountPath: /opt/horizon/.local/horizon-client/26.3
                       readOnly: true
               volumes:
+                # Reuse the Synology NAS already serving RomM. Confirm the ROMS export path before merging.
+                - name: minecraft-client
+                  nfs:
+                    server: nasj6n.home
+                    path: /volume2/ROMS
+                    readOnly: true
                 - name: prepare-work
                   emptyDir: {}
                 - name: data
