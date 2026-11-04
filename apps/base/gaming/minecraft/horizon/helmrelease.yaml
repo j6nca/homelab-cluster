@@ -33,7 +33,7 @@ spec:
           storageClassName: longhorn
           resources:
             requests:
-              storage: 500Mi
+              storage: 2Gi
     services:
       minecraft:
         metadata:
@@ -161,9 +161,51 @@ spec:
                   volumeMounts:
                     - name: data
                       mountPath: /data
+                - name: prepare-minecraft-resources
+                  image: ghcr.io/thanoslabs/horizon-prepare:0.0.1
+                  imagePullPolicy: IfNotPresent
+                  # Check before preparing: preparing requires the matching client
+                  # installation files in /data/minecraft/client.
+                  command:
+                    - /bin/sh
+                    - -ec
+                    - |
+                      if horizon-prepare --check --root /opt/horizon --output /resources; then
+                        echo "Horizon resources already prepared"
+                        exit 0
+                      fi
+                      if [ ! -f /data/minecraft/client/versions/26.3/26.3.jar ]; then
+                        echo "Missing Minecraft 26.3 client files at /data/minecraft/client."
+                        echo "Populate the client JAR, version JSON, libraries and assets before preparing."
+                        exit 1
+                      fi
+                      horizon-prepare --prepare \
+                        --root /opt/horizon \
+                        --minecraft-dir /data/minecraft/client \
+                        --server-jar /data/minecraft/server_26.3.jar \
+                        --output /resources
+                      horizon-prepare --check --root /opt/horizon --output /resources
+                  resources:
+                    requests:
+                      cpu: 250m
+                      memory: 512Mi
+                    limits:
+                      cpu: "2"
+                      memory: 4Gi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop: [ALL]
+                  volumeMounts:
+                    - name: data
+                      mountPath: /data
+                    - name: resources
+                      mountPath: /resources
+                    - name: prepare-work
+                      mountPath: /opt/horizon/.local
               containers:
                 - name: horizon
-                  image: ghcr.io/thanoslabs/horizon-server:0.0.1
+                  image: ghcr.io/thanoslabs/horizon-server:0.0.2
                   imagePullPolicy: IfNotPresent
                   env:
                     - name: HORIZON_EULA
@@ -204,6 +246,8 @@ spec:
                       mountPath: /opt/horizon/.local/horizon-client/26.3
                       readOnly: true
               volumes:
+                - name: prepare-work
+                  emptyDir: {}
                 - name: data
                   persistentVolumeClaim:
                     claimName: horizon-data
