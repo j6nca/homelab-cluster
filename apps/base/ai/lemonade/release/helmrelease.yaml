@@ -48,9 +48,11 @@ spec:
                     - -ec
                     - |
                       mkdir -p /data/config /data/huggingface /data/llama /data/cache
-                      if [ ! -f /data/config/config.json ]; then
-                        cp /seed/config.json /data/.config/lemonade/config.json
-                      fi
+                      # These files are Git-managed inputs. Runtime caches and
+                      # downloaded weights remain persistent on the PVC.
+                      cp /seed/config.json /data/config/config.json
+                      cp /seed/user_models.json /data/config/user_models.json
+                      cp /seed/recipe_options.json /data/config/recipe_options.json
                       chown -R 10001:10001 /data
                   securityContext:
                     runAsUser: 0
@@ -112,6 +114,33 @@ spec:
                       mountPath: /dev/kfd
                     - name: dri
                       mountPath: /dev/dri
+                # Pinning is runtime state, so restore the desired primary
+                # model whenever Lemonade or its pod restarts.
+                - name: model-reserver
+                  image: busybox:1.37
+                  command:
+                    - sh
+                    - -ec
+                    - |
+                      while true; do
+                        if wget -q -O /dev/null http://127.0.0.1:13305/api/v1/models; then
+                          wget -q -O /dev/null \
+                            --header='Content-Type: application/json' \
+                            --post-data='{"model_name":"user.qwen38-primary","pinned":true}' \
+                            http://127.0.0.1:13305/api/v1/load || true
+                        fi
+                        sleep 300
+                      done
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop: [ALL]
+                  resources:
+                    requests:
+                      cpu: 5m
+                      memory: 8Mi
+                    limits:
+                      memory: 32Mi
               volumes:
                 - name: data
                   persistentVolumeClaim:
@@ -132,11 +161,28 @@ spec:
         data:
           config.json: |
             {
+              "max_loaded_models": 2,
               "llamacpp": {
                 "backend": "rocm"
               },
               "telemetry": {
                 "enabled": false
+              }
+            }
+          user_models.json: |
+            {
+              "user.qwen38-primary": {
+                "source": "huggingface",
+                "checkpoint": "unsloth/Qwen3.8-27B-GGUF:UD-Q5_K_M",
+                "recipe": "llamacpp",
+                "labels": ["llm", "chat"]
+              }
+            }
+          recipe_options.json: |
+            {
+              "user.qwen38-primary": {
+                "ctx_size": 32768,
+                "llamacpp_backend": "rocm"
               }
             }
     services:
