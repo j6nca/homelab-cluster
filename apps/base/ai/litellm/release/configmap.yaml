@@ -90,14 +90,19 @@ data:
           api_base: https://api.minimaxi.chat/v1
           api_key: os.environ/MINIMAX_API_KEY
 
-      # Two things are deliberately absent here.
-      #   hermes-agent: it is a *client* of this proxy, so routing a model back
-      #     to it would let a request loop.
-      #   jarvis.internal: the local endpoint needs no credential, so proxying
-      #     it buys nothing this config exists to provide. Callers that want the
-      #     local models dial jarvis.internal directly (hermes-agent's `local`
-      #     provider, openclaw's `lemonade` provider), which also means they
-      #     keep working when this proxy is down.
+      # hermes-agent is deliberately absent: it is a client of this proxy, so
+      # routing a model back to it would let a request loop.
+
+      # --- Lemonade (local ROCm inference on k-worker-ai-1) ---
+      # Keep the public model name provider-qualified so it cannot silently
+      # pool with a remote Qwen deployment. Lemonade itself requires a model
+      # on every OpenAI request; this maps the stable LiteLLM name to the
+      # Git-managed, pinned model id registered by the Lemonade release.
+      - model_name: lemonade/qwen38-primary
+        litellm_params:
+          model: openai/user.qwen38-primary
+          api_base: http://lemonade-app.lemonade.svc.cluster.local:13305/v1
+          api_key: none
 
       # --- hypercharm (https://hyper.charm.land/v1) ---
       # Plain OpenAI-compatible: bearer key, no extra headers. The catalog is
