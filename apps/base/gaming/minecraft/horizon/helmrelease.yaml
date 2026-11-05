@@ -115,10 +115,10 @@ spec:
                       test -d /minecraft-source/assets || { echo "Missing assets/ on NAS"; exit 1; }
                       test -d /minecraft-source/libraries || { echo "Missing libraries/ on NAS"; exit 1; }
                       mkdir -p /opt/horizon/.local/minecraft/versions/26.3
-                      ln -s /minecraft-source/client/versions/26.3/26.3.jar /opt/horizon/.local/minecraft/versions/26.3/26.3.jar
-                      ln -s /minecraft-source/client/versions/26.3/26.3.json /opt/horizon/.local/minecraft/versions/26.3/26.3.json
-                      ln -s /minecraft-source/assets /opt/horizon/.local/minecraft/assets
-                      ln -s /minecraft-source/libraries /opt/horizon/.local/minecraft/libraries
+                      ln -sfn /minecraft-source/client/versions/26.3/26.3.jar /opt/horizon/.local/minecraft/versions/26.3/26.3.jar
+                      ln -sfn /minecraft-source/client/versions/26.3/26.3.json /opt/horizon/.local/minecraft/versions/26.3/26.3.json
+                      ln -sfn /minecraft-source/assets /opt/horizon/.local/minecraft/assets
+                      ln -sfn /minecraft-source/libraries /opt/horizon/.local/minecraft/libraries
                       horizon-prepare --prepare \
                         --root /opt/horizon \
                         --minecraft-dir /opt/horizon/.local/minecraft \
