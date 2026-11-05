@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://thanoslabs.github.io/k8s-schemas/core/configmap_v1.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paseo-pi
+data:
+  models.json: |
+    {
+      "$schema": "https://pi.dev/schemas/models.schema.json",
+      "providers": {
+        "litellm": {
+          "name": "LiteLLM (in-cluster)",
+          "baseUrl": "http://litellm.litellm:4000/v1",
+          "api": "openai-completions",
+          "apiKey": "$LITELLM_API_KEY",
+          "authHeader": true,
+          "models": [
+            { "id": "hypercharm/qwen3.8-max", "name": "Qwen 3.8 Max" },
+            { "id": "hypercharm/qwen3.8-flash", "name": "Qwen 3.8 Flash" },
+            { "id": "hypercharm/kimi-k2.7-code", "name": "Kimi K2.7 Code" },
+            { "id": "hypercharm/glm-5.3", "name": "GLM 5.3" },
+            { "id": "hypercharm/deepseek-v4.1-flash", "name": "DeepSeek V4.1 Flash" },
+            { "id": "hypercharm/minimax-m3", "name": "MiniMax M3" }
+          ]
+        }
+      }
+    }
