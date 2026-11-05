@@ -190,8 +190,8 @@ spec:
                 # Confirm the NAS export path is mountable by Kubernetes before merging.
                 - name: minecraft-source
                   nfs:
-                    server: nasj6n.home
-                    path: /volume2/ROMS/minecraft
+                    server: mimir.internal
+                    path: /var/nfs/shared/ROMS/minecraft
                     readOnly: true
                 - name: prepare-work
                   emptyDir: {}
