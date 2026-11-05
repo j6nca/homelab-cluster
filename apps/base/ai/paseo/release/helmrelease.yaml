@@ -164,6 +164,18 @@ spec:
           http:
             port: *relay_port
     persistence:
+      # Pi custom provider catalog. The API key is resolved from the
+      # LITELLM_API_KEY environment variable injected by the ExternalSecret;
+      # no credential is written into this ConfigMap or the home PVC.
+      pi-models:
+        type: configMap
+        name: paseo-pi
+        advancedMounts:
+          paseo:
+            app:
+              - path: /home/paseo/.pi/agent/models.json
+                subPath: models.json
+                readOnly: true
       # daemon state plus agent logins/config (.codex, .pi)
       # One volume for both paths, so code and worktrees (which Paseo keeps
       # under ~/.paseo/worktrees) draw on a single 10Gi budget.
