@@ -103,7 +103,7 @@ spec:
                     - /bin/sh
                     - -ec
                     - |
-                      if horizon-prepare --check --root /opt/horizon --output /resources; then
+                      if horizon-prepare --check --root /opt/horizon --output /opt/horizon/resources; then
                         echo "Horizon resources already prepared"
                         exit 0
                       fi
@@ -121,8 +121,8 @@ spec:
                         --root /opt/horizon \
                         --minecraft-dir /opt/horizon/.local/minecraft \
                         --server-jar /minecraft-source/server/26.3/server.jar \
-                        --output /resources
-                      horizon-prepare --check --root /opt/horizon --output /resources
+                        --output /opt/horizon/resources
+                      horizon-prepare --check --root /opt/horizon --output /opt/horizon/resources
                   resources:
                     requests:
                       cpu: 250m
@@ -138,7 +138,7 @@ spec:
                     - name: data
                       mountPath: /data
                     - name: resources
-                      mountPath: /resources
+                      mountPath: /opt/horizon/resources
                     - name: minecraft-source
                       mountPath: /minecraft-source
                       readOnly: true
@@ -184,7 +184,7 @@ spec:
                     - name: data
                       mountPath: /data
                     - name: resources
-                      mountPath: /opt/horizon/.local/horizon-client/26.3
+                      mountPath: /opt/horizon/resources
                       readOnly: true
               volumes:
                 # Confirm the NAS export path is mountable by Kubernetes before merging.
