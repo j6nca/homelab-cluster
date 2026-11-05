@@ -97,7 +97,7 @@ spec:
                   type: RuntimeDefault
               initContainers:
                 - name: prepare-minecraft-resources
-                  image: ghcr.io/thanoslabs/horizon-prepare:0.0.1
+                  image: ghcr.io/thanoslabs/horizon-prepare:0.0.2@sha256:f97e6d277c3cebd06f3863bd3a2e459200b67421b7906b0eac0d2a8f7eccdd6b
                   imagePullPolicy: IfNotPresent
                   # Read the user's existing NAS layout; stage launcher-compatible links in emptyDir.
                   # No Minecraft binaries are downloaded or copied to Longhorn.
@@ -148,7 +148,7 @@ spec:
                       mountPath: /opt/horizon/.local
               containers:
                 - name: horizon
-                  image: ghcr.io/thanoslabs/horizon-server:0.0.2
+                  image: ghcr.io/thanoslabs/horizon-server:0.0.3@sha256:5ab527155377219eccdf7b72959c8c93c86bd2ae22fa09c4bbf3feda57ef431e
                   imagePullPolicy: IfNotPresent
                   env:
                     - name: HORIZON_EULA
