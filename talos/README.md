@@ -53,6 +53,44 @@ talosctl -n <node-ip> get machineconfig -o yaml
 talosctl -n <node-ip> dmesg | tail
 ```
 
+## Image Factory schematics
+
+`schematics/` contains the source used to produce custom Talos installer
+images. Image Factory IDs are content-addressed: post the file, then record the
+returned ID in the matching node's `installer.yaml` patch. Generated files in
+`clusterconfig/` are deliberately gitignored because they contain credentials.
+
+```bash
+curl --fail-with-body --request POST \
+  --data-binary @talos/schematics/worker-ai-1.yaml \
+  https://factory.talos.dev/schematics
+```
+
+The AI worker schematic adds the official `amdgpu` extension while preserving
+the `iscsi-tools` and `util-linux-tools` extensions used by Longhorn. Its
+node-scoped `accelerators.yaml` patch explicitly loads the module. Changing
+either requires upgrading/rebooting that node; Flux never applies Talos files.
+
+The Ryzen AI Max+ 395 also contains an XDNA2 NPU, but as of 2026-11-05 Image
+Factory does not publish `siderolabs/amd-npu` for a released Talos version.
+Do not add `amdxdna` to the node patch until the selected installer resolves
+that extension. Keep IOMMU enabled so the NPU remains usable when support is
+available.
+
+Before an AI-node upgrade, suspend workloads using its local devices, cordon
+and drain it, and confirm the installer manifest resolves. After it returns,
+verify the extension, module and device nodes before resuming workloads:
+
+```bash
+talosctl -n <node-ip> get extensions
+talosctl -n <node-ip> get modules | grep amdgpu
+talosctl -n <node-ip> ls /dev/kfd
+talosctl -n <node-ip> ls /dev/dri
+```
+
+The previous AI-node schematic, retained here as the rollback target, is
+`613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245`.
+
 ## Secrets
 
 Not committed in the clear. Two things need protecting, and neither is a

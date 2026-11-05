@@ -1,0 +1,19 @@
+# Load the Radeon 8060S GPU exposed by the Ryzen AI Max+ 395.
+#
+# The module is supplied by the amdgpu system extension in
+# talos/schematics/worker-ai-1.yaml. Installing the extension requires a Talos
+# upgrade/reboot; applying this patch alone cannot add it to a running
+# immutable Talos system.
+#
+# Expected device nodes after reboot:
+#   /dev/kfd
+#   /dev/dri/renderD*
+#
+# NPU follow-up: the hardware should expose /dev/accel/accel0 through the
+# amdxdna module, but Image Factory does not yet publish siderolabs/amd-npu for
+# a released Talos version. Do not add amd_iommu=off while that remains a
+# planned capability; amdxdna requires IOMMU on Strix Halo.
+machine:
+  kernel:
+    modules:
+      - name: amdgpu
