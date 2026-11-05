@@ -181,7 +181,7 @@ spec:
           recipe_options.json: |
             {
               "user.qwen38-primary": {
-                "ctx_size": 32768,
+                "ctx_size": 131072,
                 "llamacpp_backend": "rocm"
               }
             }
