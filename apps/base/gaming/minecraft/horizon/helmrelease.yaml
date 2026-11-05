@@ -91,6 +91,8 @@ spec:
                 runAsUser: 10001
                 runAsGroup: 10001
                 fsGroup: 10001
+                # Mimir's ROMS export is group-readable by NAS GID 988.
+                supplementalGroups: [988]
                 seccompProfile:
                   type: RuntimeDefault
               initContainers:
@@ -107,14 +109,14 @@ spec:
                         echo "Horizon resources already prepared"
                         exit 0
                       fi
-                      test -f /minecraft-source/client/versions/26.3.jar || { echo "Missing client/versions/26.3.jar on NAS"; exit 1; }
-                      test -f /minecraft-source/client/versions/26.3.json || { echo "Missing client/versions/26.3.json on NAS"; exit 1; }
+                      test -f /minecraft-source/client/versions/26.3/26.3.jar || { echo "Missing client/versions/26.3/26.3.jar on NAS"; exit 1; }
+                      test -f /minecraft-source/client/versions/26.3/26.3.json || { echo "Missing client/versions/26.3/26.3.json on NAS"; exit 1; }
                       test -f /minecraft-source/server/26.3/server.jar || { echo "Missing server/26.3/server.jar on NAS"; exit 1; }
                       test -d /minecraft-source/assets || { echo "Missing assets/ on NAS"; exit 1; }
                       test -d /minecraft-source/libraries || { echo "Missing libraries/ on NAS"; exit 1; }
                       mkdir -p /opt/horizon/.local/minecraft/versions/26.3
-                      ln -s /minecraft-source/client/versions/26.3.jar /opt/horizon/.local/minecraft/versions/26.3/26.3.jar
-                      ln -s /minecraft-source/client/versions/26.3.json /opt/horizon/.local/minecraft/versions/26.3/26.3.json
+                      ln -s /minecraft-source/client/versions/26.3/26.3.jar /opt/horizon/.local/minecraft/versions/26.3/26.3.jar
+                      ln -s /minecraft-source/client/versions/26.3/26.3.json /opt/horizon/.local/minecraft/versions/26.3/26.3.json
                       ln -s /minecraft-source/assets /opt/horizon/.local/minecraft/assets
                       ln -s /minecraft-source/libraries /opt/horizon/.local/minecraft/libraries
                       horizon-prepare --prepare \
