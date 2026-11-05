@@ -6,11 +6,20 @@ Horizon is deployed through Flux using the `thanoslabs/generic` Helm chart.
 
 The HelmRelease is active. The server uses `ghcr.io/thanoslabs/horizon-server:0.0.2` and the init container uses `ghcr.io/thanoslabs/horizon-prepare:0.0.1` (Java 25).
 
-The first init container fetches and SHA-1-verifies the official Minecraft 26.3 server JAR from Mojang's version manifest and caches it at `/data/minecraft/server_26.3.jar`. The second init container checks the prepared resources and, if absent, runs `horizon-prepare` with Java 25. The server starts only after preparation passes `--check`. Java is not present in the server runtime.
+The preparation init container uses the Minecraft 26.3 server JAR and client files already on the NAS, checks the prepared resources and, if absent, runs `horizon-prepare` with Java 25. The server starts only after preparation passes `--check`. Java is not present in the server runtime. **Separate blocker:** `horizon-server:0.0.2` currently contains the supervisor but not the required `horizon-engine` binary; rebuild/publish a corrected server image and update this HelmRelease before expecting the server to start.
 
-**Client inputs are not downloaded automatically yet.** Before the first successful startup, supply the Minecraft 26.3 client installation files to `/data/minecraft/client` on the `horizon-data` PVC. This must contain `versions/26.3/26.3.jar`, `versions/26.3/26.3.json`, the matching `libraries/` and `assets/` directories from an official launcher installation. See [Horizon hosting instructions](https://github.com/horizon-rust/horizon/blob/main/docs/hosting.md). Without these, the preparation init container will fail with an actionable error; the server JAR alone is insufficient.
+**All Minecraft inputs are supplied on the NAS** under the `ROMS/minecraft` directory:
+```text
+ROMS/minecraft/
+├── client/versions/26.3.jar
+├── client/versions/26.3.json
+├── server/26.3/server.jar
+├── assets/
+└── libraries/
+```
+The NAS is mounted read-only at `/minecraft-source` during preparation. Because the client uses the user's singular `client/versions/` directory rather than a launcher-style `versions/26.3/` tree, the init container creates symlinks inside its ephemeral work directory to the expected launcher layout. No game JARs are downloaded, and the NAS is never modified. See [Horizon hosting instructions](https://github.com/horizon-rust/horizon/blob/main/docs/hosting.md).
 
-The `horizon-data` PVC is 2Gi and stores world data, server configuration, the server JAR, and the client inputs. Confirm its free space before copying client files; increase the claim if necessary. The `horizon-resources` PVC requests 2Gi for prepared resources. Preparation scratch space is an ephemeral `emptyDir`. A pre-existing 500Mi Longhorn claim may require an explicit expansion after applying the updated request.
+The `horizon-data` PVC is 2Gi and stores world data and server configuration; both client and server installation files stay on the NAS. The `horizon-resources` PVC requests 2Gi for prepared resources. Preparation scratch space is an ephemeral `emptyDir`. The NAS volume uses the same `nasj6n.home` server as RomM, with an **assumed** NFS export path `/volume2/ROMS/minecraft`. Verify that path is actually exported/mountable from Kubernetes before merging; update `volumes.minecraft-client.nfs.path` if the real export differs. The `ROMS` export is mounted read-only and is used only by the preparation init container. A pre-existing 500Mi Longhorn claim may require an explicit expansion after applying the updated request.
 
 Review and accept the [Minecraft EULA](https://aka.ms/MinecraftEULA) before running this configuration; `HORIZON_EULA=true` is set. The whitelist defaults to enabled with no pre-authorized users; add Minecraft account names through Horizon's documented commands.
 
