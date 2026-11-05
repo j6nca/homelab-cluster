@@ -4,9 +4,9 @@ Horizon is deployed through Flux using the `thanoslabs/generic` Helm chart.
 
 ## Startup and preparation
 
-The HelmRelease is active. The server uses `ghcr.io/thanoslabs/horizon-server:0.0.2` and the init container uses `ghcr.io/thanoslabs/horizon-prepare:0.0.1` (Java 25).
+The HelmRelease is active. The server uses `ghcr.io/thanoslabs/horizon-server:0.0.3` and the init container uses `ghcr.io/thanoslabs/horizon-prepare:0.0.2` (Java 25).
 
-The preparation init container uses the Minecraft 26.3 server JAR and client files already on the NAS, checks the prepared resources and, if absent, runs `horizon-prepare` with Java 25. It writes to `/opt/horizon/resources`, which is the server's working-directory `resources/` path, and the same PVC is mounted there in both containers. The server starts only after preparation passes `--check`. Java is not present in the server runtime. **Separate blocker:** `horizon-server:0.0.2` may contain the supervisor without the required `horizon-engine` binary; verify the image contents and update this HelmRelease if that is still true.
+The preparation init container uses the Minecraft 26.3 server JAR and client files already on the NAS, checks the prepared resources and, if absent, runs `horizon-prepare` with Java 25. It writes to `/opt/horizon/resources`, which is the server's working-directory `resources/` path, and the same PVC is mounted there in both containers. The server starts only after preparation passes `--check`. Java is not present in the server runtime. **Separate blocker:** `horizon-server:0.0.3` may contain the supervisor without the required `horizon-engine` binary; verify the image contents and update this HelmRelease if that is still true.
 
 **All Minecraft inputs are supplied on the NAS** under the `ROMS/minecraft` directory:
 ```text
