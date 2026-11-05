@@ -11,13 +11,13 @@ The preparation init container uses the Minecraft 26.3 server JAR and client fil
 **All Minecraft inputs are supplied on the NAS** under the `ROMS/minecraft` directory:
 ```text
 ROMS/minecraft/
-├── client/versions/26.3.jar
-├── client/versions/26.3.json
+├── client/versions/26.3/26.3.jar
+├── client/versions/26.3/26.3.json
 ├── server/26.3/server.jar
 ├── assets/
 └── libraries/
 ```
-The NAS is mounted read-only at `/minecraft-source` during preparation. Because the client uses the user's singular `client/versions/` directory rather than a launcher-style `versions/26.3/` tree, the init container creates symlinks inside its ephemeral work directory to the expected launcher layout. No game JARs are downloaded, and the NAS is never modified. See [Horizon hosting instructions](https://github.com/horizon-rust/horizon/blob/main/docs/hosting.md).
+The NAS is mounted read-only at `/minecraft-source` during preparation. The client version is stored under `client/versions/26.3/`, while `assets/` and `libraries/` are at the share root. The init container stages symlinks in its ephemeral work directory to assemble the launcher layout Horizon expects. The NAS is never modified. Supplementary group 988 grants the non-root preparation process read access to the ROMS files. See [Horizon hosting instructions](https://github.com/horizon-rust/horizon/blob/main/docs/hosting.md).
 
 The `horizon-data` PVC is 2Gi and stores world data and server configuration; both client and server installation files stay on the NAS. The `horizon-resources` PVC requests 2Gi for prepared resources and is mounted at `/opt/horizon/resources` in both containers. Preparation scratch space is an ephemeral `emptyDir`. The NAS volume uses `mimir.internal:/var/nfs/shared/ROMS/minecraft`, following the Mimir export paths used elsewhere in the cluster. The `ROMS` export is mounted read-only and is used only by the preparation init container. A pre-existing 500Mi Longhorn claim may require an explicit expansion after applying the updated request.
 
