@@ -117,10 +117,10 @@ spec:
                       ln -s /minecraft-source/client/version/26.3.json /opt/horizon/.local/minecraft/versions/26.3/26.3.json
                       ln -s /minecraft-source/assets /opt/horizon/.local/minecraft/assets
                       ln -s /minecraft-source/libraries /opt/horizon/.local/minecraft/libraries
-                      horizon-prepare --prepare \\
-                        --root /opt/horizon \\
-                        --minecraft-dir /opt/horizon/.local/minecraft \\
-                        --server-jar /minecraft-source/server/26.3/server.jar \\
+                      horizon-prepare --prepare \
+                        --root /opt/horizon \
+                        --minecraft-dir /opt/horizon/.local/minecraft \
+                        --server-jar /minecraft-source/server/26.3/server.jar \
                         --output /resources
                       horizon-prepare --check --root /opt/horizon --output /resources
                   resources:
