@@ -94,78 +94,11 @@ spec:
                 seccompProfile:
                   type: RuntimeDefault
               initContainers:
-                - name: download-minecraft-server
-                  image: python:3.13-alpine
-                  imagePullPolicy: IfNotPresent
-                  command:
-                    - python
-                    - -c
-                    - |
-                      import hashlib
-                      import json
-                      import os
-                      import pathlib
-                      import urllib.request
-
-                      version = "26.3"
-                      destination = pathlib.Path("/data/minecraft") / f"server_{version}.jar"
-                      destination.parent.mkdir(parents=True, exist_ok=True)
-
-                      def get_json(url):
-                          with urllib.request.urlopen(url, timeout=30) as response:
-                              return json.load(response)
-
-                      manifest = get_json("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json")
-                      entry = next((v for v in manifest["versions"] if v["id"] == version), None)
-                      if entry is None:
-                          raise SystemExit(f"Minecraft version {version} not found in Mojang manifest")
-                      metadata = get_json(entry["url"])
-                      server = metadata["downloads"]["server"]
-                      expected = server["sha1"]
-
-                      if destination.exists():
-                          digest = hashlib.sha1()
-                          with destination.open("rb") as existing:
-                              while chunk := existing.read(1024 * 1024):
-                                  digest.update(chunk)
-                          if digest.hexdigest() == expected:
-                              print(f"Verified existing {destination}")
-                              raise SystemExit(0)
-                          print("Existing server JAR has an invalid checksum; replacing it")
-
-                      temporary = destination.with_suffix(".jar.tmp")
-                      try:
-                          with urllib.request.urlopen(server["url"], timeout=120) as response, temporary.open("wb") as output:
-                              digest = hashlib.sha1()
-                              while chunk := response.read(1024 * 1024):
-                                  output.write(chunk)
-                                  digest.update(chunk)
-                          if digest.hexdigest() != expected:
-                              raise ValueError("Downloaded server JAR SHA-1 mismatch")
-                          os.replace(temporary, destination)
-                      finally:
-                          temporary.unlink(missing_ok=True)
-                      print(f"Downloaded and verified {destination}")
-                  resources:
-                    requests:
-                      cpu: 50m
-                      memory: 64Mi
-                    limits:
-                      cpu: 500m
-                      memory: 256Mi
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    readOnlyRootFilesystem: true
-                    capabilities:
-                      drop: [ALL]
-                  volumeMounts:
-                    - name: data
-                      mountPath: /data
                 - name: prepare-minecraft-resources
                   image: ghcr.io/thanoslabs/horizon-prepare:0.0.1
                   imagePullPolicy: IfNotPresent
-                  # The matching Minecraft client installation is read-only on the NAS.
-                  # The Longhorn data PVC only stores the downloaded server JAR.
+                  # Read the user's existing NAS layout; stage launcher-compatible links in emptyDir.
+                  # No Minecraft binaries are downloaded or copied to Longhorn.
                   command:
                     - /bin/sh
                     - -ec
@@ -174,15 +107,20 @@ spec:
                         echo "Horizon resources already prepared"
                         exit 0
                       fi
-                      if [ ! -f /minecraft-client/versions/26.3/26.3.jar ]; then
-                        echo "Missing Minecraft 26.3 client files at /minecraft-client."
-                        echo "Populate the client JAR, version JSON, libraries and assets before preparing."
-                        exit 1
-                      fi
-                      horizon-prepare --prepare \
-                        --root /opt/horizon \
-                        --minecraft-dir /minecraft-client \
-                        --server-jar /data/minecraft/server_26.3.jar \
+                      test -f /minecraft-source/client/version/26.3.jar || { echo "Missing client/version/26.3.jar on NAS"; exit 1; }
+                      test -f /minecraft-source/client/version/26.3.json || { echo "Missing client/version/26.3.json on NAS"; exit 1; }
+                      test -f /minecraft-source/server/26.3/server.jar || { echo "Missing server/26.3/server.jar on NAS"; exit 1; }
+                      test -d /minecraft-source/assets || { echo "Missing assets/ on NAS"; exit 1; }
+                      test -d /minecraft-source/libraries || { echo "Missing libraries/ on NAS"; exit 1; }
+                      mkdir -p /opt/horizon/.local/minecraft/versions/26.3
+                      ln -s /minecraft-source/client/version/26.3.jar /opt/horizon/.local/minecraft/versions/26.3/26.3.jar
+                      ln -s /minecraft-source/client/version/26.3.json /opt/horizon/.local/minecraft/versions/26.3/26.3.json
+                      ln -s /minecraft-source/assets /opt/horizon/.local/minecraft/assets
+                      ln -s /minecraft-source/libraries /opt/horizon/.local/minecraft/libraries
+                      horizon-prepare --prepare \\
+                        --root /opt/horizon \\
+                        --minecraft-dir /opt/horizon/.local/minecraft \\
+                        --server-jar /minecraft-source/server/26.3/server.jar \\
                         --output /resources
                       horizon-prepare --check --root /opt/horizon --output /resources
                   resources:
@@ -201,8 +139,8 @@ spec:
                       mountPath: /data
                     - name: resources
                       mountPath: /resources
-                    - name: minecraft-client
-                      mountPath: /minecraft-client
+                    - name: minecraft-source
+                      mountPath: /minecraft-source
                       readOnly: true
                     - name: prepare-work
                       mountPath: /opt/horizon/.local
@@ -249,11 +187,11 @@ spec:
                       mountPath: /opt/horizon/.local/horizon-client/26.3
                       readOnly: true
               volumes:
-                # Reuse the Synology NAS already serving RomM. Confirm the ROMS export path before merging.
-                - name: minecraft-client
+                # Confirm the NAS export path is mountable by Kubernetes before merging.
+                - name: minecraft-source
                   nfs:
                     server: nasj6n.home
-                    path: /volume2/ROMS
+                    path: /volume2/ROMS/minecraft
                     readOnly: true
                 - name: prepare-work
                   emptyDir: {}
