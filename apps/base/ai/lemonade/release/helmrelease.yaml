@@ -50,15 +50,17 @@ spec:
                       mkdir -p /data/config /data/huggingface /data/llama /data/cache
                       # These files are Git-managed inputs. Runtime caches and
                       # downloaded weights remain persistent on the PVC.
-                      cp /seed/config.json /data/config/config.json
-                      cp /seed/user_models.json /data/config/user_models.json
-                      cp /seed/recipe_options.json /data/config/recipe_options.json
+                      cp /seed/config.json /data/cache/config.json
+                      cp /seed/user_models.json /data/cache/user_models.json
+                      cp /seed/recipe_options.json /data/cache/recipe_options.json
                       chown -R 10001:10001 /data
                   securityContext:
                     runAsUser: 0
+                    runAsNonRoot: false
                     allowPrivilegeEscalation: false
                     capabilities:
                       drop: [ALL]
+                      add: [CHOWN, DAC_OVERRIDE]
                   volumeMounts:
                     - name: data
                       mountPath: /data
@@ -67,8 +69,13 @@ spec:
                       readOnly: true
               containers:
                 - name: lemonade
-                  image: ghcr.io/lemonade-sdk/lemonade-server:v10.10.1
+                  image: ghcr.io/lemonade-sdk/lemonade-server:v10.10.0@sha256:8b9c58cf9ea2edf2694aee50755057958b44a858374692d9edccd8081547326c
                   imagePullPolicy: IfNotPresent
+                  env:
+                    - name: HOME
+                      value: /opt/lemonade
+                    - name: XDG_RUNTIME_DIR
+                      value: /opt/lemonade/.cache/lemonade
                   ports:
                     - name: http
                       containerPort: 13305
@@ -163,7 +170,7 @@ spec:
             {
               "max_loaded_models": 2,
               "llamacpp": {
-                "backend": "rocm"
+                "backend": "vulkan"
               },
               "telemetry": {
                 "enabled": false
@@ -171,7 +178,7 @@ spec:
             }
           user_models.json: |
             {
-              "user.qwen38-primary": {
+              "qwen38-primary": {
                 "source": "huggingface",
                 "checkpoint": "unsloth/Qwen3.8-27B-GGUF:UD-Q5_K_M",
                 "recipe": "llamacpp",
@@ -182,7 +189,7 @@ spec:
             {
               "user.qwen38-primary": {
                 "ctx_size": 131072,
-                "llamacpp_backend": "rocm"
+                "llamacpp_backend": "vulkan"
               }
             }
     services:
