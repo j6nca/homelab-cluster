@@ -105,7 +105,7 @@ metadata:
   # Pages source: thanoslabs/tetherd
 spec:
   endpoints:
-    - dnsName: tetherd.j6n.dev
+    - dnsName: tetherd.thanoslabs.org
       recordType: CNAME
       targets:
         - thanoslabs.github.io
