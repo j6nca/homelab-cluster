@@ -22,7 +22,7 @@ module "thanoslabs" {
     keyboards          = { domain = "keyboards.thanoslabs.org" }
     waypoint           = { domain = "waypoint.thanoslabs.org" }
     getbud             = { domain = "getbud.thanoslabs.org" }
-    tetherd            = { domain = "tetherd.j6n.dev" }
+    tetherd            = { domain = "tetherd.thanoslabs.org" }
     fruitless-sessions = { domain = "fruitless-sessions.thanoslabs.org" }
   }
 }
